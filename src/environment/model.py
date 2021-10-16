@@ -2,84 +2,76 @@
 
 from abc import ABCMeta, abstractmethod
 import numpy as np
+from .environment import BaseEnvironment
 
 
-# base
-class Model(metaclass=ABCMeta):
+class BaseModel(BaseEnvironment, metaclass=ABCMeta):
 
     @abstractmethod
     def __init__(
         self
     ):
-        self.state_space = None
-        self.action_space = None
-        self.observation_space = None
+        raise NotImplementedError
     
     @abstractmethod
+    def setup(
+        self,
+        env
+    ):
+        raise NotImplementedError
+
+    @abstractmethod
+    def reset(
+        self
+    ):
+        raise NotImplementedError
+
+    @abstractmethod
+    def step(
+        self,
+        action
+    ):
+        raise NotImplementedError
+
+    @abstractmethod
+    def update(
+        self,
+        n_times = 1
+    ):
+        raise NotImplementedError
+
+class Model(BaseModel):
+
+    def __init__(
+        self
+    ):
+        # self.state_space = None
+        # self.action_space = None
+        # self.observation_space = None
+        pass
+    
     def setup(
         self,
         env
     ):
         # self.state_space = env.state_space
-        self.action_space = env.action_space
-        self.observation_space = env.observation_space
+        # self.action_space = env.action_space
+        # self.observation_space = env.observation_space
+        pass
 
-    @abstractmethod
     def reset(
         self
     ):
-        raise NotImplementedError
+        pass
 
-    @abstractmethod
     def step(
         self,
         action
     ):
         raise NotImplementedError
 
-
-    @abstractmethod
     def update(
         self,
-        n_times=1
-    ):
-        raise NotImplementedError
-
-
-# default
-class DefaultModel:
-
-    def __init__(
-        self
-    ):
-        self.env = None
-        self.state_space = None
-        self.action_space = None
-        self.observation_space = None
-    
-    def setup(
-        self,
-        env
-    ):
-        self.env = env
-        self.state_space = env.observation_space
-        self.action_space = env.action_space
-        self.observation_space = env.observation_space
-
-    def reset(
-        self
-    ):
-        return self.env.reset()
-
-    def step(
-        self,
-        action
-    ):
-        return self.env.step(action)
-
-    def update(
-        self,
-        trajs,
-        n_times=1
+        n_times = 1
     ):
         pass
