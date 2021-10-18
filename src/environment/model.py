@@ -45,30 +45,31 @@ class Model(BaseModel):
     def __init__(
         self
     ):
-        # self.state_space = None
-        # self.action_space = None
-        # self.observation_space = None
-        pass
+        self.state_space = None
+        self.action_space = None
+        self.observation_space = None
+        self.state = None
     
-    def setup(
-        self,
-        env
-    ):
-        # self.state_space = env.state_space
-        # self.action_space = env.action_space
-        # self.observation_space = env.observation_space
-        pass
-
     def reset(
         self
     ):
+        observation = self.state = None
+        return observation
+    
+    def setup(
+        self
+    ):
         pass
-
+    
     def step(
         self,
         action
     ):
-        raise NotImplementedError
+        observation = None
+        reward = None
+        done = True
+        info = None
+        return observation, reward, done, info
 
     def update(
         self,

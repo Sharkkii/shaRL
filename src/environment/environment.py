@@ -1,11 +1,11 @@
 #### Environment ####
 
-import math
+# import math
 from abc import ABCMeta, abstractmethod
+import warnings
 import numpy as np
 import torch
 import gym
-# from gym import spaces
 # from gym.wrappers import TimeLimit
 
 
@@ -30,39 +30,63 @@ class BaseEnvironment(metaclass=ABCMeta):
     ):
         raise NotImplementedError
 
+    @abstractmethod
+    def update(
+        self
+    ):
+        raise NotImplementedError
+
 class Environment(BaseEnvironment):
 
     def __init__(
         self
     ):
-        pass
+        self.state_space = None
+        self.action_space = None
+        self.observation_space = None
+        self.state = None
     
     def reset(
         self
     ):
-        pass
+        observation = self.state = None
+        return observation
     
     def step(
         self,
         action
     ):
-        raise NotImplementedError
+        observation = None
+        reward = None
+        done = True
+        info = None
+        return observation, reward, done, info
+    
+    def update(
+        self
+    ):
+        warnings.warn("`update` cannot be used for an Environment instance.")
 
-class GymEnvironment(BaseEnvironment):
+class GymEnvironment(Environment):
 
     def __init__(
         self,
         name = ""
     ):
-        self.env = None
-
+        self.env = gym.make(name)
+        self.state_space = self.env.observation_space
+        self.observation_space = self.env.observation_space
+        self.action_space = self.env.observation_space
+        self.state = None
+        
     def reset(
         self
     ):
-        self.env.reset()
+        observation = self.state = self.env.reset()
+        return observation
     
     def step(
         self,
         action
     ):
-        self.env.step(action)
+        return self.env.step(action)
