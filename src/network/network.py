@@ -12,7 +12,7 @@ class BaseNetwork(metaclass=ABCMeta):
         self,
         network
     ):
-        self.network = network
+        self.network = network if callable(network) else (lambda x: None)
     
     def __call__(
         self,
@@ -26,7 +26,7 @@ class ValueNetwork(BaseNetwork):
         self,
         value_network
     ):
-        self.value_network = value_network
+        self.value_network = value_network if callable(value_network) else (lambda state: None)
     
     def __call__(
         self,
@@ -40,7 +40,7 @@ class QValueNetwork(BaseNetwork):
         self,
         qvalue_network
     ):
-        self.qvalue_network = qvalue_network
+        self.qvalue_network = qvalue_network if callable(qvalue_network) else (lambda state, action: None)
     
     def __call__(
         self,
@@ -55,14 +55,14 @@ class PolicyNetwork(BaseNetwork):
         self,
         policy_network
     ):
-        self.policy_network = policy_network
+        self.policy_network = policy_network if callable(policy_network) else (lambda x: None)
     
     def __call__(
         self,
         state,
-        action = None
+        # action = None
     ):
-        return self.policy_network(state, action)
+        return self.policy_network(state)
 
 class VNet(nn.Module):
     

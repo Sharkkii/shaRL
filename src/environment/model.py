@@ -57,9 +57,11 @@ class Model(BaseModel):
         return observation
     
     def setup(
-        self
+        self,
+        env
     ):
-        pass
+        self.observation_space = self.state_space = env.observation_space
+        self.action_space = env.action_space
     
     def step(
         self,

@@ -1,6 +1,7 @@
 #### Policy ####
 
 from abc import ABCMeta, abstractmethod
+import copy
 import numpy as np
 import torch
 import torch.nn as nn
@@ -14,7 +15,7 @@ class BasePolicy(metaclass=ABCMeta):
         policy_network = None,
         policy_optimizer = None
     ):
-        self.policy_network = policy_network
+        self.policy_network = policy_network if callable(policy_network) else (lambda state: None)
         self.policy_optimizer = policy_optimizer
 
     @abstractmethod
@@ -24,8 +25,15 @@ class BasePolicy(metaclass=ABCMeta):
         raise NotImplementedError
 
     @abstractmethod
-    def setup(self):
-        raise NotImplementedError
+    def setup(
+        self,
+        policy_network = None,
+        policy_optimizer = None
+    ):
+        if callable(policy_network):
+            self.policy_network = policy_network
+        if (policy_optimizer is not None):
+            self.policy_optimizer = policy_optimizer
 
     @abstractmethod
     def __call__(
@@ -34,6 +42,12 @@ class BasePolicy(metaclass=ABCMeta):
         action = None
     ):
         raise NotImplementedError
+    
+    # @abstractmethod
+    def copy(
+        self
+    ):
+        return copy.deepcopy(self)
 
 class Policy(BasePolicy):
     
@@ -42,19 +56,29 @@ class Policy(BasePolicy):
         policy_network = None,
         policy_optimizer = None
     ):
-        super().__init__(policy_network, policy_optimizer)
+        super().__init__(
+            policy_network = policy_network,
+            policy_optimizer = policy_optimizer
+        )
 
     def reset(
         self
     ):
-        raise NotImplementedError
+        pass
 
-    def setup(self):
-        raise NotImplementedError
+    def setup(
+        self,
+        policy_network = None,
+        policy_optimizer = None
+    ):
+        super().setup(
+            policy_network = policy_network,
+            policy_optimizer = policy_optimizer
+        )   
 
     def __call__(
         self,
         state,
-        action = None
+        # action = None
     ):
-        raise NotImplementedError
+        return self.policy_network(state)

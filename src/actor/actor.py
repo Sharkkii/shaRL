@@ -1,9 +1,14 @@
 #### Actor ####
 
+import os
 import sys
 from abc import ABCMeta, abstractmethod
 import numpy as np
 import torch
+from gym.spaces import Box, Discrete
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from policy import Policy
 
 
 class BaseActor(metaclass=ABCMeta):
@@ -11,13 +16,12 @@ class BaseActor(metaclass=ABCMeta):
     @abstractmethod
     def __init__(
         self,
-        policy = None,
-        optim_policy = None
+        policy = None
     ):
-        self.policy = policy
-        self.behavior_policy = None
-        self.target_policy = None
-        self.optim_policy = optim_policy
+        raise NotImplementedError
+        # self.policy = policy
+        # self.behavior_policy = None
+        # self.target_policy = None
 
     @abstractmethod
     def reset(
@@ -27,9 +31,14 @@ class BaseActor(metaclass=ABCMeta):
 
     @abstractmethod
     def setup(
-        self
+        self,
+        policy_network = None,
+        policy_optimizer = None
     ):
-        raise NotImplementedError
+        self.policy.setup(
+            policy_network = policy_network,
+            policy_optimizer = policy_optimizer
+        )
 
     @abstractmethod
     def choose_action(
@@ -45,12 +54,12 @@ class BaseActor(metaclass=ABCMeta):
     ):
         raise NotImplementedError
 
-    @abstractmethod
-    def update_behavior_policy(
-        self,
-        trajectory
-    ):
-        raise NotImplementedError
+    # @abstractmethod
+    # def update_behavior_policy(
+    #     self,
+    #     trajectory
+    # ):
+    #     raise NotImplementedError
 
     @abstractmethod
     def update_target_policy(
@@ -73,47 +82,62 @@ class Actor(BaseActor):
         self,
         policy = None
     ):
-        self.policy = policy
+        self.policy = Policy() if policy is None else policy
+        self.target_policy = self.policy.copy()
     
     def reset(
         self
     ):
-        raise NotImplementedError
+        pass
     
     def setup(
-        self
+        self,
+        policy_network = None,
+        policy_optimizer = None
     ):
-        raise NotImplementedError
+        super().setup(
+            policy_network = policy_network,
+            policy_optimizer = policy_optimizer
+        )
     
     def choose_action(
         self,
-        state
+        state,
+        action_space
     ):
-        raise NotImplementedError
+        action = self.policy(state)
+        if (action is None):
+            action = action_space.sample()
+        else:
+            action = torch.argmax(action) if (type(action_space) is Discrete) else action
+        return action
     
     def update_policy(
         self,
+        critic,
         trajectory
     ):
         pass
 
-    def update_behavior_policy(
-        self,
-        trajectory
-    ):
-        pass
+    # def update_behavior_policy(
+    #     self,
+    #     trajectory
+    # ):
+    #     pass
 
     def update_target_policy(
         self,
+        critic,
         trajectory
     ):
         pass
 
     def update(
         self,
+        critic,
         trajectory,
         n_times = 1
     ):
         for _ in range(n_times):
-            self.update_behavior_policy(trajectory)
-            self.update_target_policy(trajectory)
+            self.update_policy(critic, trajectory)
+            self.update_target_policy(critic, trajectory)

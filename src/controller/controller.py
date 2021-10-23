@@ -150,7 +150,7 @@ class Controller(BaseController):
                 if (self.agent.memory.count < n_sample_start):
                     # continue
                     pass
-                trajs = self.agent.load_history(n_sample=n_sample)
+                trajs = self.agent.load_history()
 
             # optimize policy
             # FIXME: J_v, J_q, J_pi will be overwritten

@@ -1,9 +1,14 @@
 #### Agent ####
 
+import os
 import sys
 from abc import ABCMeta, abstractmethod
 import numpy as np
 import torch
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from actor import Actor
+from critic import Critic
 
 
 class BaseAgent(metaclass=ABCMeta):
@@ -11,18 +16,13 @@ class BaseAgent(metaclass=ABCMeta):
     @abstractmethod
     def __init__(
         self,
-        actor,
-        critic,
-        model,
+        actor = None,
+        critic = None,
+        model = None,
         memory = None,
         gamma = 1.0
     ):
-        self.actor = actor
-        self.critic = critic
-        self.env = None
-        self.model = model
-        self.memory = memory
-        self.gamma = gamma
+        raise NotImplementedError
     
     @abstractmethod
     def reset(
@@ -36,10 +36,24 @@ class BaseAgent(metaclass=ABCMeta):
     @abstractmethod
     def setup(
         self,
-        env
+        env,
+        policy_network = None,
+        value_network = None,
+        qvalue_network = None,
+        policy_optimizer = None,
+        value_optimizer = None,
+        qvalue_optimizer = None
     ):
-        self.actor.setup()
-        self.critic.setup()
+        self.actor.setup(
+            policy_network = policy_network,
+            policy_optimizer = policy_optimizer
+        )
+        self.critic.setup(
+            value_network = value_network,
+            qvalue_network = qvalue_network,
+            value_optimizer = value_optimizer,
+            qvalue_optimizer = qvalue_optimizer,
+        )
         self.env = env
         self.model.setup(env)
         self.memory.setup()
@@ -110,19 +124,20 @@ class Agent(BaseAgent):
 
     def __init__(
         self,
-        actor,
-        critic,
-        model,
-        memory,
-        gamma=1.0
+        actor = None,
+        critic = None,
+        model = None,
+        memory = None,
+        gamma = 1.0
     ):
-        super().__init__(
-            actor = actor,
-            critic = critic,
-            model = model,
-            memory = memory,
-            gamma = gamma
-        )
+        assert(model is not None)
+        assert(memory is not None)
+        self.actor = Actor() if actor is None else actor
+        self.critic = Critic() if critic is None else critic
+        self.env = None
+        self.model = model
+        self.memory = memory
+        self.gamma = gamma
     
     def reset(
         self
@@ -131,9 +146,23 @@ class Agent(BaseAgent):
 
     def setup(
         self,
-        env
+        env,
+        policy_network = None,
+        value_network = None,
+        qvalue_network = None,
+        policy_optimizer = None,
+        value_optimizer = None,
+        qvalue_optimizer = None
     ):
-        super().setup(env)
+        super().setup(
+            env = env,
+            policy_network = policy_network,
+            value_network = value_network,
+            qvalue_network = qvalue_network,
+            policy_optimizer = policy_optimizer,
+            value_optimizer = value_optimizer,
+            qvalue_optimizer = qvalue_optimizer
+        )
     
     # def setup_every_epoch(
     #     epoch,
@@ -157,6 +186,7 @@ class Agent(BaseAgent):
         n_times = 1
     ):
         return self.actor.update(
+            self.critic,
             trajectory,
             n_times = n_times
         )
@@ -167,6 +197,7 @@ class Agent(BaseAgent):
         n_times = 1
     ):
         return self.critic.update(
+            self.actor,
             trajectory, 
             n_times = n_times
         )
@@ -180,18 +211,45 @@ class Agent(BaseAgent):
     def interact_with(
         self,
         env,
-        n_times = 1
+        n_times = 1,
+        n_limit = 100
     ):
-        return []
+
+        history = []
+        for _ in range(n_times):
+
+            t = 0
+            state = env.reset()
+            done = False
+            for _ in range(n_limit):
+                if (done): break
+                action = self.actor.choose_action(
+                    state = state,
+                    action_space = self.env.action_space
+                )
+                print(action)
+                next_state, reward, done, info = env.step(action)
+                history.append((state, action, reward, next_state))
+                state = next_state
+        
+        return history
+
     
     def save_history(
         self,
         history
     ):
-        pass
+        self.memory.save(history)
 
     def load_history(
+        self
+    ):
+        return self.memory.load()
+    
+    def replay_history(
         self,
         n_sample = 0
     ):
-        return []
+        return self.memory.replay(n_sample)
+
+    

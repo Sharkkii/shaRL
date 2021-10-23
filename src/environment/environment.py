@@ -76,7 +76,7 @@ class GymEnvironment(Environment):
         self.env = gym.make(name)
         self.state_space = self.env.observation_space
         self.observation_space = self.env.observation_space
-        self.action_space = self.env.observation_space
+        self.action_space = self.env.action_space
         self.state = None
         
     def reset(
