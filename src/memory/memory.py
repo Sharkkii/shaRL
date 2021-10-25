@@ -83,7 +83,7 @@ class Memory(BaseMemory):
     
     @property
     def count(self):
-        return self._count
+        return len(self.cell)
     
     @count.setter
     def count(self, count):
@@ -118,6 +118,12 @@ class Memory(BaseMemory):
     ):
         return np.random.choice(self.cell, n_sample)
     
+    def get(
+        self,
+        index = None
+    ):
+        return self.cell if (index is None) else [self.cell[i] for i in index]
+
 class RLMemory(BaseMemory):
 
     def __init__(
@@ -186,10 +192,37 @@ class RLMemory(BaseMemory):
         self,
         do_zip = False
     ):
-        state_trajectory = self.state_memory.load()
-        action_trajectory = self.action_memory.load()
-        reward_trajectory = self.reward_memory.load()
-        next_state_trajectory = self.next_state_memory.load()
+        state_trajectory = torch.tensor(self.state_memory.load())
+        action_trajectory = torch.tensor(self.action_memory.load())
+        reward_trajectory = torch.tensor(self.reward_memory.load())
+        next_state_trajectory = torch.tensor(self.next_state_memory.load())
+        if (do_zip):
+            history = RLMemory.zip(
+                state_trajectory,
+                action_trajectory,
+                reward_trajectory,
+                next_state_trajectory
+            )
+        else:
+            history = (
+                state_trajectory,
+                action_trajectory,
+                reward_trajectory,
+                next_state_trajectory
+            )
+        return history
+    
+    def replay(
+        self,
+        n_sample = 0,
+        do_zip = False
+    ):
+        assert(self.count >= n_sample)
+        index = list(np.random.randint(0, self.count, n_sample))
+        state_trajectory = torch.tensor(self.state_memory.get(index))
+        action_trajectory = torch.tensor(self.action_memory.get(index))
+        reward_trajectory = torch.tensor(self.reward_memory.get(index))
+        next_state_trajectory = torch.tensor(self.next_state_memory.get(index))
         if (do_zip):
             history = RLMemory.zip(
                 state_trajectory,
