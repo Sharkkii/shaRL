@@ -2,27 +2,23 @@
 
 from abc import ABCMeta, abstractmethod
 import numpy as np
+from .environment import BaseEnvironment
 
 
-# base
-class Model(metaclass=ABCMeta):
+class BaseModel(BaseEnvironment, metaclass=ABCMeta):
 
     @abstractmethod
     def __init__(
         self
     ):
-        self.state_space = None
-        self.action_space = None
-        self.observation_space = None
+        raise NotImplementedError
     
     @abstractmethod
     def setup(
         self,
         env
     ):
-        # self.state_space = env.state_space
-        self.action_space = env.action_space
-        self.observation_space = env.observation_space
+        raise NotImplementedError
 
     @abstractmethod
     def reset(
@@ -37,49 +33,48 @@ class Model(metaclass=ABCMeta):
     ):
         raise NotImplementedError
 
-
     @abstractmethod
     def update(
         self,
-        n_times=1
+        n_times = 1
     ):
         raise NotImplementedError
 
-
-# default
-class DefaultModel:
+class Model(BaseModel):
 
     def __init__(
         self
     ):
-        self.env = None
         self.state_space = None
         self.action_space = None
         self.observation_space = None
+        self.state = None
+    
+    def reset(
+        self
+    ):
+        observation = self.state = None
+        return observation
     
     def setup(
         self,
         env
     ):
-        self.env = env
-        self.state_space = env.observation_space
+        self.observation_space = self.state_space = env.observation_space
         self.action_space = env.action_space
-        self.observation_space = env.observation_space
-
-    def reset(
-        self
-    ):
-        return self.env.reset()
-
+    
     def step(
         self,
         action
     ):
-        return self.env.step(action)
+        observation = None
+        reward = None
+        done = True
+        info = None
+        return observation, reward, done, info
 
     def update(
         self,
-        trajs,
-        n_times=1
+        n_times = 1
     ):
         pass

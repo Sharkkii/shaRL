@@ -1,12 +1,4 @@
-from .environment import PseudoMountainCar
+from .environment import Environment
+from .environment import GymEnvironment
+from .environment import CartPoleEnvironment
 from .model import Model
-from .model import DefaultModel
-from .wrapper import TransparentWrapper
-from .wrapper import CartPoleWrapper
-
-import gym
-from gym.envs.registration import register
-register(
-    id="PseudoMountainCar-v0",
-    entry_point="environment:PseudoMountainCar"
-)
