@@ -111,10 +111,10 @@ class Controller(BaseController):
 
         for epoch in range(n_epoch):
 
-            # self.agent.setup_every_epoch(
-            #     epoch=epoch,
-            #     n_epoch=n_epoch
-            # )
+            self.agent.setup_on_every_epoch(
+                epoch = epoch,
+                n_epoch = n_epoch
+            )
 
             # train
 
@@ -122,7 +122,14 @@ class Controller(BaseController):
             trajs_env = []
             trajs_model = []
 
-            for _ in range(env_step):
+            for step in range(env_step):
+
+                self.agent.setup_on_every_step(
+                    step = step,
+                    n_step = env_step
+                )
+
+                # print("environment_step")
 
                 # interact w/ environment
                 if (is_model_free):
@@ -143,18 +150,25 @@ class Controller(BaseController):
                     )
 
             trajs = trajs_env + trajs_model
+            if (is_on_policy):
+                pass # convert trajs by Memory.zip
 
             if (is_off_policy):
                 self.agent.save_history(trajs)
                 # guard
-                if (self.agent.memory.count < n_sample_start):
-                    # continue
-                    pass
-                trajs = self.agent.load_history()
+                if (self.agent.memory.count >= n_sample_start):
+                    trajs = self.agent.replay_history(
+                        n_sample = n_sample
+                    )
+                    # trajs = self.agent.load_history()
+                else:
+                    continue
 
             # optimize policy
             # FIXME: J_v, J_q, J_pi will be overwritten
             for _ in range(gradient_step):
+
+                # print("gradient_step")
 
                 # update value function (critic)
                 self.agent.update_critic(trajs, n_times=1)
@@ -200,11 +214,11 @@ class Controller(BaseController):
             #     print("total reward: %f" % result[1], end=" ")
             #     print()
 
-    def evaluate(
-        self,
-        n_eval=1
-    ):
-        result = self.agent.evaluate(self.env, n_eval)
-        return result
+    # def evaluate(
+    #     self,
+    #     n_eval=1
+    # ):
+    #     result = self.agent.evaluate(self.env, n_eval)
+    #     return result
 
     

@@ -42,9 +42,11 @@ class BaseOptimizer(metaclass=ABCMeta):
 class Optimizer(BaseOptimizer):
 
     def __init__(
-        self
+        self,
+        optimizer,
+        network
     ):
-        pass
+        self.optimizer = optimizer(network.parameters())
     
     def reset(
         self
@@ -54,7 +56,8 @@ class Optimizer(BaseOptimizer):
     def zero_grad(
         self
     ):
-        raise NotImplementedError
+        # raise NotImplementedError
+        self.optimizer.zero_grad()
     
     def setup(
         self
@@ -64,4 +67,5 @@ class Optimizer(BaseOptimizer):
     def step(
         self
     ):
-        raise NotImplementedError
+        # raise NotImplementedError
+        self.optimizer.step()
