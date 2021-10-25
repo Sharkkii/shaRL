@@ -19,6 +19,14 @@ class BasePolicy(metaclass=ABCMeta):
         self.policy_optimizer = policy_optimizer
 
     @abstractmethod
+    def __call__(
+        self,
+        state,
+        action = None
+    ):
+        raise NotImplementedError
+
+    @abstractmethod
     def reset(
         self
     ):
@@ -34,14 +42,6 @@ class BasePolicy(metaclass=ABCMeta):
             self.policy_network = policy_network
         if (policy_optimizer is not None):
             self.policy_optimizer = policy_optimizer
-
-    @abstractmethod
-    def __call__(
-        self,
-        state,
-        action = None
-    ):
-        raise NotImplementedError
     
     # @abstractmethod
     def copy(
@@ -61,6 +61,13 @@ class Policy(BasePolicy):
             policy_optimizer = policy_optimizer
         )
 
+    def __call__(
+        self,
+        state,
+        # action = None
+    ):
+        return self.policy_network(state)
+        
     def reset(
         self
     ):
@@ -76,9 +83,3 @@ class Policy(BasePolicy):
             policy_optimizer = policy_optimizer
         )   
 
-    def __call__(
-        self,
-        state,
-        # action = None
-    ):
-        return self.policy_network(state)

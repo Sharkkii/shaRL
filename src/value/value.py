@@ -14,7 +14,7 @@ class BaseValue(metaclass=ABCMeta):
         value_network = None,
         value_optimizer = None
     ):
-        self.value_network = value_network
+        self.value_network = value_network if callable(value_network) else (lambda state: None)
         self.value_optimizer = value_optimizer
 
     @abstractmethod
@@ -22,7 +22,8 @@ class BaseValue(metaclass=ABCMeta):
         self,
         state
     ):
-        return self.value_network(state)
+        raise NotImplementedError
+        # return self.value_network(state)
     
     @abstractmethod
     def reset(
@@ -88,18 +89,17 @@ class BaseQValue(metaclass=ABCMeta):
         qvalue_network = None,
         qvalue_optimizer = None
     ):
-        if callable(qvalue_network):
-            self.qvalue_network = qvalue_network
-        if (qvalue_optimizer is not None):
-            self.qvalue_optimizer = qvalue_optimizer
+        self.qvalue_network = qvalue_network if callable(qvalue_network) else (lambda state, action=None: None)
+        self.qvalue_optimizer = qvalue_optimizer
 
     @abstractmethod
     def __call__(
         self,
         state,
-        action
+        action = None
     ):
-        return self.qvalue_network(state, action)
+        # return self.qvalue_network(state, action)
+        raise NotImplementedError
 
     @abstractmethod
     def reset(
@@ -113,7 +113,7 @@ class BaseQValue(metaclass=ABCMeta):
         qvalue_network = None,
         qvalue_optimizer = None
     ):
-        if (qvalue_network is not None):
+        if callable(qvalue_network):
             self.qvalue_network = qvalue_network
         if (qvalue_optimizer is not None):
             self.qvalue_optimizer = qvalue_optimizer
@@ -124,7 +124,42 @@ class BaseQValue(metaclass=ABCMeta):
     ):
         return copy.deepcopy(self)
 
-class QValue(BaseQValue):
+class DiscreteQValue(BaseQValue):
+
+    def __init__(
+        self,
+        qvalue_network = None,
+        qvalue_optimizer = None
+    ):
+        super().__init__(
+            qvalue_network,
+            qvalue_optimizer
+        )
+
+    def __call__(
+        self,
+        state,
+        action = None
+    ):
+        assert(action is None)
+        return self.qvalue_network(state)
+
+    def reset(
+        self
+    ):
+        pass
+    
+    def setup(
+        self,
+        qvalue_network = None,
+        qvalue_optimizer = None
+    ):
+        super().setup(
+            qvalue_network = qvalue_network,
+            qvalue_optimizer = qvalue_optimizer
+        )
+
+class ContinuousQValue(BaseQValue):
 
     def __init__(
         self,
@@ -157,3 +192,5 @@ class QValue(BaseQValue):
             qvalue_network = qvalue_network,
             qvalue_optimizer = qvalue_optimizer
         )
+
+QValue = DiscreteQValue

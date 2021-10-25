@@ -8,17 +8,24 @@ import torch.nn as nn
 
 class BaseNetwork(metaclass=ABCMeta):
 
+    @abstractmethod
     def __init__(
         self,
         network
     ):
         self.network = network if callable(network) else (lambda x: None)
-    
+
+    @abstractmethod
     def __call__(
         self,
         x
     ):
         return self.network(x)
+    
+    def parameters(
+        self
+    ):
+        return self.network.parameters()
     
 class ValueNetwork(BaseNetwork):
 
@@ -26,28 +33,52 @@ class ValueNetwork(BaseNetwork):
         self,
         value_network
     ):
-        self.value_network = value_network if callable(value_network) else (lambda state: None)
+        self.network = value_network if callable(value_network) else (lambda state: None)
+        # self.value_network = value_network if callable(value_network) else (lambda state: None)
     
     def __call__(
         self,
         state
     ):
-        return self.value_network(state)
+        return self.network(state)
+        # return self.value_network(state)
 
-class QValueNetwork(BaseNetwork):
+class DiscreteQValueNetwork(BaseNetwork):
 
     def __init__(
         self,
         qvalue_network
     ):
-        self.qvalue_network = qvalue_network if callable(qvalue_network) else (lambda state, action: None)
+        self.network = qvalue_network if callable(qvalue_network) else (lambda state: None)
+        # self.qvalue_network = qvalue_network if callable(qvalue_network) else (lambda state: None)
+    
+    def __call__(
+        self,
+        state,
+        action = None
+    ):
+        assert(action is None)
+        return self.network(state)
+        # return self.qvalue_network(state)
+
+class ContinuousQValueNetwork(BaseNetwork):
+
+    def __init__(
+        self,
+        qvalue_network
+    ):
+        self.network = qvalue_network if callable(qvalue_network) else (lambda state, action: None)
+        # self.qvalue_network = qvalue_network if callable(qvalue_network) else (lambda state, action: None)
     
     def __call__(
         self,
         state,
         action
     ):
-        return self.qvalue_network(state, action)
+        return self.network(state, action)
+        # return self.qvalue_network(state, action)
+
+QValueNetwork = DiscreteQValueNetwork
 
 class PolicyNetwork(BaseNetwork):
 
@@ -55,14 +86,16 @@ class PolicyNetwork(BaseNetwork):
         self,
         policy_network
     ):
-        self.policy_network = policy_network if callable(policy_network) else (lambda x: None)
+        self.network = policy_network if callable(policy_network) else (lambda x: None)
+        # self.policy_network = policy_network if callable(policy_network) else (lambda x: None)
     
     def __call__(
         self,
         state,
         # action = None
     ):
-        return self.policy_network(state)
+        return self.network(state)
+        # return self.policy_network(state)
 
 class VNet(nn.Module):
     
