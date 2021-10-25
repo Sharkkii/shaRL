@@ -21,7 +21,10 @@ class BaseCritic(metaclass=ABCMeta):
         # smooth_v = 0.99,
         # smooth_q = 0.99,
     ):
-        raise NotImplementedError
+        self.value = None
+        self.qvalue = None
+        self.target_value = None
+        self.target_qvalue = None
     
     @abstractmethod
     def reset(
@@ -37,14 +40,23 @@ class BaseCritic(metaclass=ABCMeta):
         value_optimizer = None,
         qvalue_optimizer = None
     ):
-        self.value.setup(
-            value_network = value_network,
-            value_optimizer = value_optimizer
-        )
-        self.qvalue.setup(
-            qvalue_network = qvalue_network,
-            qvalue_optimizer = qvalue_optimizer
-        )
+        raise NotImplementedError
+    
+    @abstractmethod
+    def setup_on_every_epoch(
+        self,
+        epoch,
+        n_epoch
+    ):
+        raise NotImplementedError
+
+    @abstractmethod
+    def setup_on_every_step(
+        self,
+        step,
+        n_step
+    ):
+        raise NotImplementedError
 
     @abstractmethod
     def update_value(
@@ -115,12 +127,30 @@ class Critic(BaseCritic):
         value_optimizer = None,
         qvalue_optimizer = None
     ):
-        super().setup(
+        self.value.setup(
             value_network = value_network,
+            value_optimizer = value_optimizer
+        )
+        self.qvalue.setup(
             qvalue_network = qvalue_network,
-            value_optimizer = value_optimizer,
             qvalue_optimizer = qvalue_optimizer
         )
+        self.target_value = self.value.copy()
+        self.target_qvalue = self.qvalue.copy()
+    
+    def setup_on_every_epoch(
+        self,
+        epoch,
+        n_epoch
+    ):
+        pass
+
+    def setup_on_every_step(
+        self,
+        step,
+        n_step
+    ):
+        pass
 
     def update_value(
         self,

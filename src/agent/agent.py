@@ -22,7 +22,14 @@ class BaseAgent(metaclass=ABCMeta):
         memory = None,
         gamma = 1.0
     ):
-        raise NotImplementedError
+        assert(model is not None)
+        assert(memory is not None)
+        self.actor = Actor() if (actor is None) else actor
+        self.critic = Critic() if (critic is None) else critic
+        self.env = None
+        self.model = model
+        self.memory = memory
+        self.gamma = gamma
     
     @abstractmethod
     def reset(
@@ -58,12 +65,21 @@ class BaseAgent(metaclass=ABCMeta):
         self.model.setup(env)
         self.memory.setup()
     
-    # @abstractmethod
-    # def setup_every_epoch(
-    #     epoch,
-    #     n_epoch
-    # ):
-    #     raise NotImplementedError
+    @abstractmethod
+    def setup_on_every_epoch(
+        self,
+        epoch,
+        n_epoch
+    ):
+        raise NotImplementedError
+
+    @abstractmethod
+    def setup_on_every_step(
+        self,
+        step,
+        n_step
+    ):
+        raise NotImplementedError
 
     @abstractmethod
     def update_model(
@@ -164,11 +180,19 @@ class Agent(BaseAgent):
             qvalue_optimizer = qvalue_optimizer
         )
     
-    # def setup_every_epoch(
-    #     epoch,
-    #     n_epoch
-    # ):
-    #     raise NotImplementedError
+    def setup_on_every_epoch(
+        self,
+        epoch,
+        n_epoch
+    ):
+        pass
+
+    def setup_on_every_step(
+        self,
+        step,
+        n_step
+    ):
+        pass
 
     def update_model(
         self,
@@ -202,17 +226,11 @@ class Agent(BaseAgent):
             n_times = n_times
         )
 
-    # def update_every_epoch(
-    #     epoch,
-    #     n_epoch
-    # ):
-    #     raise NotImplementedError
-
     def interact_with(
         self,
         env,
         n_times = 1,
-        n_limit = 100
+        n_limit = 1000
     ):
 
         history = []
@@ -227,10 +245,11 @@ class Agent(BaseAgent):
                     state = state,
                     action_space = self.env.action_space
                 )
-                print(action)
                 next_state, reward, done, info = env.step(action)
                 history.append((state, action, reward, next_state))
                 state = next_state
+                t = t + 1
+            print(t)
         
         return history
 
@@ -250,6 +269,8 @@ class Agent(BaseAgent):
         self,
         n_sample = 0
     ):
-        return self.memory.replay(n_sample)
+        return self.memory.replay(
+            n_sample = n_sample
+        )
 
     

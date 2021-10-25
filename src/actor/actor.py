@@ -18,10 +18,8 @@ class BaseActor(metaclass=ABCMeta):
         self,
         policy = None
     ):
-        raise NotImplementedError
-        # self.policy = policy
-        # self.behavior_policy = None
-        # self.target_policy = None
+        self.policy = None
+        self.target_policy = None
 
     @abstractmethod
     def reset(
@@ -35,10 +33,23 @@ class BaseActor(metaclass=ABCMeta):
         policy_network = None,
         policy_optimizer = None
     ):
-        self.policy.setup(
-            policy_network = policy_network,
-            policy_optimizer = policy_optimizer
-        )
+        raise NotImplementedError
+
+    @abstractmethod
+    def setup_on_every_epoch(
+        self,
+        epoch,
+        n_epoch
+    ):
+        raise NotImplementedError
+
+    @abstractmethod
+    def setup_on_every_step(
+        self,
+        step,
+        n_step
+    ):
+        raise NotImplementedError
 
     @abstractmethod
     def choose_action(
@@ -54,13 +65,6 @@ class BaseActor(metaclass=ABCMeta):
     ):
         raise NotImplementedError
 
-    # @abstractmethod
-    # def update_behavior_policy(
-    #     self,
-    #     trajectory
-    # ):
-    #     raise NotImplementedError
-
     @abstractmethod
     def update_target_policy(
         self,
@@ -75,14 +79,13 @@ class BaseActor(metaclass=ABCMeta):
         n_times = 1
     ):
         raise NotImplementedError
-
 class Actor(BaseActor):
 
     def __init__(
         self,
         policy = None
     ):
-        self.policy = Policy() if policy is None else policy
+        self.policy = Policy() if (policy is None) else policy
         self.target_policy = self.policy.copy()
     
     def reset(
@@ -95,10 +98,25 @@ class Actor(BaseActor):
         policy_network = None,
         policy_optimizer = None
     ):
-        super().setup(
+        self.policy.setup(
             policy_network = policy_network,
             policy_optimizer = policy_optimizer
         )
+        self.target_policy = self.policy.copy()
+    
+    def setup_on_every_epoch(
+        self,
+        epoch,
+        n_epoch
+    ):
+        pass
+
+    def setup_on_every_step(
+        self,
+        step,
+        n_step
+    ):
+        pass
     
     def choose_action(
         self,
@@ -118,12 +136,6 @@ class Actor(BaseActor):
         trajectory
     ):
         pass
-
-    # def update_behavior_policy(
-    #     self,
-    #     trajectory
-    # ):
-    #     pass
 
     def update_target_policy(
         self,
