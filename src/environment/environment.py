@@ -115,7 +115,7 @@ class CartPoleEnvironment(GymEnvironment):
         observation, reward, done, info = self.env.step(action)
         self._t += 1
         if (done):
-            reward = 0.0 if (self._t >= self._T) else -100.0
+            reward = 1.0 if (self._t >= self._T) else -1.0
         else:
-            reward = 1.0
+            reward = 0.1
         return observation, reward, done, info

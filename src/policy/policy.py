@@ -67,6 +67,12 @@ class Policy(BasePolicy):
         # action = None
     ):
         return self.policy_network(state)
+
+    def predict(
+        self,
+        state
+    ):
+        return self.policy_network.predict(state)
         
     def reset(
         self

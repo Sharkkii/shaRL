@@ -97,6 +97,12 @@ class PolicyNetwork(BaseNetwork):
         return self.network(state)
         # return self.policy_network(state)
 
+    def predict(
+        self,
+        state
+    ):
+        return self.network.predict(state)
+
 class VNet(nn.Module):
     
     def __init__(self, input_shape=4):
@@ -156,9 +162,14 @@ class PiNet(nn.Module):
         nn.init.normal_(self.l3.weight, mean=0., std=1.)
         
     def forward(self, x):
-        dim = x.ndim-1
         x = torch.Tensor(x)
         x = nn.ReLU()(self.l1(x))
         x = nn.ReLU()(self.l2(x))
-        x = nn.Softmax(dim=dim)(self.l3(x))
+        x = self.l3(x)
+        return x
+    
+    def predict(self, x):
+        dim = x.ndim-1
+        x = self.forward(x)
+        x = nn.Softmax(dim=dim)(x)
         return x
