@@ -119,3 +119,32 @@ class CartPoleEnvironment(GymEnvironment):
         else:
             reward = 1.0
         return observation, reward, done, info
+
+class PendulumEnvironment(GymEnvironment):
+
+    def __init__(
+        self
+    ):
+        super().__init__(
+            name = "Pendulum-v1"
+        )
+        # self._t = 0
+        # self._T = 100
+
+    def reset(
+        self
+    ):
+        # self._t = 0
+        return super().reset()
+    
+    def step(
+        self,
+        action
+    ):
+        observation, reward, done, info = self.env.step(action)
+        # self._t += 1
+        # if (done):
+        #     reward = 1.0 if (self._t >= self._T) else -1.0
+        # else:
+        #     reward = 0.1
+        return observation, reward, done, info

@@ -10,7 +10,7 @@ import numpy as np
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 # # NOTE: test for RL
-from src.environment import Environment, Model, GymEnvironment
+from src.environment import Environment, Model, GymEnvironment, CartPoleEnvironment, PendulumEnvironment
 
 
 def test_add_environment():
@@ -34,6 +34,26 @@ def test_add_environment():
         if (done):
             break
     env.update() # do nothing
+
+    env = CartPoleEnvironment()
+    observation = env.reset()
+    for _ in range(10):
+        action = env.action_space.sample()
+        print(action)
+        observation, reward, done, _ = env.step(action)
+        print(observation, reward)
+        if (done):
+            break
+
+    env = PendulumEnvironment()
+    observation = env.reset()
+    for _ in range(10):
+        action = env.action_space.sample()
+        print(action)
+        observation, reward, done, _ = env.step(action)
+        print(observation, reward)
+        if (done):
+            break
 
     print("OK: test_add_environment")
 
