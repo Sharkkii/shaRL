@@ -230,7 +230,8 @@ class Agent(BaseAgent):
         self,
         env,
         n_times = 1,
-        n_limit = 1000
+        n_limit = 1000,
+        verbose = False
     ):
 
         history = []
@@ -249,7 +250,8 @@ class Agent(BaseAgent):
                 history.append((state, action, reward, next_state))
                 state = next_state
                 t = t + 1
-            print(t)
+            # if verbose:
+            #     print(t)
         
         return history
 

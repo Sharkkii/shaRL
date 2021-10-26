@@ -63,8 +63,7 @@ class Policy(BasePolicy):
 
     def __call__(
         self,
-        state,
-        # action = None
+        state
     ):
         return self.policy_network(state)
 
@@ -87,5 +86,5 @@ class Policy(BasePolicy):
         super().setup(
             policy_network = policy_network,
             policy_optimizer = policy_optimizer
-        )   
+        )
 

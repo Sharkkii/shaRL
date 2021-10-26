@@ -86,16 +86,13 @@ class PolicyNetwork(BaseNetwork):
         self,
         policy_network
     ):
-        self.network = policy_network if callable(policy_network) else (lambda x: None)
-        # self.policy_network = policy_network if callable(policy_network) else (lambda x: None)
+        self.network = policy_network if callable(policy_network) else (lambda state: None)
     
     def __call__(
         self,
-        state,
-        # action = None
+        state
     ):
         return self.network(state)
-        # return self.policy_network(state)
 
     def predict(
         self,
@@ -150,6 +147,7 @@ class QNet(nn.Module):
             return x
 
 class PiNet(nn.Module):
+
     def __init__(self, input_shape=4, output_shape=2):
         super().__init__()
         self.input_shape = input_shape
@@ -161,12 +159,18 @@ class PiNet(nn.Module):
         nn.init.normal_(self.l2.weight, mean=0., std=1.)
         nn.init.normal_(self.l3.weight, mean=0., std=1.)
         
-    def forward(self, x):
-        x = torch.Tensor(x)
-        x = nn.ReLU()(self.l1(x))
-        x = nn.ReLU()(self.l2(x))
-        x = self.l3(x)
-        return x
+    def forward(self, x, y=None):
+        if (y is None):
+            x = nn.ReLU()(self.l1(x))
+            x = nn.ReLU()(self.l2(x))
+            x = self.l3(x)
+            return x
+        else:
+            x = torch.cat([x, y], dim=1)
+            x = nn.ReLU()(self.l1(x))
+            x = nn.ReLU()(self.l2(x))
+            x = self.l3(x)
+            return x
     
     def predict(self, x):
         dim = x.ndim-1
