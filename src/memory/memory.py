@@ -142,6 +142,9 @@ class RLMemory(BaseMemory):
         self.next_state_memory = Memory(
             capacity = capacity
         )
+        self.reward_processor = RewardProcessor(
+            alpha = 0.01
+        )
     
     @property
     def capacity(self):
@@ -215,7 +218,8 @@ class RLMemory(BaseMemory):
     def replay(
         self,
         n_sample = 0,
-        do_zip = False
+        do_zip = False,
+        do_normalize = True
     ):
         assert(self.count >= n_sample)
         index = list(np.random.randint(0, self.count, n_sample))
@@ -223,6 +227,12 @@ class RLMemory(BaseMemory):
         action_trajectory = torch.tensor(self.action_memory.get(index))
         reward_trajectory = torch.tensor(self.reward_memory.get(index))
         next_state_trajectory = torch.tensor(self.next_state_memory.get(index))
+
+        if (do_normalize):
+            reward_trajectory = self.reward_processor(
+                reward_trajectory
+            )
+
         if (do_zip):
             history = RLMemory.zip(
                 state_trajectory,
@@ -267,6 +277,26 @@ class RLMemory(BaseMemory):
 
         return list(zip(state_traj, action_traj, reward_traj, state_next_traj))
 
-        
+class RewardProcessor:
 
+    def __init__(
+        self,
+        alpha = 0.01
+    ):
+        self.target_mu = None
+        self.target_sigma = None
+        self.alpha = alpha
+    
+    def __call__(
+        self,
+        reward,
+        eps = 1e-4
+    ):
+        mu = torch.mean(reward)
+        sigma = torch.std(reward)
+        self.target_mu = mu if (self.target_mu is None) else (self.alpha * mu + (1 - self.alpha) * self.target_mu)
+        self.target_sigma = sigma if (self.target_sigma is None) else (self.alpha * sigma + (1 - self.alpha) * self.target_sigma)
+
+        reward = (reward - self.target_mu) / (self.target_sigma + eps)
+        return reward
         
