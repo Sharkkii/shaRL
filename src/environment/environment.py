@@ -156,13 +156,10 @@ class PendulumEnvironment(GymEnvironment):
         super().__init__(
             name = "Pendulum-v1"
         )
-        # self._t = 0
-        # self._T = 100
 
     def reset(
         self
     ):
-        # self._t = 0
         return super().reset()
     
     def step(
@@ -170,9 +167,19 @@ class PendulumEnvironment(GymEnvironment):
         action
     ):
         observation, reward, done, info = self.env.step(action)
-        # self._t += 1
-        # if (done):
-        #     reward = 1.0 if (self._t >= self._T) else -1.0
-        # else:
-        #     reward = 0.1
         return observation, reward, done, info
+
+    def score(
+        self,
+        trajectory
+    ):
+        score_dictionary = {
+            "total_reward": None
+        }
+        if (len(trajectory) > 0):
+            total_reward = 0
+            for (_, _, r, _) in trajectory:
+                total_reward = total_reward + r
+            total_reward = int(total_reward)
+            score_dictionary["total_reward"] = total_reward
+        return score_dictionary

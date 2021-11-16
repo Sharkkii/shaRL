@@ -10,6 +10,7 @@ from policy import Policy
 from actor import Actor
 from critic import Critic
 from agent import Agent
+from controller import Phases
 
 
 class DeepDeterministicPolicyGradient(Agent):
@@ -21,12 +22,14 @@ class DeepDeterministicPolicyGradient(Agent):
         model = None,
         memory = None,
         gamma = 1.0,
-        tau = 0.5
+        tau = 0.5,
+        k = 3.0
     ):
         assert(model is not None)
         assert(memory is not None)
         actor = DDPGActor(
-            tau = tau
+            tau = tau,
+            k = k
         )
         critic = DDPGCritic(
             gamma = gamma,
@@ -45,24 +48,28 @@ class DDPGActor(Actor):
     def __init__(
         self,
         policy = None,
-        tau = 0.5
+        tau = 0.5,
+        k = 3.0
     ):
         policy = Policy()
         super().__init__(
             policy = policy
         )
         self.tau = tau
+        self.k = k
     
     def choose_action(
         self,
         state,
         action_space,
-        is_deterministic = False
+        phase = Phases.NONE
     ):
         assert(type(action_space) is gym.spaces.Box)
+        is_deterministic = (phase in [Phases.VALIDATION, Phases.TEST])
         action = self.policy(torch.from_numpy(state)).detach().numpy()
         if (not is_deterministic):
-            action += np.random.randn()
+            scale = ((action_space.high - action_space.low) / 2.0) / self.k
+            action += scale * np.random.randn()
         return action
     
     def update_policy(
@@ -74,11 +81,11 @@ class DDPGActor(Actor):
 
         action_trajectory = self.policy(state_trajectory)
         q = critic.qvalue(state_trajectory, action_trajectory)
-        sum_q = torch.sum(q)
+        objective = -1 * torch.mean(q)
 
         policy_optimizer = self.policy.policy_optimizer
         policy_optimizer.zero_grad()
-        sum_q.backward()
+        objective.backward()
         policy_optimizer.step()
 
     def update_target_policy(
