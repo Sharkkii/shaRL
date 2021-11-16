@@ -1,6 +1,5 @@
 #### Optimizer ####
 
-from collections import defaultdict
 from abc import ABCMeta, abstractmethod
 import torch
 import torch.nn as nn
@@ -44,9 +43,13 @@ class Optimizer(BaseOptimizer):
     def __init__(
         self,
         optimizer,
-        network
+        network,
+        **kwargs
     ):
-        self.optimizer = optimizer(network.parameters())
+        self.optimizer = optimizer(
+            network.parameters(),
+            **kwargs
+        )
     
     def reset(
         self

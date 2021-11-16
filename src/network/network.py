@@ -106,8 +106,8 @@ class VNet(nn.Module):
         super().__init__()
         self.input_shape = input_shape
         self.output_shape = 1
-        self.l1 = nn.Linear(self.input_shape, 20)
-        self.l2 = nn.Linear(20, 10)
+        self.l1 = nn.Linear(self.input_shape, 10)
+        self.l2 = nn.Linear(10, 10)
         self.l3 = nn.Linear(10, self.output_shape)
         nn.init.normal_(self.l1.weight, mean=0., std=1.)
         nn.init.normal_(self.l2.weight, mean=0., std=1.)
@@ -126,8 +126,8 @@ class QNet(nn.Module):
         super().__init__()
         self.input_shape = input_shape
         self.output_shape = output_shape
-        self.l1 = nn.Linear(self.input_shape, 20)
-        self.l2 = nn.Linear(20, 10)
+        self.l1 = nn.Linear(self.input_shape, 10)
+        self.l2 = nn.Linear(10, 10)
         self.l3 = nn.Linear(10, self.output_shape)
         nn.init.normal_(self.l1.weight, mean=0., std=1.)
         nn.init.normal_(self.l2.weight, mean=0., std=1.)
@@ -152,8 +152,8 @@ class PiNet(nn.Module):
         super().__init__()
         self.input_shape = input_shape
         self.output_shape = output_shape
-        self.l1 = nn.Linear(self.input_shape, 20)
-        self.l2 = nn.Linear(20, 10)
+        self.l1 = nn.Linear(self.input_shape, 10)
+        self.l2 = nn.Linear(10, 10)
         self.l3 = nn.Linear(10, self.output_shape)
         nn.init.normal_(self.l1.weight, mean=0., std=1.)
         nn.init.normal_(self.l2.weight, mean=0., std=1.)

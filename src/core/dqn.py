@@ -3,7 +3,6 @@
 import numpy as np
 import torch
 import torch.nn.functional as F
-from src import policy
 
 from value import Value, DiscreteQValue
 from policy import Policy
@@ -32,6 +31,7 @@ class DQN(Agent):
             eps_decay = eps_decay
         )
         critic = DQNCritic(
+            gamma = gamma,
             tau = tau
         )
         super().__init__(
@@ -60,13 +60,13 @@ class DQNActor(Actor):
         eps = 0.0,
         eps_decay = 1.0
     ):
+        assert(0.0 <= eps_decay <= 1.0)
         policy = Policy()
         super().__init__(
             policy = policy
         )
         self.copied_qvalue = None
         self.copied_target_qvalue = None
-        assert(0.0 <= eps_decay <= 1.0)
         self.eps = eps
         self.eps_decay = eps_decay
 
@@ -76,7 +76,7 @@ class DQNActor(Actor):
         n_epoch
     ):
         self.eps = self.eps * self.eps_decay
-        print(self.eps)
+        # print(self.eps)
 
     def choose_action(
         self,
@@ -108,9 +108,11 @@ class DQNCritic(Critic):
         self,
         value = None,
         qvalue = None,
-        tau = 0.5,
-        gamma = 1.0
+        gamma = 1.0,
+        tau = 0.5
     ):
+        assert(0.0 < gamma <= 1.0)
+        assert(0.0 <= tau <= 1.0)
         value = Value()
         qvalue = DiscreteQValue()
         super().__init__(
@@ -127,7 +129,10 @@ class DQNCritic(Critic):
     ):
         (state_trajectory, action_trajectory, reward_trajectory, next_state_trajectory) = trajectory
         action_trajectory = action_trajectory.long()
-        q = torch.diag(self.qvalue(state_trajectory)[:, action_trajectory])
+
+        # q = torch.diag(self.qvalue(state_trajectory)[:, action_trajectory])
+        batch_size = len(state_trajectory)
+        q = torch.cat([self.qvalue(state_trajectory)[[n], [action_trajectory[n]]] for n in range(batch_size)], axis=0)
         with torch.no_grad():
             target_q, _ = torch.max(self.target_qvalue(next_state_trajectory), dim=1)
             target_q = reward_trajectory + self.gamma * target_q
@@ -144,4 +149,4 @@ class DQNCritic(Critic):
         trajectory
     ):
         for theta, target_theta in zip(self.qvalue.qvalue_network.parameters(), self.target_qvalue.qvalue_network.parameters()):
-            target_theta.data = (1 - self.tau) * theta.data + self.tau * target_theta.data
+            target_theta.data = (1 - self.tau) * target_theta.data + self.tau * theta.data
