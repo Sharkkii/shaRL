@@ -137,7 +137,7 @@ class Controller(BaseController):
                         self.env,
                         # is_discrete_action_space=is_discrete_action_space,
                         # is_deterministic_policy=is_deterministic_policy,
-                        n_times=1
+                        n_times = 1
                     )
 
                 # interact w/ model    
@@ -146,7 +146,7 @@ class Controller(BaseController):
                         self.agent.model,
                         # is_discrete_action_space=is_discrete_action_space,
                         # is_deterministic_policy=is_deterministic_policy,
-                        n_times=1
+                        n_times = 1
                     )
 
             trajs = trajs_env + trajs_model
@@ -193,6 +193,12 @@ class Controller(BaseController):
             # )
 
             # evaluate
+            if (n_eval > 0):
+                score = self.evaluate(
+                    n_eval = n_eval
+                )
+                print(score)
+            
             # J_v = J_q = J_pi = J_m = 0
             # print("%d" % epoch, end="\r", flush=True)
             # if ((epoch+1) % n_eval_interval == 0):
@@ -214,11 +220,25 @@ class Controller(BaseController):
             #     print("total reward: %f" % result[1], end=" ")
             #     print()
 
-    # def evaluate(
-    #     self,
-    #     n_eval=1
-    # ):
-    #     result = self.agent.evaluate(self.env, n_eval)
-    #     return result
+    def evaluate(
+        self,
+        n_eval = 1,
+    ):
+        # initialize score dictionary
+        scores = self.env.score([])
+        for key, _ in scores.items():
+            scores[key] = []
+        
+        # evaluate
+        for _ in range(n_eval):
+            traj = self.agent.interact_with(
+                self.env,
+                n_times = 1
+            )
+            score = self.env.score(traj)
+            for key, value in score.items():
+                scores[key].append(value)
+
+        return scores
 
     

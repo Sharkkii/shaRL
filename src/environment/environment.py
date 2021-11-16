@@ -36,6 +36,13 @@ class BaseEnvironment(metaclass=ABCMeta):
     ):
         raise NotImplementedError
 
+    @abstractmethod
+    def score(
+        self,
+        trajectory
+    ):
+        raise NotImplementedError
+
 class Environment(BaseEnvironment):
 
     def __init__(
@@ -56,6 +63,7 @@ class Environment(BaseEnvironment):
         self,
         action
     ):
+        warnings.warn("`step` is not implemented.")
         observation = None
         reward = None
         done = True
@@ -66,6 +74,14 @@ class Environment(BaseEnvironment):
         self
     ):
         warnings.warn("`update` cannot be used for an Environment instance.")
+
+    def score(
+        self,
+        trajectory
+    ):
+        warnings.warn("`score` is not implemented.")
+        score_dictionary = {}
+        return score_dictionary
 
 class GymEnvironment(Environment):
 
@@ -119,6 +135,18 @@ class CartPoleEnvironment(GymEnvironment):
         else:
             reward = 0.1
         return observation, reward, done, info
+    
+    def score(
+        self,
+        trajectory
+    ):
+        score_dictionary = {
+            "duration": None
+        }
+        if (len(trajectory) > 0):
+            duration = len(trajectory)
+            score_dictionary["duration"] = duration
+        return score_dictionary
 
 class PendulumEnvironment(GymEnvironment):
 

@@ -40,6 +40,13 @@ class BaseModel(BaseEnvironment, metaclass=ABCMeta):
     ):
         raise NotImplementedError
 
+    @abstractmethod
+    def score(
+        self,
+        trajectory
+    ):
+       raise NotImplementedError
+
 class Model(BaseModel):
 
     def __init__(
@@ -78,3 +85,10 @@ class Model(BaseModel):
         n_times = 1
     ):
         pass
+
+    def score(
+        self,
+        trajectory
+    ):
+        score_dictionary = {}
+        return score_dictionary
