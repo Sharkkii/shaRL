@@ -9,6 +9,7 @@ import torch
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from actor import Actor
 from critic import Critic
+from controller import Phases
 
 
 class BaseAgent(metaclass=ABCMeta):
@@ -231,6 +232,7 @@ class Agent(BaseAgent):
         env,
         n_times = 1,
         n_limit = 1000,
+        phase = Phases.NONE,
         verbose = False
     ):
 
@@ -244,14 +246,13 @@ class Agent(BaseAgent):
                 if (done): break
                 action = self.actor.choose_action(
                     state = state,
-                    action_space = self.env.action_space
+                    action_space = self.env.action_space,
+                    phase = phase
                 )
                 next_state, reward, done, info = env.step(action)
                 history.append((state, action, reward, next_state))
                 state = next_state
                 t = t + 1
-            # if verbose:
-            #     print(t)
         
         return history
 

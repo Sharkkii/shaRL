@@ -9,7 +9,7 @@ from gym.spaces import Box, Discrete
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from policy import Policy
-
+from controller import Phases
 
 class BaseActor(metaclass=ABCMeta):
 
@@ -121,7 +121,8 @@ class Actor(BaseActor):
     def choose_action(
         self,
         state,
-        action_space
+        action_space,
+        phase = Phases.NONE
     ):
         action = self.policy(state)
         if (action is None):

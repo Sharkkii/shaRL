@@ -1,7 +1,9 @@
 #### Controller ####
 
 import sys
+import warnings
 from abc import ABCMeta, abstractmethod
+from enum import Enum
 import numpy as np
 import torch
 
@@ -70,8 +72,10 @@ class Controller(BaseController):
         n_epoch=1,
         n_sample=1,
         n_sample_start=1,
-        n_eval=1,
-        n_eval_interval=1,
+        n_eval = None, # deprecated
+        n_train_eval = 1,
+        n_test_eval = 0,
+        n_eval_interval = 1,
         env_step=1,
         gradient_step=1,
     ):
@@ -82,6 +86,11 @@ class Controller(BaseController):
         # is_on_policy = self.props_agent["is_on_policy"]
         # is_off_policy = self.props_agent["is_off_policy"]
         # is_online = self.props_agent["is_online"]
+
+        if (n_eval is not None):
+            warnings.warn("`n_eval` is deprecated. Use `n_train_eval` & `n_test_eval` instead.")
+            n_train_eval = n_eval
+            n_test_eval = 0
 
         is_model_based = False
         is_model_free = True
@@ -193,11 +202,12 @@ class Controller(BaseController):
             # )
 
             # evaluate
-            if (n_eval > 0):
-                score = self.evaluate(
-                    n_eval = n_eval
+            if (n_train_eval > 0 or n_test_eval > 0):
+                train_score, test_score = self.evaluate(
+                    n_train_eval = n_train_eval,
+                    n_test_eval = n_test_eval
                 )
-                print(score)
+                print(train_score["total_reward"], test_score["total_reward"])
             
             # J_v = J_q = J_pi = J_m = 0
             # print("%d" % epoch, end="\r", flush=True)
@@ -222,23 +232,47 @@ class Controller(BaseController):
 
     def evaluate(
         self,
-        n_eval = 1,
+        n_train_eval = 1,
+        n_test_eval = 0,
+        # is_training_step = False,
+        # is_evaluation_step = True
     ):
+        # assert(is_training_step != is_evaluation_step)
+
         # initialize score dictionary
-        scores = self.env.score([])
-        for key, _ in scores.items():
-            scores[key] = []
+        train_score = self.env.score([])
+        for key, _ in train_score.items():
+            train_score[key] = []
+        test_score = self.env.score([])
+        for key, _ in test_score.items():
+            test_score[key] = []
         
-        # evaluate
-        for _ in range(n_eval):
+        # evaluate (train)
+        for _ in range(n_train_eval):
             traj = self.agent.interact_with(
                 self.env,
-                n_times = 1
+                n_times = 1,
+                phase = Phases.TRAINING
             )
             score = self.env.score(traj)
             for key, value in score.items():
-                scores[key].append(value)
+                train_score[key].append(value)
+        
+        # evlauate (test)
+        for _ in range(n_test_eval):
+            traj = self.agent.interact_with(
+                self.env,
+                n_times = 1,
+                phase = Phases.TEST
+            )
+            score = self.env.score(traj)
+            for key, value in score.items():
+                test_score[key].append(value)
 
-        return scores
+        return (train_score, test_score)
 
-    
+class Phases(Enum):
+    NONE = 0
+    TRAINING = 1
+    VALIDATION = 2
+    TEST = 3
