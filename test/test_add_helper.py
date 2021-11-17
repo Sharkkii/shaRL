@@ -19,10 +19,18 @@ def test_add_helper():
     vhelper.setup()
 
     data = {"data": [3, 1, 4, 1, 5]}
+    print(data)
     graph = vhelper.line(data)
     vhelper.save_csv_data(data)
     vhelper.save_json_data(data)
     vhelper.save_graph(graph)
+
+    data = vhelper.load_csv_data()
+    print(data)
+    data = vhelper.load_json_data()
+    print(data)
+    image = vhelper.load_graph()
+    vhelper.show_graph(image)
 
     print("OK: test_add_helper")
 
