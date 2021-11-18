@@ -3,13 +3,14 @@
 import numpy as np
 import torch
 import torch.nn.functional as F
+import gym
 
 from value import Value, DiscreteQValue
 from policy import Policy
 from actor import Actor
 from critic import Critic
 from agent import Agent
-
+from controller import Phases
 
 class SoftActorCriticDiscrete(Agent):
 
@@ -22,13 +23,11 @@ class SoftActorCriticDiscrete(Agent):
         gamma = 1.0,
         alpha = 1.0,
         alpha_decay = 1.0,
-        tau = 0.5,
-        is_deterministic = False
+        tau = 0.5
     ):
         assert(model is not None)
         assert(memory is not None)
         actor = SACDiscreteActor(
-            is_deterministic = is_deterministic,
             alpha = alpha,
             alpha_decay = alpha_decay
         )
@@ -51,8 +50,7 @@ class SACDiscreteActor(Actor):
         self,
         policy = None,
         alpha = 1.0,
-        alpha_decay = 1.0,
-        is_deterministic = False
+        alpha_decay = 1.0
     ):
         assert(alpha >= 0.0)
         assert(0.0 < alpha_decay <= 1.0)
@@ -62,7 +60,6 @@ class SACDiscreteActor(Actor):
         )
         self.alpha = alpha
         self.alpha_decay = alpha_decay
-        self.is_deterministic = is_deterministic
 
     def setup_on_every_epoch(
         self,
@@ -75,10 +72,16 @@ class SACDiscreteActor(Actor):
     def choose_action(
         self,
         state,
-        action_space
+        action_space,
+        phase = Phases.NONE
     ):
-        p = self.policy.predict(state).detach().numpy()
-        action = np.argmax(p) if self.is_deterministic else np.random.choice(action_space.n, p=p)
+        assert(type(action_space) is gym.spaces.Discrete)
+        is_deterministic = (phase in [Phases.VALIDATION, Phases.TEST])
+        p = self.policy.predict(torch.from_numpy(state)).detach().numpy()
+        if is_deterministic:
+            action = np.argmax(p)
+        else:
+            action = np.random.choice(action_space.n, p=p)
         return action
     
     def update_policy(

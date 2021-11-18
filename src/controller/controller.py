@@ -1,13 +1,11 @@
 #### Controller ####
 
-import sys
 import warnings
 from abc import ABCMeta, abstractmethod
 from enum import Enum
 import numpy as np
 import torch
 
-# sys.path.append("../src")
 # from props import props_env, props_agent
 
 
@@ -207,7 +205,7 @@ class Controller(BaseController):
                     n_train_eval = n_train_eval,
                     n_test_eval = n_test_eval
                 )
-                print(train_score["total_reward"], test_score["total_reward"])
+                print(train_score, test_score)
             
             # J_v = J_q = J_pi = J_m = 0
             # print("%d" % epoch, end="\r", flush=True)
@@ -233,12 +231,8 @@ class Controller(BaseController):
     def evaluate(
         self,
         n_train_eval = 1,
-        n_test_eval = 0,
-        # is_training_step = False,
-        # is_evaluation_step = True
+        n_test_eval = 0
     ):
-        # assert(is_training_step != is_evaluation_step)
-
         # initialize score dictionary
         train_score = self.env.score([])
         for key, _ in train_score.items():
