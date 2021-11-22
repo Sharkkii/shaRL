@@ -43,13 +43,12 @@ class Optimizer(BaseOptimizer):
     def __init__(
         self,
         optimizer,
-        network,
+        # network,
         **kwargs
     ):
-        self.optimizer = optimizer(
-            network.parameters(),
-            **kwargs
-        )
+        self.optimizer_class = optimizer
+        self.optimizer = None
+        self.kwargs = kwargs
     
     def reset(
         self
@@ -59,16 +58,18 @@ class Optimizer(BaseOptimizer):
     def zero_grad(
         self
     ):
-        # raise NotImplementedError
         self.optimizer.zero_grad()
     
     def setup(
-        self
+        self,
+        network
     ):
-        raise NotImplementedError
+        self.optimizer = self.optimizer_class(
+            network.parameters(),
+            **self.kwargs
+        )
     
     def step(
         self
     ):
-        # raise NotImplementedError
         self.optimizer.step()
