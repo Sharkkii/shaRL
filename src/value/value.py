@@ -41,9 +41,9 @@ class BaseValue(metaclass=ABCMeta):
             self.value_network = value_network
         if (value_optimizer is not None):
             self.value_optimizer = value_optimizer
-        self.value_optimizer.setup(
-            network = self.value_network
-        )
+            self.value_optimizer.setup(
+                network = self.value_network
+            )
 
     # @abstractmethod
     def copy(
@@ -120,9 +120,9 @@ class BaseQValue(metaclass=ABCMeta):
             self.qvalue_network = qvalue_network
         if (qvalue_optimizer is not None):
             self.qvalue_optimizer = qvalue_optimizer
-        self.qvalue_optimizer.setup(
-            network = self.qvalue_network
-        )
+            self.qvalue_optimizer.setup(
+                network = self.qvalue_network
+            )
     
     # @abstractmethod
     def copy(

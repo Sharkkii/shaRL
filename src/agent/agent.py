@@ -248,7 +248,6 @@ class Agent(BaseAgent):
                 if (done): break
                 action = self.actor.choose_action(
                     state = state,
-                    action_space = self.env.action_space,
                     phase = phase
                 )
                 next_state, reward, done, info = env.step(action)

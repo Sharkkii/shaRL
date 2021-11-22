@@ -15,6 +15,16 @@ class ValueNetwork(BaseNetwork):
     ):
         self.network = value_network if callable(value_network) else (lambda state: None)
     
+    def reset(
+        self
+    ):
+        pass
+
+    def setup(
+        self
+    ):
+        pass
+    
     def __call__(
         self,
         state
@@ -28,6 +38,16 @@ class DiscreteQValueNetwork(BaseNetwork):
         qvalue_network
     ):
         self.network = qvalue_network if callable(qvalue_network) else (lambda state: None)
+
+    def reset(
+        self
+    ):
+        pass
+
+    def setup(
+        self
+    ):
+        pass
     
     def __call__(
         self,
@@ -44,6 +64,16 @@ class ContinuousQValueNetwork(BaseNetwork):
         qvalue_network
     ):
         self.network = qvalue_network if callable(qvalue_network) else (lambda state, action: None)
+
+    def reset(
+        self
+    ):
+        pass
+
+    def setup(
+        self
+    ):
+        pass
     
     def __call__(
         self,

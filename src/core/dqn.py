@@ -5,10 +5,11 @@ import torch
 import torch.nn.functional as F
 
 from value import Value, DiscreteQValue
-from policy import Policy
+from policy import QBasedPolicy
 from actor import Actor
 from critic import Critic
 from agent import Agent
+from controller import Phases
 
 
 class DQN(Agent):
@@ -61,12 +62,12 @@ class DQNActor(Actor):
         eps_decay = 1.0
     ):
         assert(0.0 <= eps_decay <= 1.0)
-        policy = Policy()
+        policy = QBasedPolicy(
+            copied_qvalue = None
+        )
         super().__init__(
             policy = policy
         )
-        self.copied_qvalue = None
-        self.copied_target_qvalue = None
         self.eps = eps
         self.eps_decay = eps_decay
 
@@ -81,17 +82,14 @@ class DQNActor(Actor):
     def choose_action(
         self,
         state,
-        action_space
+        phase = Phases.NONE
     ):
-        if (self.copied_qvalue is None):
-            action = action_space.sample()
-        else:
-            # epsilon-greedy
-            q = self.copied_qvalue(torch.from_numpy(state)).detach().numpy()
-            action = np.argmax(q)
-            r = np.random.rand()
-            if (r <= action_space.n * self.eps):
-                action = action_space.sample()
+        action = self.policy.sample(
+            state = state,
+            action_space = self.env.action_space,
+            phase = phase,
+            eps = self.eps
+        )
         return action
     
     def update_policy(
@@ -99,8 +97,8 @@ class DQNActor(Actor):
         critic,
         trajectory = None
     ):
-        self.copied_qvalue = critic.qvalue
-        self.copied_target_qvalue = critic.target_qvalue
+        self.policy.copied_qvalue = critic.qvalue
+        self.policy.copied_target_qvalue = critic.target_qvalue
 
 class DQNCritic(Critic):
 
@@ -113,7 +111,7 @@ class DQNCritic(Critic):
     ):
         assert(0.0 < gamma <= 1.0)
         assert(0.0 <= tau <= 1.0)
-        value = Value()
+        value = None
         qvalue = DiscreteQValue()
         super().__init__(
             value = value,

@@ -1,3 +1,5 @@
+from .network import BaseNetwork
+from .network import BasePolicyNetwork
 from .value_network import ValueNetwork
 from .value_network import QValueNetwork
 from .value_network import DiscreteQValueNetwork

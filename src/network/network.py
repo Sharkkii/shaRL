@@ -18,14 +18,43 @@ class BaseNetwork(metaclass=ABCMeta):
     @abstractmethod
     def __call__(
         self,
-        x
+        **x
     ):
-        return self.network(x)
+        return self.network(**x)
+
+    @abstractmethod
+    def reset(
+        self
+    ):
+        pass
+
+    @abstractmethod
+    def setup(
+        self,
+        **kwargs
+    ):
+        pass
     
     def parameters(
         self
     ):
         return self.network.parameters()
+
+class BasePolicyNetwork(BaseNetwork, metaclass=ABCMeta):
+
+    @abstractmethod
+    def P(
+        self,
+        **x
+    ):
+        return self.network(**x)
+
+    @abstractmethod
+    def logP(
+        self,
+        **x
+    ):
+        return torch.log(self.P(**x))
 
 class VNet(nn.Module):
     
@@ -33,9 +62,9 @@ class VNet(nn.Module):
         super().__init__()
         self.input_shape = input_shape
         self.output_shape = 1
-        self.l1 = nn.Linear(self.input_shape, 10)
-        self.l2 = nn.Linear(10, 10)
-        self.l3 = nn.Linear(10, self.output_shape)
+        self.l1 = nn.Linear(self.input_shape, 20)
+        self.l2 = nn.Linear(20, 20)
+        self.l3 = nn.Linear(20, self.output_shape)
         nn.init.normal_(self.l1.weight, mean=0., std=1.)
         nn.init.normal_(self.l2.weight, mean=0., std=1.)
         nn.init.normal_(self.l3.weight, mean=0., std=1.)
@@ -57,9 +86,9 @@ class QNet(nn.Module):
         super().__init__()
         self.input_shape = input_shape
         self.output_shape = output_shape
-        self.l1 = nn.Linear(self.input_shape, 10)
-        self.l2 = nn.Linear(10, 10)
-        self.l3 = nn.Linear(10, self.output_shape)
+        self.l1 = nn.Linear(self.input_shape, 20)
+        self.l2 = nn.Linear(20, 20)
+        self.l3 = nn.Linear(20, self.output_shape)
         nn.init.normal_(self.l1.weight, mean=0., std=1.0)
         nn.init.normal_(self.l2.weight, mean=0., std=1.0)
         nn.init.normal_(self.l3.weight, mean=0., std=1.0)
@@ -87,9 +116,9 @@ class PiNet(nn.Module):
         super().__init__()
         self.input_shape = input_shape
         self.output_shape = output_shape
-        self.l1 = nn.Linear(self.input_shape, 10)
-        self.l2 = nn.Linear(10, 10)
-        self.l3 = nn.Linear(10, self.output_shape)
+        self.l1 = nn.Linear(self.input_shape, 20)
+        self.l2 = nn.Linear(20, 20)
+        self.l3 = nn.Linear(20, self.output_shape)
         nn.init.normal_(self.l1.weight, mean=0., std=1.0)
         nn.init.normal_(self.l2.weight, mean=0., std=1.0)
         nn.init.normal_(self.l3.weight, mean=0., std=1.0)
