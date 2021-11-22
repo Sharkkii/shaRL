@@ -35,6 +35,7 @@ class BaseCritic(metaclass=ABCMeta):
     @abstractmethod
     def setup(
         self,
+        env = None,
         value_network = None,
         qvalue_network = None,
         value_optimizer = None,
@@ -104,16 +105,12 @@ class Critic(BaseCritic):
     def __init__(
         self,
         value = None,
-        qvalue = None,
-        # smooth_v = 0.99,
-        # smooth_q = 0.99,
+        qvalue = None
     ):
         self.value = Value() if value is None else value
         self.qvalue = QValue() if qvalue is None else qvalue
         self.target_value = self.value.copy()
         self.target_qvalue = self.qvalue.copy()
-        # self.smooth_v = smooth_v
-        # self.smooth_q = smooth_q
     
     def reset(
         self
@@ -122,11 +119,13 @@ class Critic(BaseCritic):
 
     def setup(
         self,
+        env = None,
         value_network = None,
         qvalue_network = None,
         value_optimizer = None,
         qvalue_optimizer = None
     ):
+        self.env = env
         self.value.setup(
             value_network = value_network,
             value_optimizer = value_optimizer

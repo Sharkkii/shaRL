@@ -30,6 +30,7 @@ class BaseActor(metaclass=ABCMeta):
     @abstractmethod
     def setup(
         self,
+        env = None,
         policy_network = None,
         policy_optimizer = None
     ):
@@ -79,6 +80,7 @@ class BaseActor(metaclass=ABCMeta):
         n_times = 1
     ):
         raise NotImplementedError
+
 class Actor(BaseActor):
 
     def __init__(
@@ -95,9 +97,11 @@ class Actor(BaseActor):
     
     def setup(
         self,
+        env = None,
         policy_network = None,
         policy_optimizer = None
     ):
+        self.env = env
         self.policy.setup(
             policy_network = policy_network,
             policy_optimizer = policy_optimizer
@@ -121,9 +125,10 @@ class Actor(BaseActor):
     def choose_action(
         self,
         state,
-        action_space,
+        action_space = None, # deprecated
         phase = Phases.NONE
     ):
+        action_space = self.env.action_space
         action = self.policy(state)
         if (action is None):
             action = action_space.sample()

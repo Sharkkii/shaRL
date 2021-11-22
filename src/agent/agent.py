@@ -52,17 +52,19 @@ class BaseAgent(metaclass=ABCMeta):
         value_optimizer = None,
         qvalue_optimizer = None
     ):
+        self.env = env
         self.actor.setup(
+            env = env,
             policy_network = policy_network,
             policy_optimizer = policy_optimizer
         )
         self.critic.setup(
+            env = env,
             value_network = value_network,
             qvalue_network = qvalue_network,
             value_optimizer = value_optimizer,
             qvalue_optimizer = qvalue_optimizer,
         )
-        self.env = env
         self.model.setup(env)
         self.memory.setup()
     
