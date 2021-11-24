@@ -7,6 +7,7 @@ from .value_network import ContinuousQValueNetwork
 from .policy_network import PolicyNetwork
 from .policy_network import DiscretePolicyNetwork
 from .policy_network import ContinuousPolicyNetwork
+from .policy_network import GaussianPolicyNetwork
 from .network import VNet
 from .network import QNet
 from .network import PiNet
