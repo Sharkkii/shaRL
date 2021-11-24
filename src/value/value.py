@@ -45,6 +45,16 @@ class BaseValue(metaclass=ABCMeta):
                 network = self.value_network
             )
 
+    def train(
+        self
+    ):
+        self.value_network.train()
+    
+    def eval(
+        self
+    ):
+        self.value_network.eval()
+
     # @abstractmethod
     def copy(
         self
@@ -123,6 +133,16 @@ class BaseQValue(metaclass=ABCMeta):
             self.qvalue_optimizer.setup(
                 network = self.qvalue_network
             )
+    
+    def train(
+        self
+    ):
+        self.qvalue_network.train()
+    
+    def eval(
+        self
+    ):
+        self.qvalue_network.eval()
     
     # @abstractmethod
     def copy(

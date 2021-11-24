@@ -59,6 +59,18 @@ class BaseCritic(metaclass=ABCMeta):
     ):
         raise NotImplementedError
 
+    def train(
+        self
+    ):
+        self.value.train()
+        self.qvalue.train()
+
+    def eval(
+        self
+    ):
+        self.value.eval()
+        self.qvalue.eval()
+
     @abstractmethod
     def update_value(
         self,

@@ -85,6 +85,8 @@ class Controller(BaseController):
         # is_off_policy = self.props_agent["is_off_policy"]
         # is_online = self.props_agent["is_online"]
 
+        self.agent.train()
+
         if (n_eval is not None):
             warnings.warn("`n_eval` is deprecated. Use `n_train_eval` & `n_test_eval` instead.")
             n_train_eval = n_eval
@@ -110,6 +112,7 @@ class Controller(BaseController):
         # is_discrete_state_space = self.props_env["is_discrete_state_space"]
         # is_discrete_action_space = self.props_env["is_discrete_action_space"]
         # is_deterministic_policy = self.props_agent["is_deterministic_policy"]
+        
         is_discrete_state_space = False
         is_discrete_action_space = True
         is_deterministic_policy = False
@@ -233,6 +236,8 @@ class Controller(BaseController):
         n_train_eval = 1,
         n_test_eval = 0
     ):
+        self.agent.eval()
+
         # initialize score dictionary
         train_score = self.env.score([])
         for key, _ in train_score.items():

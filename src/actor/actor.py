@@ -51,6 +51,16 @@ class BaseActor(metaclass=ABCMeta):
         n_step
     ):
         raise NotImplementedError
+    
+    def train(
+        self
+    ):
+        self.policy.train()
+
+    def eval(
+        self
+    ):
+        self.policy.eval()
 
     @abstractmethod
     def choose_action(

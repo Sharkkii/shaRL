@@ -84,6 +84,18 @@ class BaseAgent(metaclass=ABCMeta):
     ):
         raise NotImplementedError
 
+    def train(
+        self
+    ):
+        self.actor.train()
+        self.critic.train()
+    
+    def eval(
+        self
+    ):
+        self.actor.eval()
+        self.critic.eval()
+
     @abstractmethod
     def update_model(
         self,

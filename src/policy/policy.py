@@ -9,6 +9,7 @@ import torch.nn.functional as F
 
 from controller import Phases
 
+# from ..network import DiscretePolicyNetwork
 
 class BasePolicy(metaclass=ABCMeta):
 
@@ -48,6 +49,16 @@ class BasePolicy(metaclass=ABCMeta):
             self.policy_optimizer.setup(
                 network = self.policy_network
             )
+
+    def train(
+        self
+    ):
+        self.policy_network.train()
+    
+    def eval(
+        self
+    ):
+        self.policy_network.eval()
     
     # @abstractmethod
     def P(
@@ -159,20 +170,20 @@ class ContinuousPolicy(BasePolicy):
     ):
         return self.policy_network(state, action)
     
-    # def P(
-    #     self,
-    #     state,
-    #     action
-    # ):
-    #     return self.policy_network.P(state, action)
+    def P(
+        self,
+        state,
+        action
+    ):
+        return self.policy_network.P(state, action)
         
-    # def logP(
-    #     self,
-    #     state,
-    #     action,
-    #     eps = 1e-8
-    # ):
-    #     return self.policy_network.logP(state, action, eps=eps)
+    def logP(
+        self,
+        state,
+        action,
+        eps = 1e-8
+    ):
+        return self.policy_network.logP(state, action, eps=eps)
 
     def sample(
         self,
@@ -215,7 +226,10 @@ class QBasedPolicy(BasePolicy):
         policy_network = None,
         policy_optimizer = None
     ):
-        pass
+        super().setup(
+            policy_network = policy_network,
+            policy_optimizer = policy_optimizer
+        )
 
     def __call__(
         self,
