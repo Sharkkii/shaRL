@@ -120,7 +120,7 @@ class GaussianPolicyNetwork(ContinuousPolicyNetwork):
             network_mu,
             network_sigma
         )
-        self.k = k
+        self.k = torch.tensor(k)
     
     def __call__(
         self,
@@ -169,12 +169,12 @@ class GaussianPolicyNetwork(ContinuousPolicyNetwork):
             sigma = torch.unsqueeze(sigma, dim=0)
             eps = torch.zeros(n_sample, *shape) if is_deterministic else torch.randn((n_sample, *shape))
             action = mu + eps * sigma
-
-            # FIXME: squashing function (tanh)
+            # NOTE: squashing function (tanh)
             action = self.k * torch.tanh(action)
 
             if (n_sample == 1):
                 action = torch.squeeze(action, dim=0)
+
         return action
 
     def _p(
@@ -183,12 +183,19 @@ class GaussianPolicyNetwork(ContinuousPolicyNetwork):
         sigma,
         k = 2.0
     ):
-        assert(torch.all(sigma > 0))
-        p = torch.exp(- (x - mu) ** 2 / (2.0 * sigma ** 2)) / ((2.0 * np.pi * sigma ** 2) ** 0.5)
-        # p = torch.prod(p)
+        eps = 1e-8
+        margin = 1e-4
+        x_squashed = x
+        x = x / 2.0
+        x = torch.where(x >= 1.0 - margin, x - margin, x)
+        x = torch.where(x <= - 1.0 + margin, x + margin, x)
+        x_unsquashed = torch.atanh(x)
 
-        # FIXME: squashing function (tanh)
-        p = p * k / ((k + x) * (k - x))
+        p = torch.exp(- (x_unsquashed - mu) ** 2 / (2.0 * sigma ** 2 + eps)) / ((2.0 * np.pi * sigma ** 2 + eps) ** 0.5)
+        # NOTE: squashing function (tanh)
+        p = p * k / ((k + x_squashed) * (k - x_squashed) + eps)
+
+        # p = torch.prod(p)
         return p
 
     def _logp(
@@ -198,11 +205,19 @@ class GaussianPolicyNetwork(ContinuousPolicyNetwork):
         k = 2.0,
         eps = 1e-8
     ):
-        assert(torch.all(sigma > 0))
-        logp = - torch.log(2.0 * np.pi * sigma ** 2 + eps) / 2.0 - (x - mu) ** 2 / (2.0 * sigma ** 2 + eps)
-        # logp = torch.sum(logp)
+        eps = 1e-4
+        eps_in_log = 1e-16
+        margin = 1e-4
+        x_squashed = x
+        x = x / 2.0
+        x = torch.where(x >= 1.0 - margin, x - margin, x)
+        x = torch.where(x <= - 1.0 + margin, x + margin, x)
+        x_unsquashed = torch.atanh(x)
+        
+        logp = - torch.log(2.0 * np.pi * sigma ** 2 + eps_in_log) / 2.0 - (x_unsquashed - mu) ** 2 / (2.0 * sigma ** 2 + eps)
+        # NOTE: squashing function (tanh)
+        logp = logp + torch.log(k) - torch.log(k ** 2 - x_squashed ** 2 + eps_in_log)
 
-        # FIXME: squashing function (tanh)
-        logp = logp + torch.log(k) - torch.log(k ** 2 - x ** 2)
+        # logp = torch.sum(logp)
         return logp
         
