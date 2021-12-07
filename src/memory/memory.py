@@ -143,7 +143,7 @@ class RLMemory(BaseMemory):
             capacity = capacity
         )
         self.reward_processor = RewardProcessor(
-            alpha = 0.01
+            alpha = 0.5
         )
     
     @property
@@ -281,7 +281,7 @@ class RewardProcessor:
 
     def __init__(
         self,
-        alpha = 0.01
+        alpha = 0.5
     ):
         self.target_mu = None
         self.target_sigma = None

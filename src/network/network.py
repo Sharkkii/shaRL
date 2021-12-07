@@ -77,9 +77,9 @@ class VNet(nn.Module):
         self.l2 = nn.Linear(20, 20)
         self.bn2 = nn.BatchNorm1d(20)
         self.l3 = nn.Linear(20, self.output_shape)
-        nn.init.normal_(self.l1.weight, mean=0., std=0.1)
-        nn.init.normal_(self.l2.weight, mean=0., std=0.1)
-        nn.init.normal_(self.l3.weight, mean=0., std=0.1)
+        nn.init.normal_(self.l1.weight, mean=0., std=1.0)
+        nn.init.normal_(self.l2.weight, mean=0., std=1.0)
+        nn.init.normal_(self.l3.weight, mean=0., std=1.0)
         
     def forward(self, x):
         x = torch.Tensor(x)
@@ -103,9 +103,9 @@ class QNet(nn.Module):
         self.l2 = nn.Linear(20, 20)
         self.bn2 = nn.BatchNorm1d(20)
         self.l3 = nn.Linear(20, self.output_shape)
-        nn.init.normal_(self.l1.weight, mean=0., std=0.10)
-        nn.init.normal_(self.l2.weight, mean=0., std=0.10)
-        nn.init.normal_(self.l3.weight, mean=0., std=0.10)
+        nn.init.normal_(self.l1.weight, mean=0., std=1.0)
+        nn.init.normal_(self.l2.weight, mean=0., std=1.0)
+        nn.init.normal_(self.l3.weight, mean=0., std=1.0)
 
     def forward(self, x, y=None):
         if (y is None):
@@ -135,9 +135,9 @@ class PiNet(nn.Module):
         self.l2 = nn.Linear(20, 20)
         self.bn2 = nn.BatchNorm1d(20)
         self.l3 = nn.Linear(20, self.output_shape)
-        nn.init.normal_(self.l1.weight, mean=0., std=0.10)
-        nn.init.normal_(self.l2.weight, mean=0., std=0.10)
-        nn.init.normal_(self.l3.weight, mean=0., std=0.10)
+        nn.init.normal_(self.l1.weight, mean=0., std=1.0)
+        nn.init.normal_(self.l2.weight, mean=0., std=1.0)
+        nn.init.normal_(self.l3.weight, mean=0., std=1.0)
         
     def forward(self, x, y=None):
         if (y is None):
