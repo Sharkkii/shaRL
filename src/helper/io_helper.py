@@ -39,6 +39,7 @@ class IOHelper(FileSystemHelper):
         self,
         path
     ):
+        assert(len(path) > 0)
         ext = ".csv"
         path = os.path.abspath(os.path.join(self.csv_root, path)) + ext
         return path
@@ -47,41 +48,42 @@ class IOHelper(FileSystemHelper):
         self,
         path
     ):
+        assert(len(path) > 0)
         ext = ".json"
         path = os.path.abspath(os.path.join(self.json_root, path)) + ext
         return path
 
-    def load_csv(
+    def load_from_csv(
         self,
-        path = ""
+        path = "default"
     ):
         path = self.abs_csv_path(path)
         data = pd.read_csv(path).to_dict()
         return data
 
-    def load_json(
+    def load_from_json(
         self,
-        path = ""
+        path = "default"
     ):
         path = self.abs_json_path(path)
         with open(path, "r") as f:
             data = json.load(f)
         return data
 
-    def save_csv(
+    def save_to_csv(
         self,
         data,
-        path = ""
+        path = "default"
     ):
         assert(type(data) is dict)
         path = self.abs_csv_path(path)
         df = pd.DataFrame(data)
         df.to_csv(path, index=False)
 
-    def save_json(
+    def save_to_json(
         self,
         data,
-        path = ""
+        path = "default"
     ):
         assert(type(data) is dict)
         path = self.abs_json_path(path)

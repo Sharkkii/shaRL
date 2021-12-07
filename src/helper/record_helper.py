@@ -2,6 +2,7 @@
 
 from .io_helper import IOHelper
 
+
 class RecordHelper(IOHelper):
 
     def __init__(
@@ -35,15 +36,15 @@ class RecordHelper(IOHelper):
         else:
             self.cell[key] = [ value ]
 
-    def save_csv(
+    def save_to_csv(
         self,
         path
     ):
-        super().save_csv(self.cell, path)
+        super().save_to_csv(self.cell, path)
     
-    def save_json(
+    def save_to_json(
         self,
         path
     ):
-        super().save_json(self.cell, path)
+        super().save_to_json(self.cell, path)
 
