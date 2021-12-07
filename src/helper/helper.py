@@ -9,6 +9,16 @@ class BaseHelper:
     ):
         pass
 
+    def setup(
+        self
+    ):
+        pass
+
+    def reset(
+        self
+    ):
+        pass
+
 class Helper(BaseHelper):
 
     def __init__(
@@ -21,11 +31,9 @@ class Helper(BaseHelper):
     def setup(
         self
     ):
-        self.setup_directory()
+        pass
 
-    def setup_directory(
+    def reset(
         self
     ):
-        # /dest/
-        if (not os.path.isdir(self.dest)):
-            os.mkdir(self.dest)
+        pass
