@@ -148,6 +148,45 @@ class CartPoleEnvironment(GymEnvironment):
             score_dictionary["duration"] = duration
         return score_dictionary
 
+class ContinuousMountainCarEnvironment(GymEnvironment):
+
+    def __init__(
+        self
+    ):
+        super().__init__(
+            name = "MountainCarContinuous-v0"
+        )
+        self._t = 0
+        self._T = 200
+
+    def reset(
+        self
+    ):
+        self._t = 0
+        return super().reset()
+    
+    def step(
+        self,
+        action
+    ):
+        observation, reward, done, info = self.env.step(action)
+        return observation, reward, done, info
+    
+    def score(
+        self,
+        trajectory
+    ):
+        score_dictionary = {
+            "total_reward": None
+        }
+        if (len(trajectory) > 0):
+            total_reward = 0
+            for (_, _, r, _) in trajectory:
+                total_reward = total_reward + r
+            total_reward = int(total_reward)
+            score_dictionary["total_reward"] = total_reward
+        return score_dictionary
+
 class PendulumEnvironment(GymEnvironment):
 
     def __init__(
