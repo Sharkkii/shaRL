@@ -2,39 +2,26 @@
 
 from torch.utils.data import Dataset
 
-class RLDataset(Dataset):
+
+class BaseRLDataset:
 
     def __init__(
         self,
-        n_capacity
+        min_size,
+        max_size
     ):
-        self.dataset = {
-            "state": [],
-            "action": [],
-            "reward": [],
-            "next_state": []
-        }
-        self.n_capacity = n_capacity
+        self.min_size = min_size
+        self.max_size = max_size
 
-    def __len__(
+    def setup(
         self
     ):
-        l_state = len()
-        l_action = len(self.dataset["action"])
-        l_reward = len(self.dataset["reward"])
-        l_next_state = len(self.dataset["next_state"])
-        assert(l_state == l_action and l_state == l_reward and l_state == l_next_state)
-        return l_state
+        pass
 
-    def __getitem__(
-        self,
-        index
+    def reset(
+        self
     ):
-        state = self.dataset["state"][index]
-        action = self.dataset["action"][index]
-        reward = self.dataset["reward"][index]
-        next_state = self.dataset["next_state"][index]
-        return (state, action, reward, next_state)
+        pass
 
     def load(
         self
@@ -43,14 +30,14 @@ class RLDataset(Dataset):
         action = self.dataset["action"]
         reward = self.dataset["reward"]
         next_state = self.dataset["next_state"]
-        history = RLDataset.zip(state, action, reward, next_state)
+        history = BaseRLDataset.zip(state, action, reward, next_state)
         return history
     
     def save(
         self,
         history
     ):
-        state, action, reward, next_state = RLDataset.unzip(history)
+        state, action, reward, next_state = BaseRLDataset.unzip(history)
         self.dataset["state"].extend(state)
         self.dataset["action"].extend(action)
         self.dataset["reward"].extend(reward)
@@ -61,7 +48,7 @@ class RLDataset(Dataset):
         self
     ):
         for key in self.dataset.keys():
-            self.dataset[key] = self.dataset[key][- self.n_capacity:]
+            self.dataset[key] = self.dataset[key][- self.max_size:]
 
     # {(s, a, r, s_next)} -> ({s}, {a}, {r}, {s_next})
     def unzip(
@@ -79,3 +66,41 @@ class RLDataset(Dataset):
     ):
         history = list(zip(state_traj, action_traj, reward_traj, state_next_traj))
         return history
+
+class RLDataset(Dataset, BaseRLDataset):
+
+    def __init__(
+        self,
+        min_size,
+        max_size
+    ):
+        self.dataset = {
+            "state": [],
+            "action": [],
+            "reward": [],
+            "next_state": []
+        }
+        self.min_size = min_size
+        self.max_size = max_size
+
+    def __len__(
+        self
+    ):
+        l = len(self.dataset["state"])
+        if (l < self.min_size):
+            l = self.min_size
+        elif (l > self.max_size):
+            l = self.max_size
+        return l
+
+    def __getitem__(
+        self,
+        index
+    ):
+        index = index % len(self)
+        state = self.dataset["state"][index]
+        action = self.dataset["action"][index]
+        reward = self.dataset["reward"][index]
+        next_state = self.dataset["next_state"][index]
+        return (state, action, reward, next_state)
+        
