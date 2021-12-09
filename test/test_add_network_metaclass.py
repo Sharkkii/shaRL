@@ -12,6 +12,7 @@ def test_add_network_metaclass():
         spec = "example_network"
 
     n = N(d_in = 5, d_out = 1)
+    print(n.components)
     x = torch.randn(size=(10, 5))
     y = n(x)
     print(x, y)

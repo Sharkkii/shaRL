@@ -7,7 +7,7 @@ import torch.nn as nn
 
 class MetaNetwork(type):
 
-    components = ["linear", "relu"]
+    components = ["linear", "relu", "batchnorm"]
 
     def __new__(
         cls,
@@ -105,6 +105,14 @@ class MetaNetwork(type):
                 dins.append(d_in)
                 douts.append(d_out)
                 components.append("relu")
+
+            elif ("batchnorm" in value):
+
+                d_in = -1
+                d_out = -1
+                dins.append(d_in)
+                douts.append(d_out)
+                components.append("batchnorm")
         
         dins.append(self.d_out)
         douts.append(-1)
@@ -115,7 +123,7 @@ class MetaNetwork(type):
             din = MetaNetwork._match(douts[idx-1], dins[idx])
             douts[idx-1] = dins[idx] = din
 
-            if (components[idx] == "relu"):
+            if (components[idx] in ["relu", "batchnorm"]):
                 din = MetaNetwork._match(douts[idx], dins[idx])
                 douts[idx] = dins[idx] = din
 
@@ -124,7 +132,7 @@ class MetaNetwork(type):
             dout = MetaNetwork._match(douts[idx], dins[idx+1])
             douts[idx] = dins[idx+1] = dout
 
-            if (components[idx] == "relu"):
+            if (components[idx] in ["relu", "batchnorm"]):
                 dout = MetaNetwork._match(douts[idx], dins[idx])
                 douts[idx] = dins[idx] = dout
             
@@ -137,22 +145,28 @@ class MetaNetwork(type):
                 )
                 components[idx] = component
 
-            if (components[idx] == "relu"):
+            elif (components[idx] == "relu"):
                 component = nn.ReLU()
+                components[idx] = component
+            
+            elif (components[idx] == "batchnorm"):
+                component = nn.BatchNorm1d(
+                    num_features = dins[idx]
+                )
                 components[idx] = component
 
         return components[1:-1]
 
     def _match(
-        prev_d_out,
-        next_d_in
+        d1,
+        d2
     ):
-        if (prev_d_out > 0 and next_d_in > 0):
-            assert(prev_d_out == next_d_in)
-            return prev_d_out
-        elif (prev_d_out > 0 and next_d_in <= 0):
-            return prev_d_out
-        elif (prev_d_out <= 0 and next_d_in > 0):
-            return next_d_in
+        if (d1 > 0 and d2 > 0):
+            assert(d1 == d2)
+            return d1
+        elif (d1 > 0 and d2 <= 0):
+            return d1
+        elif (d1 <= 0 and d2 > 0):
+            return d2
         else:
             return -1
