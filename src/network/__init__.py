@@ -11,3 +11,4 @@ from .policy_network import GaussianPolicyNetwork
 from .network import VNet
 from .network import QNet
 from .network import PiNet
+from .meta_network import MetaNetwork
