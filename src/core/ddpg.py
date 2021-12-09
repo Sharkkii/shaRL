@@ -25,8 +25,6 @@ class DeepDeterministicPolicyGradient(Agent):
         tau = 0.5,
         k = 3.0
     ):
-        assert(model is not None)
-        assert(memory is not None)
         actor = DDPGActor(
             tau = tau,
             k = k
@@ -61,9 +59,10 @@ class DDPGActor(Actor):
     def choose_action(
         self,
         state,
-        action_space,
+        # action_space, # deprecated
         phase = Phases.NONE
     ):
+        action_space = self.env.action_space
         assert(type(action_space) is gym.spaces.Box)
         is_deterministic = (phase in [Phases.VALIDATION, Phases.TEST])
         action = self.policy(torch.from_numpy(state)).detach().numpy()
