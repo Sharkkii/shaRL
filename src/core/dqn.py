@@ -25,8 +25,6 @@ class DQN(Agent):
         eps = 0.0,
         eps_decay = 1.0
     ):
-        assert(model is not None)
-        assert(memory is not None)
         actor = DQNActor(
             eps = eps,
             eps_decay = eps_decay

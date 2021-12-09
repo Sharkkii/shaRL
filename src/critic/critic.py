@@ -119,8 +119,8 @@ class Critic(BaseCritic):
         value = None,
         qvalue = None
     ):
-        self.value = Value() if value is None else value
-        self.qvalue = QValue() if qvalue is None else qvalue
+        self.value = Value() if (value is None) else value
+        self.qvalue = QValue() if (qvalue is None) else qvalue
         self.target_value = self.value.copy()
         self.target_qvalue = self.qvalue.copy()
     

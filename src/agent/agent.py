@@ -9,6 +9,8 @@ import torch
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from actor import Actor
 from critic import Critic
+from environment import Model
+from memory import RLMemory
 from controller import Phases
 
 
@@ -23,13 +25,11 @@ class BaseAgent(metaclass=ABCMeta):
         memory = None,
         gamma = 1.0
     ):
-        assert(model is not None)
-        assert(memory is not None)
         self.actor = Actor() if (actor is None) else actor
         self.critic = Critic() if (critic is None) else critic
         self.env = None
-        self.model = model
-        self.memory = memory
+        self.model = Model() if (model is None) else model
+        self.memory = RLMemory() if (memory is None) else memory
         self.gamma = gamma
     
     @abstractmethod
@@ -103,7 +103,6 @@ class BaseAgent(metaclass=ABCMeta):
         n_times = 1
     ):
         raise NotImplementedError
-        # return self.model.update(trajs, n_times=n_times)
 
     @abstractmethod
     def update_actor(
@@ -112,7 +111,6 @@ class BaseAgent(metaclass=ABCMeta):
         n_times = 1
     ):
         raise NotImplementedError
-        # return self.actor.update(trajs, n_times=n_times)
     
     @abstractmethod
     def update_critic(
@@ -121,7 +119,6 @@ class BaseAgent(metaclass=ABCMeta):
         n_times = 1
     ):
         raise NotImplementedError
-        # return self.critic.update(trajs, n_times=n_times)
 
     # @abstractmethod
     # def update_every_epoch(
@@ -161,14 +158,13 @@ class Agent(BaseAgent):
         memory = None,
         gamma = 1.0
     ):
-        assert(model is not None)
-        assert(memory is not None)
-        self.actor = Actor() if actor is None else actor
-        self.critic = Critic() if critic is None else critic
-        self.env = None
-        self.model = model
-        self.memory = memory
-        self.gamma = gamma
+        super().__init__(
+            actor = actor,
+            critic = critic,
+            model = model,
+            memory = memory,
+            gamma = gamma
+        )
     
     def reset(
         self
@@ -268,7 +264,6 @@ class Agent(BaseAgent):
                 t = t + 1
         
         return history
-
     
     def save_history(
         self,

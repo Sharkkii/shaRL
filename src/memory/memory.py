@@ -22,28 +22,6 @@ class BaseMemory(metaclass=ABCMeta):
     ):
         raise NotImplementedError
     
-    # def push_back(
-    #     self,
-    #     x
-    # ):
-    #     raise NotImplementedError
-    
-    # def pop_back(
-    #     self
-    # ):
-    #     raise NotImplementedError
-    
-    # def push_front(
-    #     self,
-    #     x
-    # ):
-    #     raise NotImplementedError
-
-    # def pop_front(
-    #     self
-    # ):
-    #     raise NotImplementedError
-    
     def save(
         self,
         x
@@ -66,7 +44,7 @@ class Memory(BaseMemory):
 
     def __init__(
         self,
-        capacity = 100
+        capacity = 10000
     ):
         assert(capacity > 0)
         self._capacity = capacity
@@ -128,7 +106,7 @@ class RLMemory(BaseMemory):
 
     def __init__(
         self,
-        capacity = 100
+        capacity = 10000
     ):
         self.state_memory = Memory(
             capacity = capacity

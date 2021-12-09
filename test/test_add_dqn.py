@@ -1,27 +1,20 @@
-import numpy as np
-import matplotlib.pyplot as plt
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import gym
-
 import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from src.controller import Controller
-from src.environment import CartPoleEnvironment, Model
+from src.environment import CartPoleEnvironment
 from src.network import VNet, QNet, PiNet, ValueNetwork, QValueNetwork, PolicyNetwork
-from src.memory import RLMemory
 from src.optimizer import Optimizer
 from src.core import DQN
 
 
 def test_add_dqn():
 
-    # v_net = VNet(input_shape=4)
-    # v_opt = Optimizer(torch.optim.Adam, lr=1e-2)
-    # v_net = ValueNetwork(value_network=v_net)
+    v_net = VNet(input_shape=4)
+    v_opt = Optimizer(torch.optim.Adam, lr=1e-2)
+    v_net = ValueNetwork(value_network=v_net)
 
     q_net = QNet(input_shape=4, output_shape=2)
     q_opt = Optimizer(torch.optim.Adam, lr=1e-4)
@@ -32,12 +25,8 @@ def test_add_dqn():
     pi_net = PolicyNetwork(policy_network=pi_net)
 
     env = CartPoleEnvironment()
-    model = Model()
-    memory = RLMemory(capacity = 10000)
 
     agent = DQN(
-        model = model,
-        memory = memory,
         gamma = 0.99,
         tau = 0.01,
         eps = 0.25,
@@ -46,10 +35,10 @@ def test_add_dqn():
     agent.setup(
         env = env,
         policy_network = pi_net,
-        # value_network = v_net,
+        value_network = v_net,
         qvalue_network = q_net,
         policy_optimizer = pi_opt,
-        # value_optimizer = v_opt,
+        value_optimizer = v_opt,
         qvalue_optimizer = q_opt
     )
 

@@ -26,8 +26,6 @@ class SoftActorCritic(Agent):
         alpha_decay = 1.0,
         tau = 0.5
     ):
-        assert(model is not None)
-        assert(memory is not None)
         actor = SACActor(
             alpha = alpha,
             alpha_decay = alpha_decay,

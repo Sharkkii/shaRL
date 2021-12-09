@@ -1,18 +1,13 @@
 import numpy as np
-import matplotlib.pyplot as plt
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import gym
 
 import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from src.controller import Controller
-from src.environment import GymEnvironment, PendulumEnvironment, Model
+from src.environment import GymEnvironment, PendulumEnvironment
 from src.network import VNet, QNet, PiNet, ValueNetwork, ContinuousQValueNetwork, GaussianPolicyNetwork
-from src.memory import RLMemory
 from src.optimizer import Optimizer
 from src.core import SoftActorCritic
 
@@ -39,12 +34,8 @@ def test_add_sac():
     )
 
     env = PendulumEnvironment()
-    model = Model()
-    memory = RLMemory(capacity = 10000)
 
     agent = SoftActorCritic(
-        model = model,
-        memory = memory,
         gamma = 0.99,
         alpha = 1.0,
         alpha_decay = 1.0,
