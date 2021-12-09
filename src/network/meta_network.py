@@ -2,7 +2,9 @@
 
 import os
 import yaml
+import torch
 import torch.nn as nn
+
 class MetaNetwork(type):
 
     components = ["linear", "relu"]
@@ -14,12 +16,11 @@ class MetaNetwork(type):
         namespace
     ):
 
-        def _initialize(
+        def _init(
             self,
             d_in,
             d_out
         ):
-
             self.d_in = d_in
             self.d_out = d_out
 
@@ -34,13 +35,19 @@ class MetaNetwork(type):
                 spec = spec
             )
 
+            for base in bases:
+                base.__init__(self)
+
         def _forward(
             self,
             x
         ):
+            x = torch.tensor(x)
+            for component in self.components:
+                x = component(x)
             return x
 
-        namespace["__init__"] = _initialize
+        namespace["__init__"] = _init
         namespace["forward"] = _forward
         return super().__new__(cls, name, bases, namespace)
 
@@ -78,6 +85,7 @@ class MetaNetwork(type):
         douts = []
         dins.append(-1)
         douts.append(self.d_in)
+        components.append("")
 
         # `key` will be ignored
         for key, value in spec.items():
@@ -100,39 +108,40 @@ class MetaNetwork(type):
         
         dins.append(self.d_out)
         douts.append(-1)
+        components.append("")
 
-        for idx in range(len(components)):
+        for idx in range(1, len(components)-1):
 
-            din = MetaNetwork._match(douts[idx], dins[idx+1])
-            douts[idx] = dins[idx+1] = din
-
-            if (components[idx] == "relu"):
-                din = MetaNetwork._match(douts[idx+1], dins[idx+1])
-                douts[idx+1] = dins[idx+1] = din
-
-        for idx in reversed(range(len(components))):
-
-            dout = MetaNetwork._match(douts[idx+1], dins[idx+2])
-            douts[idx+1] = dins[idx+2] = dout
+            din = MetaNetwork._match(douts[idx-1], dins[idx])
+            douts[idx-1] = dins[idx] = din
 
             if (components[idx] == "relu"):
-                dout = MetaNetwork._match(douts[idx+1], dins[idx+1])
-                douts[idx+1] = dins[idx+1] = dout
+                din = MetaNetwork._match(douts[idx], dins[idx])
+                douts[idx] = dins[idx] = din
+
+        for idx in reversed(range(1, len(components)-1)):
+
+            dout = MetaNetwork._match(douts[idx], dins[idx+1])
+            douts[idx] = dins[idx+1] = dout
+
+            if (components[idx] == "relu"):
+                dout = MetaNetwork._match(douts[idx], dins[idx])
+                douts[idx] = dins[idx] = dout
             
-        for idx in range(1, len(components)):
+        for idx in range(1, len(components)-1):
 
             if (components[idx] == "linear"):
                 component = nn.Linear(
-                in_features = dins[idx],
-                out_features = douts[idx]
-            )
+                    in_features = dins[idx],
+                    out_features = douts[idx]
+                )
                 components[idx] = component
 
             if (components[idx] == "relu"):
                 component = nn.ReLU()
                 components[idx] = component
 
-        return components
+        return components[1:-1]
 
     def _match(
         prev_d_out,
@@ -147,5 +156,3 @@ class MetaNetwork(type):
             return next_d_in
         else:
             return -1
-        
-

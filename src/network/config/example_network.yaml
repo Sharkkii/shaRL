@@ -1,0 +1,16 @@
+1:
+  linear:
+    d_in: -1
+    d_out: 10
+2:
+  relu: None
+3:
+  linear:
+    d_in: -1
+    d_out: 20
+4:
+  relu: None
+5:
+  linear:
+    d_in: -1
+    d_out: -1
