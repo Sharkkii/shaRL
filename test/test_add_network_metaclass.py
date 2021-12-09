@@ -7,9 +7,10 @@ from src.network import MetaNetwork
 def test_add_network_metaclass():
     
     class N(metaclass=MetaNetwork):
-        spec = "example"
+        spec = "example_network"
 
-    print(dir(N))
+    n = N(d_in = 5, d_out = 1)
+    print(n.components)
 
 def main():
     test_add_network_metaclass()
