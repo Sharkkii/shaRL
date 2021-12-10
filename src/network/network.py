@@ -1,10 +1,10 @@
 #### Network ####
 
 from abc import ABCMeta, abstractmethod
-import numpy as np
 import torch
 import torch.nn as nn
 
+from .meta_network import MetaNetwork
 
 class BaseNetwork(metaclass=ABCMeta):
 
@@ -13,7 +13,8 @@ class BaseNetwork(metaclass=ABCMeta):
         self,
         network
     ):
-        self.network = network if callable(network) else (lambda x: None)
+        assert(callable(network))
+        self.network = network
 
     @abstractmethod
     def __call__(
@@ -82,7 +83,6 @@ class VNet(nn.Module):
         nn.init.normal_(self.l3.weight, mean=0., std=1.0)
         
     def forward(self, x):
-        x = torch.Tensor(x)
         x = nn.ReLU()(self.bn1(self.l1(x)))
         x = nn.ReLU()(self.bn2(self.l2(x)))
         x = self.l3(x)
@@ -157,3 +157,6 @@ class PiNet(nn.Module):
         x = self.forward(x)
         x = nn.Softmax(dim=dim)(x)
         return x
+
+class DefaultNetwork(nn.Module, metaclass=MetaNetwork):
+    spec = "default"

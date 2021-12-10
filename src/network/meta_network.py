@@ -21,6 +21,9 @@ class MetaNetwork(type):
             d_in,
             d_out
         ):
+            for base in bases:
+                base.__init__(self)
+            
             self.d_in = d_in
             self.d_out = d_out
 
@@ -30,19 +33,16 @@ class MetaNetwork(type):
             spec = MetaNetwork._load_spec(
                 spec_name = spec_name
             )
-            self.components = MetaNetwork._get_components(
+            components = MetaNetwork._get_components(
                 self = self,
                 spec = spec
             )
-
-            for base in bases:
-                base.__init__(self)
+            self.components = nn.ModuleList(components)
 
         def _forward(
             self,
             x
         ):
-            x = torch.tensor(x)
             for component in self.components:
                 x = component(x)
             return x

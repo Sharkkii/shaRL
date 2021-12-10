@@ -86,8 +86,6 @@ class ContinuousPolicyNetwork(BasePolicyNetwork):
         log_p = torch.log(self.P(state, action))
         return log_p
 
-PolicyNetwork = DiscretePolicyNetwork
-
 class GaussianPolicyNetwork(ContinuousPolicyNetwork):
 
     class _N(nn.Module):
@@ -220,4 +218,7 @@ class GaussianPolicyNetwork(ContinuousPolicyNetwork):
 
         # logp = torch.sum(logp)
         return logp
-        
+
+DefaultPolicyNetwork = PolicyNetwork = DiscretePolicyNetwork
+DefaultDiscretePolicyNetwork = DiscretePolicyNetwork
+DefaultContinuousPolicyNetwork = ContinuousPolicyNetwork
