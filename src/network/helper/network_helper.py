@@ -1,7 +1,5 @@
 ### Helper ####
 
-import torch.optim as optim
-
 from ...const import SpaceType
 from ...const import MeasureType
 from ...const import cast_to_space_type
@@ -26,11 +24,6 @@ def get_default_network(
         d_out = d_out
     )
     return default_network
-
-def get_default_optimizer():
-    default_optimizer = optim.Adam
-    kwargs = {}
-    return default_optimizer, kwargs
 
 def get_default_measure_network(
     env,
@@ -65,5 +58,8 @@ def get_default_measure_network(
             default_measure_network = DefaultContinuousPolicyNetwork(
                 default_network
             )
+
+    else:
+        default_measure_network = None
 
     return default_measure_network

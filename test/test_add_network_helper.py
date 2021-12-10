@@ -7,7 +7,7 @@ from src.const import MeasureType
 from src.network import get_default_measure_network
 from src.environment import CartPoleEnvironment, PendulumEnvironment
 
-def test_add_env_helper():
+def test_add_network_helper():
     
     # CartPole (discrete)
     env = CartPoleEnvironment()
@@ -22,7 +22,7 @@ def test_add_env_helper():
     print(get_default_measure_network(env, MeasureType.POLICY).network)
 
 def main():
-    test_add_env_helper()
+    test_add_network_helper()
 
 if __name__ == "__main__":
     main()

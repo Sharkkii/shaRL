@@ -25,4 +25,3 @@ from .policy_network import GaussianPolicyNetwork
 
 from .helper import get_default_network
 from .helper import get_default_measure_network
-from .helper import get_default_optimizer
