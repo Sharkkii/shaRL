@@ -1,46 +1,37 @@
-from enum import Enum
-import gym
+#### Helper ####
 
-class Spaces(Enum):
-    NONE = 0
-    DISCRETE = 1
-    CONTINUOUS = 2
+from ...const import SpaceType
+from ...const import MeasureType
+from ...const import cast_to_space_type
 
-def cast_to_spaces(
-    env
-):
-    if (type(env.action_space) is gym.spaces.Discrete):
-        return Spaces.DISCRETE
-    elif (type(env.action_space) is gym.spaces.Box):
-        return Spaces.CONTINUOUS
-    else:
-        return Spaces.NONE
 
 def get_compatible_interface(
-    env
+    env,
+    measure_type
 ):
-    interface = {}
-    is_discrete = (cast_to_spaces(env) == Spaces.DISCRETE)
-    is_continuous = (cast_to_spaces(env) == Spaces.CONTINUOUS)
 
-    if (is_discrete):
+    if (cast_to_space_type(env) == SpaceType.DISCRETE):
 
         d_observation = env.observation_space.shape[0]
         d_action = env.action_space.n
 
-        interface["value"] = (d_observation, 1)
-        interface["qvalue"] = (d_observation, d_action)
-        interface["policy"] = (d_observation, d_action)
+        if (measure_type == MeasureType.VALUE):
+            return (d_observation, 1)
+        elif (measure_type == MeasureType.QVALUE):
+            return (d_observation, d_action)
+        elif (measure_type == MeasureType.POLICY):
+            return (d_observation, d_action)
 
-    elif (is_continuous):
+    elif (cast_to_space_type(env) == SpaceType.CONTINUOUS):
 
         d_observation = env.observation_space.shape[0]
         d_action = env.action_space.shape[0]
 
-        interface["value"] = (d_observation, 1)
-        interface["qvalue"] = (d_observation + d_action, 1)
-        interface["policy"] = (d_observation + d_action, 1)
+        if (measure_type == MeasureType.VALUE):
+            return (d_observation, 1)
+        elif (measure_type == MeasureType.QVALUE):
+            return (d_observation + d_action, 1)
+        elif (measure_type == MeasureType.POLICY):
+            return (d_observation + d_action, 1)
 
-    return interface
-
-
+    return None
