@@ -64,10 +64,11 @@ class Optimizer(BaseOptimizer):
         self,
         network
     ):
-        self.optimizer = self.optimizer_class(
-            network.parameters(),
-            **self.kwargs
-        )
+        if (callable(network)):
+            self.optimizer = self.optimizer_class(
+                network.parameters(),
+                **self.kwargs
+            )
     
     def step(
         self

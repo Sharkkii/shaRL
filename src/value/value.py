@@ -6,6 +6,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 
+from ..optimizer import Optimizer
+
 class BaseValue(metaclass=ABCMeta):
 
     @abstractmethod
@@ -14,7 +16,7 @@ class BaseValue(metaclass=ABCMeta):
         value_network = None,
         value_optimizer = None
     ):
-        self.value_network = value_network if callable(value_network) else (lambda state: None)
+        self.value_network = value_network
         self.value_optimizer = value_optimizer
 
     @abstractmethod
@@ -23,7 +25,6 @@ class BaseValue(metaclass=ABCMeta):
         state
     ):
         raise NotImplementedError
-        # return self.value_network(state)
     
     @abstractmethod
     def reset(
@@ -37,10 +38,12 @@ class BaseValue(metaclass=ABCMeta):
         value_network = None,
         value_optimizer = None
     ):
-        if callable(value_network):
+        if ((self.value_network is None) and callable(value_network)):
             self.value_network = value_network
-        if (value_optimizer is not None):
+        if ((self.value_optimizer is None) and (type(value_optimizer) is Optimizer)):
             self.value_optimizer = value_optimizer
+            
+        if (self.value_optimizer is not None):
             self.value_optimizer.setup(
                 network = self.value_network
             )
@@ -102,7 +105,7 @@ class BaseQValue(metaclass=ABCMeta):
         qvalue_network = None,
         qvalue_optimizer = None
     ):
-        self.qvalue_network = qvalue_network if callable(qvalue_network) else (lambda state, action=None: None)
+        self.qvalue_network = qvalue_network
         self.qvalue_optimizer = qvalue_optimizer
 
     @abstractmethod
@@ -111,7 +114,6 @@ class BaseQValue(metaclass=ABCMeta):
         state,
         action = None
     ):
-        # return self.qvalue_network(state, action)
         raise NotImplementedError
 
     @abstractmethod
@@ -126,10 +128,12 @@ class BaseQValue(metaclass=ABCMeta):
         qvalue_network = None,
         qvalue_optimizer = None
     ):
-        if callable(qvalue_network):
+        if ((self.qvalue_network is None) and callable(qvalue_network)):
             self.qvalue_network = qvalue_network
-        if (qvalue_optimizer is not None):
+        if ((self.qvalue_optimizer is None) and (type(qvalue_optimizer) is Optimizer)):
             self.qvalue_optimizer = qvalue_optimizer
+        
+        if (self.qvalue_optimizer is not None):
             self.qvalue_optimizer.setup(
                 network = self.qvalue_network
             )

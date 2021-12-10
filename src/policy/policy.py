@@ -8,7 +8,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from ..controller import Phases
-
+from ..optimizer import Optimizer
 
 class BasePolicy(metaclass=ABCMeta):
 
@@ -18,7 +18,7 @@ class BasePolicy(metaclass=ABCMeta):
         policy_network = None,
         policy_optimizer = None
     ):
-        self.policy_network = policy_network if callable(policy_network) else (lambda state: None)
+        self.policy_network = policy_network
         self.policy_optimizer = policy_optimizer
 
     @abstractmethod
@@ -41,10 +41,12 @@ class BasePolicy(metaclass=ABCMeta):
         policy_network = None,
         policy_optimizer = None
     ):
-        if callable(policy_network):
+        if ((self.policy_network is None) and callable(policy_network)):
             self.policy_network = policy_network
-        if (policy_optimizer is not None):
+        if ((self.policy_optimizer is None) and (type(policy_optimizer) is Optimizer)):
             self.policy_optimizer = policy_optimizer
+        
+        if (self.policy_optimizer is not None):
             self.policy_optimizer.setup(
                 network = self.policy_network
             )
