@@ -18,6 +18,12 @@ class RLDataLoader:
             shuffle = shuffle
         )
 
+    @property
+    def is_available(
+        self
+    ):
+        return self.dataset.is_available
+
     def __iter__(
         self
     ):
