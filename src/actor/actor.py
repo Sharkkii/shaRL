@@ -1,15 +1,13 @@
 #### Actor ####
 
-import os
-import sys
 from abc import ABCMeta, abstractmethod
 import numpy as np
 import torch
 from gym.spaces import Box, Discrete
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from policy import Policy
-from controller import Phases
+from ..policy import Policy
+from ..controller import Phases
+
 
 class BaseActor(metaclass=ABCMeta):
 

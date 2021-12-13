@@ -5,12 +5,13 @@ import torch
 import torch.nn.functional as F
 import gym
 
-from value import Value, DiscreteQValue
-from policy import Policy
-from actor import Actor
-from critic import Critic
-from agent import Agent
-from controller import Phases
+from ..value import Value, DiscreteQValue
+from ..policy import Policy
+from ..actor import Actor
+from ..critic import Critic
+from ..agent import Agent
+from ..controller import Phases
+
 
 class SoftActorCriticDiscrete(Agent):
 
@@ -25,8 +26,6 @@ class SoftActorCriticDiscrete(Agent):
         alpha_decay = 1.0,
         tau = 0.5
     ):
-        assert(model is not None)
-        assert(memory is not None)
         actor = SACDiscreteActor(
             alpha = alpha,
             alpha_decay = alpha_decay
@@ -72,9 +71,10 @@ class SACDiscreteActor(Actor):
     def choose_action(
         self,
         state,
-        action_space,
+        # action_space, # deprecated
         phase = Phases.NONE
     ):
+        action_space = self.env.action_space
         assert(type(action_space) is gym.spaces.Discrete)
         is_deterministic = (phase in [Phases.VALIDATION, Phases.TEST])
         p = self.policy.predict(torch.from_numpy(state)).detach().numpy()

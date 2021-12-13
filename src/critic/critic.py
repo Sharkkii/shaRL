@@ -1,14 +1,11 @@
 #### Critic ####
 
-import os
-import sys
 from abc import ABCMeta, abstractmethod
 import numpy as np
 import torch
 import torch.nn.functional as F
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from value import Value, QValue
+from ..value import Value, QValue
 
 
 class BaseCritic(metaclass=ABCMeta):

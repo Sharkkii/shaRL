@@ -4,12 +4,12 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from value import Value, DiscreteQValue
-from policy import QBasedPolicy
-from actor import Actor
-from critic import Critic
-from agent import Agent
-from controller import Phases
+from ..value import Value, DiscreteQValue
+from ..policy import QBasedPolicy
+from ..actor import Actor
+from ..critic import Critic
+from ..agent import Agent
+from ..controller import Phases
 
 
 class DQN(Agent):

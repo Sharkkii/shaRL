@@ -5,12 +5,12 @@ import torch
 import torch.nn.functional as F
 import gym
 
-from value import Value, ContinuousQValue
-from policy import ContinuousPolicy
-from actor import Actor
-from critic import Critic
-from agent import Agent
-from controller import Phases
+from ..value import Value, ContinuousQValue
+from ..policy import ContinuousPolicy
+from ..actor import Actor
+from ..critic import Critic
+from ..agent import Agent
+from ..controller import Phases
 
 
 class SoftActorCritic(Agent):

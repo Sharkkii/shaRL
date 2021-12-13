@@ -1,17 +1,14 @@
 #### Agent ####
 
-import os
-import sys
 from abc import ABCMeta, abstractmethod
 import numpy as np
 import torch
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from actor import Actor
-from critic import Critic
-from environment import Model
-from memory import RLMemory
-from controller import Phases
+from ..actor import Actor
+from ..critic import Critic
+from ..environment import Model
+from ..memory import RLMemory
+from ..controller import Phases
 
 
 class BaseAgent(metaclass=ABCMeta):
