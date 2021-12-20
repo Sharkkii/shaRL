@@ -40,21 +40,29 @@ class BaseOptimizer(metaclass=ABCMeta):
 
 class Optimizer(BaseOptimizer):
 
+    def check_whether_available(f):
+        def wrapper(self, *args, **kwargs):
+            if (self.optimizer is None):
+                raise Exception(f"Call `Optimizer.setup` before using `Optimizer.{ f.__name__ }`")
+            f(self, *args, **kwargs)
+        return wrapper
+
     def __init__(
         self,
         optimizer,
-        # network,
         **kwargs
     ):
-        self.optimizer_class = optimizer
+        self.optimizer_factory = optimizer
         self.optimizer = None
+        self.network = None
         self.kwargs = kwargs
-    
+
     def reset(
         self
     ):
         raise NotImplementedError
     
+    @check_whether_available
     def zero_grad(
         self
     ):
@@ -65,12 +73,23 @@ class Optimizer(BaseOptimizer):
         network
     ):
         if (callable(network)):
-            self.optimizer = self.optimizer_class(
+            self.optimizer = self.optimizer_factory(
                 network.parameters(),
                 **self.kwargs
             )
-    
+            self.network = network
+            print(f"Optimizer.setup: { self.optimizer_factory }({ network })")
+
+    @check_whether_available
     def step(
         self
     ):
         self.optimizer.step()
+
+    @check_whether_available
+    def clip_grad_value(
+        self,
+        value = 1.0
+    ):
+        for parameter in self.network.parameters():
+            torch.nn.utils.clip_grad_value_(parameter.grad, value)
