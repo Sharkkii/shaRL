@@ -39,6 +39,13 @@ class BaseCritic(metaclass=ABCMeta):
         qvalue_optimizer = None
     ):
         raise NotImplementedError
+
+    @abstractmethod
+    def setup_with_actor(
+        self,
+        actor
+    ):
+        raise NotImplementedError
     
     @abstractmethod
     def setup_on_every_epoch(
@@ -145,6 +152,12 @@ class Critic(BaseCritic):
         )
         self.target_value = self.value.copy()
         self.target_qvalue = self.qvalue.copy()
+
+    def setup_with_actor(
+        self,
+        actor
+    ):
+        pass
     
     def setup_on_every_epoch(
         self,

@@ -33,6 +33,13 @@ class BaseActor(metaclass=ABCMeta):
         policy_optimizer = None
     ):
         raise NotImplementedError
+    
+    @abstractmethod
+    def setup_with_critic(
+        self,
+        critic
+    ):
+        raise NotImplementedError
 
     @abstractmethod
     def setup_on_every_epoch(
@@ -115,6 +122,12 @@ class Actor(BaseActor):
             policy_optimizer = policy_optimizer
         )
         self.target_policy = self.policy.copy()
+
+    def setup_with_critic(
+        self,
+        critic
+    ):
+        pass
     
     def setup_on_every_epoch(
         self,

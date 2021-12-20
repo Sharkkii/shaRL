@@ -62,6 +62,12 @@ class BaseAgent(metaclass=ABCMeta):
             value_optimizer = value_optimizer,
             qvalue_optimizer = qvalue_optimizer,
         )
+        self.actor.setup_with_critic(
+            critic = self.critic
+        )
+        self.critic.setup_with_actor(
+            actor = self.actor
+        )
         self.model.setup(env)
         self.memory.setup()
     
