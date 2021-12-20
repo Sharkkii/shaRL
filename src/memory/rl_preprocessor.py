@@ -68,11 +68,10 @@ class TensorConverter(BasePreprocessor):
     ):
         if (type(x) == np.ndarray):
             return torch.from_numpy(x)
-        elif (type(x)) in [int, float]:
+        elif (type(x)) in [int, float, np.int32, np.int64, np.float32, np.float64]:
             return torch.tensor(x)
         else:
             return x
-
 
 class RewardStabilizer(BasePreprocessor):
 

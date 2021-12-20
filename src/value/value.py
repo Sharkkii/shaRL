@@ -42,11 +42,10 @@ class BaseValue(metaclass=ABCMeta):
             self.value_network = value_network
         if ((self.value_optimizer is None) and (type(value_optimizer) is Optimizer)):
             self.value_optimizer = value_optimizer
-            
-        if (self.value_optimizer is not None):
             self.value_optimizer.setup(
                 network = self.value_network
             )
+        print(f"Value.setup: { self.value_network } & { self.value_optimizer }")
 
     def train(
         self
@@ -132,11 +131,10 @@ class BaseQValue(metaclass=ABCMeta):
             self.qvalue_network = qvalue_network
         if ((self.qvalue_optimizer is None) and (type(qvalue_optimizer) is Optimizer)):
             self.qvalue_optimizer = qvalue_optimizer
-        
-        if (self.qvalue_optimizer is not None):
             self.qvalue_optimizer.setup(
                 network = self.qvalue_network
             )
+            print(f"QValue.setup: { self.qvalue_network } & { self.qvalue_optimizer }")
     
     def train(
         self

@@ -20,7 +20,7 @@ class DQN(Agent):
         critic = None,
         model = None,
         memory = None,
-        gamma = 1.0,
+        gamma = 0.99,
         tau = 0.5,
         eps = 0.0,
         eps_decay = 1.0
@@ -60,14 +60,18 @@ class DQNActor(Actor):
         eps_decay = 1.0
     ):
         assert(0.0 <= eps_decay <= 1.0)
-        policy = QBasedPolicy(
-            copied_qvalue = None
-        )
+        policy = QBasedPolicy()
         super().__init__(
             policy = policy
         )
         self.eps = eps
         self.eps_decay = eps_decay
+
+    def setup_with_critic(
+        self,
+        critic
+    ):
+        self.policy.setup_reference_qvalue(critic.qvalue)
 
     def setup_on_every_epoch(
         self,
@@ -75,7 +79,6 @@ class DQNActor(Actor):
         n_epoch
     ):
         self.eps = self.eps * self.eps_decay
-        # print(self.eps)
 
     def choose_action(
         self,
@@ -95,8 +98,7 @@ class DQNActor(Actor):
         critic,
         trajectory = None
     ):
-        self.policy.copied_qvalue = critic.qvalue
-        self.policy.copied_target_qvalue = critic.target_qvalue
+        self.policy.setup_reference_qvalue(critic.qvalue)
 
 class DQNCritic(Critic):
 
@@ -104,7 +106,7 @@ class DQNCritic(Critic):
         self,
         value = None,
         qvalue = None,
-        gamma = 1.0,
+        gamma = 0.99,
         tau = 0.5
     ):
         assert(0.0 < gamma <= 1.0)
@@ -125,18 +127,20 @@ class DQNCritic(Critic):
     ):
         (state_trajectory, action_trajectory, reward_trajectory, next_state_trajectory) = trajectory
         action_trajectory = action_trajectory.long()
-
-        # q = torch.diag(self.qvalue(state_trajectory)[:, action_trajectory])
         batch_size = len(state_trajectory)
-        q = torch.cat([self.qvalue(state_trajectory)[[n], [action_trajectory[n]]] for n in range(batch_size)], axis=0)
+
+        q = self.qvalue(state_trajectory)
+        y_pred = torch.cat([q[[n], [action_trajectory[n]]] for n in range(batch_size)], axis=0)
+
         with torch.no_grad():
             target_q, _ = torch.max(self.target_qvalue(next_state_trajectory), dim=1)
-            target_q = reward_trajectory + self.gamma * target_q
+            y_true = reward_trajectory + self.gamma * target_q
 
         optim = self.qvalue.qvalue_optimizer
         optim.zero_grad()
-        loss = F.mse_loss(q, target_q)
+        loss = F.mse_loss(y_pred, y_true)
         loss.backward()
+        optim.clip_grad_value(value = 1.0)
         optim.step()
 
     def update_target_qvalue(

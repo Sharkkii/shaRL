@@ -45,11 +45,10 @@ class BasePolicy(metaclass=ABCMeta):
             self.policy_network = policy_network
         if ((self.policy_optimizer is None) and (type(policy_optimizer) is Optimizer)):
             self.policy_optimizer = policy_optimizer
-        
-        if (self.policy_optimizer is not None):
             self.policy_optimizer.setup(
                 network = self.policy_network
             )
+            print(f"Policy.setup: { self.policy_network } & { self.policy_optimizer }")
 
     def train(
         self
@@ -204,18 +203,25 @@ Policy = DiscretePolicy
 
 class QBasedPolicy(BasePolicy):
     
+    def check_whether_available(f):
+        def wrapper(self, *args, **kwargs):
+            if (self.reference_qvalue is None):
+                raise Exception(f"Call `QBasedPolicy.setup` before using `QBasedPolicy.{ f.__name__ }`")
+            return f(self, *args, **kwargs)
+        return wrapper
+
     def __init__(
         self,
         policy_network = None,
         policy_optimizer = None,
-        copied_qvalue = None
+        reference_qvalue = None # read-only
     ):
         super().__init__(
-            policy_network = None, # policy_network,
-            policy_optimizer = None # policy_optimizer
+            policy_network = policy_network,
+            policy_optimizer = policy_optimizer
         )
-        # DiscreteQValue
-        self.copied_qvalue = copied_qvalue
+        if (reference_qvalue is not None):
+            self.setup_reference_qvalue(reference_qvalue)
 
     def reset(
         self
@@ -225,37 +231,56 @@ class QBasedPolicy(BasePolicy):
     def setup(
         self,
         policy_network = None,
-        policy_optimizer = None
+        policy_optimizer = None,
+        reference_qvalue = None
     ):
         super().setup(
             policy_network = policy_network,
             policy_optimizer = policy_optimizer
         )
+        if (reference_qvalue is not None):
+            self.setup_reference_qvalue(reference_qvalue)
+    
+    def setup_reference_qvalue(
+        self,
+        reference_qvalue
+    ):
+        assert(reference_qvalue is not None)
+        self.reference_qvalue = reference_qvalue.copy()
 
+    @check_whether_available
     def __call__(
         self,
         state,
         action = None
     ):
         assert(action is None)
-        q = self.copied_qvalue(state)
-        p = F.softmax(q, dim=1)
-        return p
-    
+        q = self.reference_qvalue(state)
+        return q
+
+    @check_whether_available
     def sample(
         self,
         state,
         action_space,
-        phase = Phases.NONE,
-        eps = 0.05
+        phase,
+        eps = 0.0
     ):
-        if (self.copied_qvalue is None):
-            action = action_space.sample()
-        else:
-            # epsilon-greedy
-            q = self.copied_qvalue(torch.from_numpy(state)).detach().numpy()
-            action = np.argmax(q)
-            r = np.random.rand()
-            if (r <= action_space.n * eps):
-                action = action_space.sample()
+        # epsilon-greedy
+        with torch.no_grad():
+
+            state = torch.from_numpy(state)
+            q = self.reference_qvalue(state).numpy()
+
+            if (phase in [Phases.TRAINING]):
+                r = np.random.rand()
+                if (r <= action_space.n * eps):
+                    action = action_space.sample()
+                else:
+                    action = np.argmax(q)
+
+            elif (phase in [Phases.TEST]):
+                action = np.argmax(q)
+
+        action = np.int64(action)
         return action
