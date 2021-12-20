@@ -67,15 +67,15 @@ class Controller(BaseController):
     
     def fit(
         self,
-        n_epoch=1,
-        n_sample=1,
-        n_sample_start=1,
+        n_epoch = 1,
+        n_sample = 1,
+        n_sample_start = 1,
         n_eval = None, # deprecated
         n_train_eval = 1,
         n_test_eval = 0,
-        n_eval_interval = 1,
-        env_step=1,
-        gradient_step=1,
+        n_eval_interval = 10,
+        env_step = 1,
+        gradient_step = -1 # supported only when `gradient_step` < 0
     ):
         # is_model_based = self.props_agent["is_model_based"]
         # is_model_free = self.props_agent["is_model_free"]
@@ -85,7 +85,13 @@ class Controller(BaseController):
         # is_off_policy = self.props_agent["is_off_policy"]
         # is_online = self.props_agent["is_online"]
 
+        # TODO: -> agent.setup (see props.py)
+        # is_deterministic_policy = self.props_agent["is_deterministic_policy"]
+
         self.agent.train()
+
+        if (gradient_step > 0):
+            warnings.warn("`gradient_step` controlls how many batches we use to update parameters. It's better to use the default value -1 (use all batches).")
 
         if (n_eval is not None):
             warnings.warn("`n_eval` is deprecated. Use `n_train_eval` & `n_test_eval` instead.")
@@ -107,17 +113,27 @@ class Controller(BaseController):
             is_model_based = False
             is_on_policy = True
             is_off_policy = False
-
-        # TODO: -> agent.setup (see props.py)
-        # is_discrete_state_space = self.props_env["is_discrete_state_space"]
-        # is_discrete_action_space = self.props_env["is_discrete_action_space"]
-        # is_deterministic_policy = self.props_agent["is_deterministic_policy"]
         
-        is_discrete_state_space = False
-        is_discrete_action_space = True
         is_deterministic_policy = False
 
         assert(n_sample <= n_sample_start <= self.agent.memory.capacity)
+
+        # FIXME: define dataset & dataloader
+        from ..memory import RLDataset, RLDataLoader
+        from ..memory import TensorConverter, RewardStabilizer
+
+        n_batch = 100
+        transform = TensorConverter()
+        dataset = RLDataset(
+            min_size = 1000,
+            max_size = 100000,
+            transform = transform
+        )
+        dataloader = RLDataLoader(
+            dataset = dataset,
+            batch_size = n_batch,
+            shuffle = True
+        )
 
         for epoch in range(n_epoch):
 
@@ -139,62 +155,78 @@ class Controller(BaseController):
                     n_step = env_step
                 )
 
-                # print("environment_step")
-
                 # interact w/ environment
                 if (is_model_free):
                     trajs_env = self.agent.interact_with(
                         self.env,
-                        # is_discrete_action_space=is_discrete_action_space,
-                        # is_deterministic_policy=is_deterministic_policy,
-                        n_times = 1
+                        n_times = 1,
+                        phase = Phases.TRAINING
                     )
 
                 # interact w/ model    
                 if (is_model_based):
                     trajs_model = self.agent.interact_with(
                         self.agent.model,
-                        # is_discrete_action_space=is_discrete_action_space,
-                        # is_deterministic_policy=is_deterministic_policy,
-                        n_times = 1
+                        n_times = 1,
+                        phase = Phases.TRAINING
                     )
 
             trajs = trajs_env + trajs_model
-            if (is_on_policy):
-                pass # convert trajs by Memory.zip
+            dataloader.save(trajs)
+            if (not dataloader.is_available):
+                continue
 
-            if (is_off_policy):
-                self.agent.save_history(trajs)
-                # guard
-                if (self.agent.memory.count >= n_sample_start):
-                    trajs = self.agent.replay_history(
-                        n_sample = n_sample
-                    )
-                    # trajs = self.agent.load_history()
-                else:
-                    continue
+            # if (is_on_policy):
+            #     pass # convert trajs by Memory.zip
 
-            # optimize policy
-            # FIXME: J_v, J_q, J_pi will be overwritten
-            for _ in range(gradient_step):
+            # if (is_off_policy):
+            #     self.agent.save_history(trajs)
+            #     # guard
+            #     if (self.agent.memory.count >= n_sample_start):
+            #         trajs = self.agent.replay_history(
+            #             n_sample = n_sample
+            #         )
+            #         # trajs = self.agent.load_history()
+            #     else:
+            #         continue
 
-                # print("gradient_step")
+            # optimize policy & value
+            if (gradient_step <= 0):
+                
+                # use all data
+                # NOTE: history: {(s,a,r,s)}
+                for history in dataloader:
 
-                # update value function (critic)
-                self.agent.update_critic(trajs, n_times=1)
-                # J_v, J_q = self.agent.update_critic(trajs, n_times=1)
+                    # guard
+                    if (len(history[0]) < n_batch):
+                        continue
 
-                # update policy (actor)
-                self.agent.update_actor(trajs, n_times=1)
-                # J_pi = self.agent.update_actor(trajs, n_times=1)
+                    # update value function (critic)
+                    self.agent.update_critic(history, n_times=1)
 
-                # learn dynamics
-                if (is_model_based):
-                    self.agent.update_model(trajs, n_times=1)
-                    # J_m = self.agent.update_model(n_times=1)
-                else:
-                    # J_m = None
-                    pass
+                    # update policy (actor)
+                    self.agent.update_actor(history, n_times=1)
+
+                    # learn dynamics
+                    # if (is_model_based):
+                    #     self.agent.update_model(history, n_times=1)
+
+            else:
+                assert(False)
+
+                # use the number (designated by `gradient_step`) of batches
+                # NOT supported now
+                for _ in range(gradient_step):
+
+                    # update value function (critic)
+                    self.agent.update_critic(trajs, n_times=1)
+
+                    # update policy (actor)
+                    self.agent.update_actor(trajs, n_times=1)
+
+                    # learn dynamics
+                    if (is_model_based):
+                        self.agent.update_model(trajs, n_times=1)
 
             # TODO: learn something if needed
             # self.agent.update_every_epoch(
@@ -203,33 +235,16 @@ class Controller(BaseController):
             # )
 
             # evaluate
-            if (n_train_eval > 0 or n_test_eval > 0):
-                train_score, test_score = self.evaluate(
-                    n_train_eval = n_train_eval,
-                    n_test_eval = n_test_eval
-                )
-                print(train_score, test_score)
+            if ((epoch+1) % n_eval_interval == 0):
+                if (n_train_eval > 0 or n_test_eval > 0):
+                    train_score, test_score = self.evaluate(
+                        n_train_eval = n_train_eval,
+                        n_test_eval = n_test_eval
+                    )
+                print((epoch+1), train_score, test_score)
+            else:
+                print("\r%d" % (epoch+1), end="")
             
-            # J_v = J_q = J_pi = J_m = 0
-            # print("%d" % epoch, end="\r", flush=True)
-            # if ((epoch+1) % n_eval_interval == 0):
-            #     print(epoch+1, end=" | ")
-            #     result = self.evaluate(n_eval)
-            #     if (J_v is not None):
-            #         print("J_v: %2.4f" % J_v, end=" | ")
-            #     else:
-            #         print(J_v, end=" | ")
-            #     if (J_q is not None):
-            #         print("J_q: %2.4f" % J_q, end=" | ")
-            #     else:
-            #         print(J_q, end=" | ")
-            #     if (J_pi is not None):
-            #         print("J_pi: %2.4f" % J_pi, end=" | ")
-            #     else:
-            #         print(J_pi,  end=" | ")
-            #     print("duration: %d" % result[0], end=" ")
-            #     print("total reward: %f" % result[1], end=" ")
-            #     print()
 
     def evaluate(
         self,

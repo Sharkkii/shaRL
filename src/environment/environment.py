@@ -1,12 +1,10 @@
 #### Environment ####
 
-# import math
 from abc import ABCMeta, abstractmethod
 import warnings
 import numpy as np
 import torch
 import gym
-# from gym.wrappers import TimeLimit
 
 
 class BaseEnvironment(metaclass=ABCMeta):
@@ -116,7 +114,7 @@ class CartPoleEnvironment(GymEnvironment):
             name = "CartPole-v0"
         )
         self._t = 0
-        self._T = 100
+        self._T = 200
 
     def reset(
         self
