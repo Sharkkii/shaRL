@@ -93,3 +93,11 @@ class Optimizer(BaseOptimizer):
     ):
         for parameter in self.network.parameters():
             torch.nn.utils.clip_grad_value_(parameter.grad, value)
+    
+    @check_whether_available
+    def clip_grad_norm(
+        self,
+        value = 1.0
+    ):
+        for parameter in self.network.parameters():
+            torch.nn.utils.clip_grad_norm_(parameter.grad, value, norm_type=2)

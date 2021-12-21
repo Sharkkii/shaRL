@@ -66,18 +66,19 @@ class SACDiscreteActor(Actor):
         n_epoch
     ):
         self.alpha = self.alpha * self.alpha_decay
-        # print(self.alpha)
     
     def choose_action(
         self,
         state,
-        # action_space, # deprecated
         phase = Phases.NONE
     ):
         action_space = self.env.action_space
         assert(type(action_space) is gym.spaces.Discrete)
+
+        with torch.no_grad():
+            p = self.policy.P(torch.from_numpy(state)).detach().numpy()
+
         is_deterministic = (phase in [Phases.VALIDATION, Phases.TEST])
-        p = self.policy.predict(torch.from_numpy(state)).detach().numpy()
         if is_deterministic:
             action = np.argmax(p)
         else:
@@ -91,19 +92,19 @@ class SACDiscreteActor(Actor):
         eps = 1e-8
     ):
 
-        critic.qvalue.requires_grad = False
-        self.policy.requires_grad = True
-
         (state_trajectory, action_trajectory, reward_trajectory, next_state_trajectory) = trajectory
         action_trajectory = action_trajectory.long()
 
-        pi = torch.clamp(self.policy(state_trajectory), eps, 1 - eps)
-        kl_divergence = torch.sum(pi * (self.alpha * torch.log(pi) - critic.qvalue(state_trajectory)), dim=1)
-        loss = torch.mean(kl_divergence)
+        with torch.no_grad():
+            q = critic.qvalue(state_trajectory)
+        pi = torch.clamp(self.policy.P(state_trajectory), eps, 1 - eps)
+        kl_divergence = torch.sum(pi * (self.alpha * torch.log(pi) - q), dim=1)
 
         optim = self.policy.policy_optimizer
         optim.zero_grad()
+        loss = torch.mean(kl_divergence)
         loss.backward()
+        optim.clip_grad_norm(value = 1.0)
         optim.step()
 
 class SACDiscreteCritic(Critic):
@@ -136,21 +137,24 @@ class SACDiscreteCritic(Critic):
         eps = 1e-8
     ):
 
-        self.qvalue.requires_grad = True
-        actor.policy.requires_grad = False
-
         (state_trajectory, action_trajectory, reward_trajectory, next_state_trajectory) = trajectory
         action_trajectory = action_trajectory.long()
         batch_size = len(state_trajectory)
 
-        q = torch.cat([self.qvalue(state_trajectory)[[n], [action_trajectory[n]]] for n in range(batch_size)], axis=0)
-        pi = torch.clamp(actor.policy(next_state_trajectory), eps, 1 - eps)
-        v = torch.sum(pi * (self.target_qvalue(next_state_trajectory) - self.alpha * torch.log(pi)), dim=1)
-        loss = F.mse_loss(q, (reward_trajectory + self.gamma * v))
+        q = self.qvalue(state_trajectory)
+        y_pred = torch.cat([q[[n], [action_trajectory[n]]] for n in range(batch_size)], axis=0)
+
+        with torch.no_grad():
+            pi = torch.clamp(actor.policy.P(next_state_trajectory), eps, 1 - eps)
+            target_q = self.target_qvalue(next_state_trajectory)
+            v = torch.sum(pi * (target_q - self.alpha * torch.log(pi)), dim=1)
+            y_true = reward_trajectory + self.gamma * v
 
         optim = self.qvalue.qvalue_optimizer
         optim.zero_grad()
+        loss = F.mse_loss(y_pred, y_true)
         loss.backward()
+        optim.clip_grad_norm(value = 1.0)
         optim.step()
 
     def update_target_qvalue(

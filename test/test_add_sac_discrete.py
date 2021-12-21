@@ -1,45 +1,34 @@
-import numpy as np
-import matplotlib.pyplot as plt
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import gym
-
 import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from src.controller import Controller
-from src.environment import GymEnvironment, CartPoleEnvironment, Model
+from src.environment import CartPoleEnvironment
 from src.network import VNet, QNet, PiNet, ValueNetwork, DiscreteQValueNetwork, PolicyNetwork
-from src.memory import RLMemory
 from src.optimizer import Optimizer
 from src.core import SoftActorCriticDiscrete
 
 
 def test_add_sac_discrete():
 
+    env = CartPoleEnvironment()
+
     v_net = VNet(input_shape=4)
-    v_opt = Optimizer(torch.optim.SGD, v_net, lr=1e-4)
+    v_opt = Optimizer(torch.optim.Adam, lr=1e-3)
     v_net = ValueNetwork(value_network=v_net)
 
     q_net = QNet(input_shape=4, output_shape=2)
-    q_opt = Optimizer(torch.optim.SGD, q_net, lr=1e-4)
+    q_opt = Optimizer(torch.optim.Adam, lr=1e-3)
     q_net = DiscreteQValueNetwork(qvalue_network=q_net)
 
     pi_net = PiNet(input_shape=4, output_shape=2)
-    pi_opt = Optimizer(torch.optim.SGD, pi_net, lr=1e-4)
+    pi_opt = Optimizer(torch.optim.Adam, lr=1e-3)
     pi_net = PolicyNetwork(policy_network=pi_net)
 
-    env = CartPoleEnvironment()
-    model = Model()
-    memory = RLMemory(capacity = 10000)
-
     agent = SoftActorCriticDiscrete(
-        model = model,
-        memory = memory,
-        gamma = 0.99,
-        alpha = 100.0,
+        gamma = 0.90,
+        alpha = 1.0,
         alpha_decay = 1.0,
         tau = 0.01
     )
@@ -60,18 +49,18 @@ def test_add_sac_discrete():
     )
 
     ctrl.fit(
-        n_epoch = 100,
-        n_sample = 100,
-        n_sample_start = 100,
+        n_epoch = 1000,
+        # n_sample = 100,
+        # n_sample_start = 100,
         n_train_eval = 5,
-        n_test_eval = 1,
-        env_step = 1,
-        gradient_step = 10
+        n_test_eval = 5,
+        env_step = 10,
+        # gradient_step = -1
     )
 
     train_score, test_score = ctrl.evaluate(
         n_train_eval = 5,
-        n_test_eval = 1
+        n_test_eval = 5
     )
     print(train_score["duration"], test_score["duration"])
 
