@@ -1,5 +1,6 @@
 #### Policy ####
 
+import warnings
 from abc import ABCMeta, abstractmethod
 import copy
 import numpy as np
@@ -60,19 +61,21 @@ class BasePolicy(metaclass=ABCMeta):
     ):
         self.policy_network.eval()
     
-    # @abstractmethod
+    @abstractmethod
     def P(
         self,
-        **x
+        state,
+        action
     ):
-        return self.policy_network(**x)
+        raise NotImplementedError
 
-    # @abstractmethod
+    @abstractmethod
     def logP(
         self,
-        **x
+        state,
+        action
     ):
-        return torch.log(self.P(**x))
+        raise NotImplementedError
 
     @abstractmethod
     def sample(
@@ -121,6 +124,20 @@ class DiscretePolicy(BasePolicy):
         state
     ):
         return self.policy_network(state)
+
+    def P(
+        self,
+        state,
+        action = None
+    ):
+        return self.policy_network.P(state, action)
+
+    def logP(
+        self,
+        state,
+        action = None
+    ):
+        return self.policy_network.logP(state, action)
     
     def sample(
         self,
@@ -134,6 +151,7 @@ class DiscretePolicy(BasePolicy):
         self,
         state
     ):
+        warnings.warn("`Policy.predict` is deprecated. Use `Policy.P` instead.")
         return self.policy_network.predict(state)
 
 class ContinuousPolicy(BasePolicy):

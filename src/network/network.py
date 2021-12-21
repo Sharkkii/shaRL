@@ -56,16 +56,18 @@ class BasePolicyNetwork(BaseNetwork, metaclass=ABCMeta):
     @abstractmethod
     def P(
         self,
-        **x
+        state,
+        action
     ):
-        return self.network(**x)
+        raise NotImplementedError
 
     @abstractmethod
     def logP(
         self,
-        **x
+        state,
+        action
     ):
-        return torch.log(self.P(**x))
+        raise NotImplementedError
 
 class VNet(nn.Module):
     
@@ -160,11 +162,11 @@ class PiNet(nn.Module):
             x = self.l3(x)
             return x
     
-    def predict(self, x):
-        dim = x.ndim-1
-        x = self.forward(x)
-        x = nn.Softmax(dim=dim)(x)
-        return x
+    # def predict(self, x):
+    #     dim = x.ndim-1
+    #     x = self.forward(x)
+    #     x = nn.Softmax(dim=dim)(x)
+    #     return x
 
 class DefaultNetwork(nn.Module, metaclass=MetaNetwork):
     spec = "default"

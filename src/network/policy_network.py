@@ -3,6 +3,7 @@
 import numpy as np
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 from .network import BasePolicyNetwork
 
@@ -33,17 +34,27 @@ class DiscretePolicyNetwork(BasePolicyNetwork):
 
     def P(
         self,
-        state
+        state,
+        action = None
     ):
-        p = self.policy_network(state)
-        return p
+        dim = state.ndim - 1
+        p = F.softmax(self.network(state), dim=dim)
+        if (action is None):
+            return p
+        else:
+            return p[action]
 
     def logP(
         self,
-        state
+        state,
+        action = None
     ):
-        log_p = torch.log(self.P(state))
-        return log_p
+        dim = state.ndim - 1
+        log_p = F.log_softmax(self.network(state), dim=dim)
+        if (action is None):
+            return log_p
+        else:
+            return log_p[action]
 
 class ContinuousPolicyNetwork(BasePolicyNetwork):
 
@@ -75,7 +86,7 @@ class ContinuousPolicyNetwork(BasePolicyNetwork):
         state,
         action
     ):
-        p = self.policy_network(state, action)
+        p = self.network(state, action)
         return p
 
     def logP(
