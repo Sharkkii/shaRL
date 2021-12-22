@@ -277,6 +277,36 @@ class QBasedPolicy(BasePolicy):
         return q
 
     @check_whether_available
+    def P(
+        self,
+        state,
+        action = None
+    ):
+        # softmax policy
+        dim = state.ndim - 1
+        q = self(state)
+        p = F.softmax(q, dim=dim)
+        if (action is None):
+            return p
+        else:
+            return p[action]
+    
+    @check_whether_available
+    def logP(
+        self,
+        state,
+        action = None
+    ):
+        # softmax policy
+        dim = state.ndim - 1
+        q = self(state)
+        log_p = F.log_softmax(q, dim=dim)
+        if (action is None):
+            return log_p
+        else:
+            return log_p[action]
+
+    @check_whether_available
     def sample(
         self,
         state,
