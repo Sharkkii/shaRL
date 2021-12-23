@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from ..controller import Phases
+from ..const import PhaseType
 from ..optimizer import Optimizer
 
 class BasePolicy(metaclass=ABCMeta):
@@ -82,7 +82,7 @@ class BasePolicy(metaclass=ABCMeta):
         self,
         state,
         action_space,
-        phase = Phases.NONE
+        phase = PhaseType.NONE
     ):
         raise NotImplementedError
 
@@ -143,7 +143,7 @@ class DiscretePolicy(BasePolicy):
         self,
         state,
         action_space,
-        phase = Phases.NONE
+        phase = PhaseType.NONE
     ):
         return action_space.sample()
 
@@ -320,14 +320,14 @@ class QBasedPolicy(BasePolicy):
             state = torch.from_numpy(state)
             q = self.reference_qvalue(state).numpy()
 
-            if (phase in [Phases.TRAINING]):
+            if (phase in [PhaseType.TRAINING]):
                 r = np.random.rand()
                 if (r <= action_space.n * eps):
                     action = action_space.sample()
                 else:
                     action = np.argmax(q)
 
-            elif (phase in [Phases.TEST]):
+            elif (phase in [PhaseType.TEST]):
                 action = np.argmax(q)
 
         action = np.int64(action)

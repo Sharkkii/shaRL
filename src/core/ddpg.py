@@ -5,12 +5,12 @@ import torch
 import torch.nn.functional as F
 import gym
 
+from ..const import PhaseType
 from ..value import Value, ContinuousQValue
 from ..policy import Policy
 from ..actor import Actor
 from ..critic import Critic
 from ..agent import Agent
-from ..controller import Phases
 
 
 class DeepDeterministicPolicyGradient(Agent):
@@ -60,11 +60,11 @@ class DDPGActor(Actor):
         self,
         state,
         # action_space, # deprecated
-        phase = Phases.NONE
+        phase = PhaseType.NONE
     ):
         action_space = self.env.action_space
         assert(type(action_space) is gym.spaces.Box)
-        is_deterministic = (phase in [Phases.VALIDATION, Phases.TEST])
+        is_deterministic = (phase in [PhaseType.VALIDATION, PhaseType.TEST])
         action = self.policy(torch.from_numpy(state)).detach().numpy()
         if (not is_deterministic):
             scale = ((action_space.high - action_space.low) / 2.0) / self.k

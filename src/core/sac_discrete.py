@@ -5,12 +5,12 @@ import torch
 import torch.nn.functional as F
 import gym
 
+from ..const import PhaseType
 from ..value import Value, DiscreteQValue
 from ..policy import Policy
 from ..actor import Actor
 from ..critic import Critic
 from ..agent import Agent
-from ..controller import Phases
 
 
 class SoftActorCriticDiscrete(Agent):
@@ -70,7 +70,7 @@ class SACDiscreteActor(Actor):
     def choose_action(
         self,
         state,
-        phase = Phases.NONE
+        phase = PhaseType.NONE
     ):
         action_space = self.env.action_space
         assert(type(action_space) is gym.spaces.Discrete)
@@ -78,7 +78,7 @@ class SACDiscreteActor(Actor):
         with torch.no_grad():
             p = self.policy.P(torch.from_numpy(state)).detach().numpy()
 
-        is_deterministic = (phase in [Phases.VALIDATION, Phases.TEST])
+        is_deterministic = (phase in [PhaseType.VALIDATION, PhaseType.TEST])
         if is_deterministic:
             action = np.argmax(p)
         else:

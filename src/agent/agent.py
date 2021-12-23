@@ -4,11 +4,11 @@ from abc import ABCMeta, abstractmethod
 import numpy as np
 import torch
 
+from ..const import PhaseType
 from ..actor import Actor
 from ..critic import Critic
 from ..environment import Model
 from ..memory import RLMemory
-from ..controller import Phases
 
 
 class BaseAgent(metaclass=ABCMeta):
@@ -246,7 +246,7 @@ class Agent(BaseAgent):
         env,
         n_times = 1,
         n_limit = 1000,
-        phase = Phases.NONE,
+        phase = PhaseType.NONE,
         use_info = False,
         verbose = False
     ):

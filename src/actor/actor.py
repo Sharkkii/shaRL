@@ -5,8 +5,8 @@ import numpy as np
 import torch
 from gym.spaces import Box, Discrete
 
+from ..const import PhaseType
 from ..policy import Policy
-from ..controller import Phases
 
 
 class BaseActor(metaclass=ABCMeta):
@@ -147,7 +147,7 @@ class Actor(BaseActor):
         self,
         state,
         action_space = None, # deprecated
-        phase = Phases.NONE
+        phase = PhaseType.NONE
     ):
         action_space = self.env.action_space
         action = self.policy(state)

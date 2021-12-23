@@ -3,12 +3,10 @@
 import warnings
 from abc import ABCMeta, abstractmethod
 from enum import Enum
-import numpy as np
-import torch
 
-from src.memory.memory import RewardProcessor
-
-# from props import props_env, props_agent
+from ..const import PhaseType
+from ..memory import RLDataset, RLDataLoader
+from ..memory import TensorConverter
 
 
 class BaseController(metaclass=ABCMeta):
@@ -40,20 +38,12 @@ class Controller(BaseController):
         self,
         environment,
         agent,
-        config={
-            "env_name": "Default",
-            "agent_name": "Default"
-        }
+        config = {}
     ):
 
         self.env = environment
         self.agent = agent
         self.config = config
-
-        # env_name = config["env_name"]
-        # agent_name = config["agent_name"]
-        # self.props_env = props_env[env_name]
-        # self.props_agent = props_agent[agent_name]
     
     def setup(
         self
@@ -79,16 +69,6 @@ class Controller(BaseController):
         env_step = 1,
         gradient_step = -1 # supported only when `gradient_step` < 0
     ):
-        # is_model_based = self.props_agent["is_model_based"]
-        # is_model_free = self.props_agent["is_model_free"]
-        # is_value_based = self.props_agent["is_value_based"]
-        # is_policy_based = self.props_agent["is_policy_based"]
-        # is_on_policy = self.props_agent["is_on_policy"]
-        # is_off_policy = self.props_agent["is_off_policy"]
-        # is_online = self.props_agent["is_online"]
-
-        # TODO: -> agent.setup (see props.py)
-        # is_deterministic_policy = self.props_agent["is_deterministic_policy"]
 
         self.agent.train()
 
@@ -121,9 +101,6 @@ class Controller(BaseController):
         assert(n_sample <= n_sample_start <= self.agent.memory.capacity)
 
         # FIXME: define dataset & dataloader
-        from ..memory import RLDataset, RLDataLoader
-        from ..memory import TensorConverter
-
         n_batch = 100
         transform = TensorConverter()
         dataset = RLDataset(
@@ -162,7 +139,7 @@ class Controller(BaseController):
                     trajs_env = self.agent.interact_with(
                         self.env,
                         n_times = 1,
-                        phase = Phases.TRAINING
+                        phase = PhaseType.TRAINING
                     )
 
                 # interact w/ model    
@@ -170,7 +147,7 @@ class Controller(BaseController):
                     trajs_model = self.agent.interact_with(
                         self.agent.model,
                         n_times = 1,
-                        phase = Phases.TRAINING
+                        phase = PhaseType.TRAINING
                     )
 
             trajs = trajs_env + trajs_model
@@ -268,7 +245,7 @@ class Controller(BaseController):
             history, info_history = self.agent.interact_with(
                 self.env,
                 n_times = 1,
-                phase = Phases.TRAINING,
+                phase = PhaseType.TRAINING,
                 use_info = True
             )
             score = self.env.score(
@@ -283,7 +260,7 @@ class Controller(BaseController):
             history, info_history = self.agent.interact_with(
                 self.env,
                 n_times = 1,
-                phase = Phases.TEST,
+                phase = PhaseType.TEST,
                 use_info = True
             )
             score = self.env.score(
@@ -294,9 +271,3 @@ class Controller(BaseController):
                 test_score[key].append(value)
 
         return (train_score, test_score)
-
-class Phases(Enum):
-    NONE = 0
-    TRAINING = 1
-    VALIDATION = 2
-    TEST = 3

@@ -5,12 +5,12 @@ import torch
 import torch.nn.functional as F
 import gym
 
+from ..const import PhaseType
 from ..value import Value, ContinuousQValue
 from ..policy import ContinuousPolicy
 from ..actor import Actor
 from ..critic import Critic
 from ..agent import Agent
-from ..controller import Phases
 
 
 class SoftActorCritic(Agent):
@@ -74,14 +74,14 @@ class SACActor(Actor):
         self,
         state,
         # action_space = None, # deprecated
-        phase = Phases.NONE
+        phase = PhaseType.NONE
     ):
         action_space = self.env.action_space
         assert(type(action_space) is gym.spaces.Box)
-        is_deterministic = (phase in [Phases.VALIDATION, Phases.TEST])
-        if (phase in [Phases.TRAINING]):
+        is_deterministic = (phase in [PhaseType.VALIDATION, PhaseType.TEST])
+        if (phase in [PhaseType.TRAINING]):
             self.policy.train()
-        elif (phase in [Phases.VALIDATION, Phases.TEST]):
+        elif (phase in [PhaseType.VALIDATION, PhaseType.TEST]):
             self.policy.eval()
         with torch.no_grad():
             state = torch.tensor(state)
@@ -96,14 +96,14 @@ class SACActor(Actor):
         self,
         state_trajectory,
         # action_space = None, # deprecated
-        phase = Phases.NONE
+        phase = PhaseType.NONE
     ):
         action_space = self.env.action_space
         assert(type(action_space) is gym.spaces.Box)
-        is_deterministic = (phase in [Phases.VALIDATION, Phases.TEST])
-        if (phase in [Phases.TRAINING]):
+        is_deterministic = (phase in [PhaseType.VALIDATION, PhaseType.TEST])
+        if (phase in [PhaseType.TRAINING]):
             self.policy.train()
-        elif (phase in [Phases.VALIDATION, Phases.TEST]):
+        elif (phase in [PhaseType.VALIDATION, PhaseType.TEST]):
             self.policy.eval()
         with torch.no_grad():
             state_trajectory = torch.tensor(state_trajectory)

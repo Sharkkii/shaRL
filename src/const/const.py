@@ -1,6 +1,12 @@
 from enum import Enum
 import gym
 
+class PhaseType(Enum):
+    NONE = 0
+    TRAINING = 1
+    VALIDATION = 2
+    TEST = 3
+
 class SpaceType(Enum):
     NONE = 0
     DISCRETE = 1
