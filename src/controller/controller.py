@@ -6,6 +6,8 @@ from enum import Enum
 import numpy as np
 import torch
 
+from src.memory.memory import RewardProcessor
+
 # from props import props_env, props_agent
 
 
@@ -120,7 +122,7 @@ class Controller(BaseController):
 
         # FIXME: define dataset & dataloader
         from ..memory import RLDataset, RLDataLoader
-        from ..memory import TensorConverter, RewardStabilizer
+        from ..memory import TensorConverter
 
         n_batch = 100
         transform = TensorConverter()
@@ -263,23 +265,31 @@ class Controller(BaseController):
         
         # evaluate (train)
         for _ in range(n_train_eval):
-            traj = self.agent.interact_with(
+            history, info_history = self.agent.interact_with(
                 self.env,
                 n_times = 1,
-                phase = Phases.TRAINING
+                phase = Phases.TRAINING,
+                use_info = True
             )
-            score = self.env.score(traj)
+            score = self.env.score(
+                history,
+                info_history
+            )
             for key, value in score.items():
                 train_score[key].append(value)
         
         # evlauate (test)
         for _ in range(n_test_eval):
-            traj = self.agent.interact_with(
+            history, info_history = self.agent.interact_with(
                 self.env,
                 n_times = 1,
-                phase = Phases.TEST
+                phase = Phases.TEST,
+                use_info = True
             )
-            score = self.env.score(traj)
+            score = self.env.score(
+                history,
+                info_history
+            )
             for key, value in score.items():
                 test_score[key].append(value)
 

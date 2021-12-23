@@ -37,7 +37,8 @@ class BaseEnvironment(metaclass=ABCMeta):
     @abstractmethod
     def score(
         self,
-        trajectory
+        history,
+        info_history
     ):
         raise NotImplementedError
 
@@ -75,7 +76,8 @@ class Environment(BaseEnvironment):
 
     def score(
         self,
-        trajectory
+        history,
+        info_history
     ):
         warnings.warn("`score` is not implemented.")
         score_dictionary = {}
@@ -136,13 +138,14 @@ class CartPoleEnvironment(GymEnvironment):
     
     def score(
         self,
-        trajectory
+        history,
+        info_history = None
     ):
         score_dictionary = {
             "duration": None
         }
-        if (len(trajectory) > 0):
-            duration = len(trajectory)
+        if (len(history) > 0):
+            duration = len(history)
             score_dictionary["duration"] = duration
         return score_dictionary
 
@@ -172,14 +175,15 @@ class ContinuousMountainCarEnvironment(GymEnvironment):
     
     def score(
         self,
-        trajectory
+        history,
+        info_history = None
     ):
         score_dictionary = {
             "total_reward": None
         }
-        if (len(trajectory) > 0):
+        if (len(history) > 0):
             total_reward = 0
-            for (_, _, r, _) in trajectory:
+            for (_, _, r, _) in history:
                 total_reward = total_reward + r
             total_reward = int(total_reward)
             score_dictionary["total_reward"] = total_reward
@@ -204,18 +208,20 @@ class PendulumEnvironment(GymEnvironment):
         action
     ):
         observation, reward, done, info = self.env.step(action)
+        reward *= 0.01
         return observation, reward, done, info
 
     def score(
         self,
-        trajectory
+        history,
+        info_history = None
     ):
         score_dictionary = {
             "total_reward": None
         }
-        if (len(trajectory) > 0):
+        if (len(history) > 0):
             total_reward = 0
-            for (_, _, r, _) in trajectory:
+            for (_, _, r, _) in history:
                 total_reward = total_reward + r
             total_reward = int(total_reward)
             score_dictionary["total_reward"] = total_reward

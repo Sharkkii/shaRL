@@ -133,7 +133,8 @@ class BaseAgent(metaclass=ABCMeta):
     @abstractmethod
     def interact_with(
         self,
-        env
+        env,
+        use_info
     ):
         raise NotImplementedError
     
@@ -246,10 +247,13 @@ class Agent(BaseAgent):
         n_times = 1,
         n_limit = 1000,
         phase = Phases.NONE,
+        use_info = False,
         verbose = False
     ):
 
         history = []
+        info_history = []
+
         for _ in range(n_times):
 
             t = 0
@@ -264,9 +268,14 @@ class Agent(BaseAgent):
                 next_state, reward, done, info = env.step(action)
                 history.append((state, action, reward, next_state))
                 state = next_state
+                if (use_info):
+                    info_history.append(info)
                 t = t + 1
         
-        return history
+        if (use_info):
+            return history, info_history
+        else:
+            return history
     
     def save_history(
         self,
