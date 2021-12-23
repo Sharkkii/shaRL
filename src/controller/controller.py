@@ -2,9 +2,9 @@
 
 import warnings
 from abc import ABCMeta, abstractmethod
-from enum import Enum
 
 from ..const import PhaseType
+from ..const import EnvironmentModelType, AgentStrategyType, AgentBehaviorType, AgentLearningType
 from ..memory import RLDataset, RLDataLoader
 from ..memory import TensorConverter
 
@@ -70,8 +70,6 @@ class Controller(BaseController):
         gradient_step = -1 # supported only when `gradient_step` < 0
     ):
 
-        self.agent.train()
-
         if (gradient_step > 0):
             warnings.warn("`gradient_step` controlls how many batches we use to update parameters. It's better to use the default value -1 (use all batches).")
 
@@ -80,23 +78,10 @@ class Controller(BaseController):
             n_train_eval = n_eval
             n_test_eval = 0
 
-        is_model_based = False
-        is_model_free = True
-        is_value_based = True
-        is_policy_based = False
-        is_on_policy = False
-        is_off_policy = True
-        is_online = False
-        assert(is_on_policy == (not is_off_policy))
-
-        # online
-        if (is_online):
-            env_step = 1
-            is_model_based = False
-            is_on_policy = True
-            is_off_policy = False
-        
-        is_deterministic_policy = False
+        model_type = EnvironmentModelType.MODEL_FREE
+        strategy_type = AgentStrategyType.VALUE_BASED
+        behavior_type = AgentBehaviorType.OFF_POLICY
+        learning_type = AgentLearningType.OFFLINE
 
         assert(n_sample <= n_sample_start <= self.agent.memory.capacity)
 
@@ -113,6 +98,8 @@ class Controller(BaseController):
             batch_size = n_batch,
             shuffle = True
         )
+
+        self.agent.train()
 
         for epoch in range(n_epoch):
 
@@ -135,7 +122,7 @@ class Controller(BaseController):
                 )
 
                 # interact w/ environment
-                if (is_model_free):
+                if (model_type == EnvironmentModelType.MODEL_FREE):
                     trajs_env = self.agent.interact_with(
                         self.env,
                         n_times = 1,
@@ -143,7 +130,7 @@ class Controller(BaseController):
                     )
 
                 # interact w/ model    
-                if (is_model_based):
+                if (model_type == EnvironmentModelType.MODEL_BASED):
                     trajs_model = self.agent.interact_with(
                         self.agent.model,
                         n_times = 1,
@@ -187,7 +174,7 @@ class Controller(BaseController):
                     self.agent.update_actor(history, n_times=1)
 
                     # learn dynamics
-                    # if (is_model_based):
+                    # if (model_type == EnvironmentModelType.MODEL_BASED):
                     #     self.agent.update_model(history, n_times=1)
 
             else:
@@ -204,7 +191,7 @@ class Controller(BaseController):
                     self.agent.update_actor(trajs, n_times=1)
 
                     # learn dynamics
-                    if (is_model_based):
+                    if (model_type == EnvironmentModelType.MODEL_BASED):
                         self.agent.update_model(trajs, n_times=1)
 
             # TODO: learn something if needed
@@ -220,7 +207,8 @@ class Controller(BaseController):
                         n_train_eval = n_train_eval,
                         n_test_eval = n_test_eval
                     )
-                print((epoch+1), train_score, test_score)
+                print("\r%d" % (epoch+1))
+                self.report(train_score, test_score)
             else:
                 print("\r%d" % (epoch+1), end="")
             
@@ -271,3 +259,11 @@ class Controller(BaseController):
                 test_score[key].append(value)
 
         return (train_score, test_score)
+
+    def report(
+        self,
+        train_score,
+        test_score
+    ):
+        print(train_score)
+        print(test_score)
