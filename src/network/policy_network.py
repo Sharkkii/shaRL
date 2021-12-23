@@ -230,6 +230,4 @@ class GaussianPolicyNetwork(ContinuousPolicyNetwork):
         # logp = torch.sum(logp)
         return logp
 
-DefaultPolicyNetwork = PolicyNetwork = DiscretePolicyNetwork
-DefaultDiscretePolicyNetwork = DiscretePolicyNetwork
-DefaultContinuousPolicyNetwork = ContinuousPolicyNetwork
+PolicyNetwork = DiscretePolicyNetwork
