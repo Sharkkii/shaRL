@@ -57,7 +57,7 @@ class BaseNetwork(metaclass=ABCMeta):
         path_to_network
     ):
         ext = ".pth"
-        path_to_network = os.path.abspath(os.path.join(os.path.dirname(__file__), "model", path_to_network)) + ext
+        path_to_network = path_to_network + ext
         torch.save(self.network.state_dict(), path_to_network)
 
     def load(
@@ -65,7 +65,7 @@ class BaseNetwork(metaclass=ABCMeta):
         path_to_network
     ):
         ext = ".pth"
-        path_to_network = os.path.abspath(os.path.join(os.path.dirname(__file__), "model", path_to_network)) + ext
+        path_to_network = path_to_network + ext
         self.network.load_state_dict(torch.load(path_to_network))
 
 class BasePolicyNetwork(BaseNetwork, metaclass=ABCMeta):

@@ -12,6 +12,7 @@ from src.network import VNet, QNet, PiNet, ValueNetwork, QValueNetwork, PolicyNe
 # from src.const import MeasureType
 from src.optimizer import Optimizer
 from src.core import DQN
+from src.const import PATH_TO_NETWORK_MODEL
 
 def test_save():
 
@@ -56,10 +57,13 @@ def test_save():
     )
 
     # save
+    path_to_policy = os.path.join(PATH_TO_NETWORK_MODEL, "path_to_policy")
+    path_to_value = os.path.join(PATH_TO_NETWORK_MODEL, "path_to_value")
+    path_to_qvalue = os.path.join(PATH_TO_NETWORK_MODEL, "path_to_qvalue")
     ctrl.agent.save(
-        path_to_policy = "path_to_policy",
-        path_to_value = "path_to_value",
-        path_to_qvalue = "path_to_qvalue"
+        path_to_policy = path_to_policy,
+        path_to_value = path_to_value,
+        path_to_qvalue = path_to_qvalue
     )
 
 def test_load(
@@ -97,10 +101,13 @@ def test_load(
 
     # load
     if (do_load):
+        path_to_policy = os.path.join(PATH_TO_NETWORK_MODEL, "path_to_policy")
+        path_to_value = os.path.join(PATH_TO_NETWORK_MODEL, "path_to_value")
+        path_to_qvalue = os.path.join(PATH_TO_NETWORK_MODEL, "path_to_qvalue")
         agent.load(
-            path_to_policy = "path_to_policy",
-            path_to_value = "path_to_value",
-            path_to_qvalue = "path_to_qvalue"
+            path_to_policy = path_to_policy,
+            path_to_value = path_to_value,
+            path_to_qvalue = path_to_qvalue
         )
 
     ctrl = Controller(
@@ -120,7 +127,7 @@ def test_enable_to_save_model():
 
     np.random.seed(0)
     torch.manual_seed(0)
-    test_save()
+    # test_save()
     test_load(True)
     test_load(False)
 
