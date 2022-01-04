@@ -4,10 +4,10 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from .network import BaseNetwork
+from .measure_network import BaseMeasureNetwork
 
 
-class ValueNetwork(BaseNetwork):
+class ValueNetwork(BaseMeasureNetwork):
 
     def __init__(
         self,
@@ -32,7 +32,7 @@ class ValueNetwork(BaseNetwork):
     ):
         return self.network(state)
 
-class DiscreteQValueNetwork(BaseNetwork):
+class DiscreteQValueNetwork(BaseMeasureNetwork):
 
     def __init__(
         self,
@@ -59,7 +59,7 @@ class DiscreteQValueNetwork(BaseNetwork):
         assert(action is None)
         return self.network(state)
 
-class ContinuousQValueNetwork(BaseNetwork):
+class ContinuousQValueNetwork(BaseMeasureNetwork):
 
     def __init__(
         self,
