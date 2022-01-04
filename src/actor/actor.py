@@ -67,6 +67,18 @@ class BaseActor(metaclass=ABCMeta):
     ):
         self.policy.eval()
 
+    def save(
+        self,
+        path_to_policy
+    ):
+        self.policy.save(path_to_policy)
+    
+    def load(
+        self,
+        path_to_policy
+    ):
+        self.policy.load(path_to_policy)
+
     @abstractmethod
     def choose_action(
         self,

@@ -60,6 +60,18 @@ class BasePolicy(metaclass=ABCMeta):
         self
     ):
         self.policy_network.eval()
+
+    def save(
+        self,
+        path_to_policy_network
+    ):
+        self.policy_network.save(path_to_policy_network)
+
+    def load(
+        self,
+        path_to_policy_network
+    ):
+        self.policy_network.load(path_to_policy_network)
     
     @abstractmethod
     def P(

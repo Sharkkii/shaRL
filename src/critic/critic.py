@@ -75,6 +75,22 @@ class BaseCritic(metaclass=ABCMeta):
         self.value.eval()
         self.qvalue.eval()
 
+    def save(
+        self,
+        path_to_value,
+        path_to_qvalue,
+    ):
+        self.value.save(path_to_value)
+        self.qvalue.save(path_to_qvalue)
+    
+    def load(
+        self,
+        path_to_value,
+        path_to_qvalue,
+    ):
+        self.value.load(path_to_value)
+        self.qvalue.load(path_to_qvalue)
+
     @abstractmethod
     def update_value(
         self,

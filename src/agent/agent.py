@@ -99,6 +99,34 @@ class BaseAgent(metaclass=ABCMeta):
         self.actor.eval()
         self.critic.eval()
 
+    def save(
+        self,
+        path_to_policy,
+        path_to_value,
+        path_to_qvalue
+    ):
+        self.actor.save(
+            path_to_policy = path_to_policy
+        )
+        self.critic.save(
+            path_to_value = path_to_value,
+            path_to_qvalue = path_to_qvalue
+        )
+
+    def load(
+        self,
+        path_to_policy,
+        path_to_value,
+        path_to_qvalue
+    ):
+        self.actor.load(
+            path_to_policy = path_to_policy
+        )
+        self.critic.load(
+            path_to_value = path_to_value,
+            path_to_qvalue = path_to_qvalue
+        )
+
     @abstractmethod
     def update_model(
         self,

@@ -1,6 +1,7 @@
 #### Network ####
 
 from abc import ABCMeta, abstractmethod
+import os
 import torch
 import torch.nn as nn
 
@@ -50,6 +51,22 @@ class BaseNetwork(metaclass=ABCMeta):
         self
     ):
         return self.network.parameters()
+
+    def save(
+        self,
+        path_to_network
+    ):
+        ext = ".pth"
+        path_to_network = os.path.abspath(os.path.join(os.path.dirname(__file__), "model", path_to_network)) + ext
+        torch.save(self.network.state_dict(), path_to_network)
+
+    def load(
+        self,
+        path_to_network
+    ):
+        ext = ".pth"
+        path_to_network = os.path.abspath(os.path.join(os.path.dirname(__file__), "model", path_to_network)) + ext
+        self.network.load_state_dict(torch.load(path_to_network))
 
 class BasePolicyNetwork(BaseNetwork, metaclass=ABCMeta):
 
