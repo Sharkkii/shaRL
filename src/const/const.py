@@ -1,5 +1,10 @@
+import os
 from enum import Enum
 import gym
+
+PATH_TO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+PATH_TO_NETWORK_CONFIG = os.path.join(PATH_TO_ROOT, "network", "config")
+PATH_TO_NETWORK_MODEL = os.path.join(PATH_TO_ROOT, "network", "model")
 
 class PhaseType(Enum):
     NONE = 0

@@ -57,6 +57,18 @@ class BaseValue(metaclass=ABCMeta):
     ):
         self.value_network.eval()
 
+    def save(
+        self,
+        path_to_value_network
+    ):
+        self.value_network.save(path_to_value_network)
+    
+    def load(
+        self,
+        path_to_value_network
+    ):
+        self.value_network.load(path_to_value_network)
+
     # @abstractmethod
     def copy(
         self
@@ -145,6 +157,18 @@ class BaseQValue(metaclass=ABCMeta):
         self
     ):
         self.qvalue_network.eval()
+    
+    def save(
+        self,
+        path_to_qvalue_network
+    ):
+        self.qvalue_network.save(path_to_qvalue_network)
+    
+    def load(
+        self,
+        path_to_qvalue_network
+    ):
+        self.qvalue_network.load(path_to_qvalue_network)
     
     # @abstractmethod
     def copy(
