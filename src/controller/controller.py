@@ -67,7 +67,11 @@ class Controller(BaseController):
         n_test_eval = 0,
         n_eval_interval = 10,
         env_step = 1,
-        gradient_step = -1 # supported only when `gradient_step` < 0
+        gradient_step = -1, # supported only when `gradient_step` < 0
+        dataset_size = 100000,
+        batch_size = 100,
+        shuffle = True,
+        return_score = True,
     ):
 
         if (gradient_step > 0):
@@ -83,21 +87,24 @@ class Controller(BaseController):
         behavior_type = AgentBehaviorType.OFF_POLICY
         learning_type = AgentLearningType.OFFLINE
 
-        assert(n_sample <= n_sample_start <= self.agent.memory.capacity)
+        # assert(n_sample <= n_sample_start <= self.agent.memory.capacity)
 
         # FIXME: define dataset & dataloader
-        n_batch = 100
         transform = TensorConverter()
         dataset = RLDataset(
-            min_size = 1000,
-            max_size = 100000,
+            min_size = batch_size,
+            max_size = dataset_size,
             transform = transform
         )
         dataloader = RLDataLoader(
             dataset = dataset,
-            batch_size = n_batch,
-            shuffle = True
+            batch_size = batch_size,
+            shuffle = shuffle
         )
+
+        metrics = self.env.score([]).keys()
+        train_score_history = { metric: [] for metric in metrics }
+        test_score_history = { metric: [] for metric in metrics }
 
         self.agent.train()
 
@@ -164,7 +171,7 @@ class Controller(BaseController):
                 for history in dataloader:
 
                     # guard
-                    if (len(history[0]) < n_batch):
+                    if (len(history[0]) < batch_size):
                         continue
 
                     # update value function (critic)
@@ -209,8 +216,16 @@ class Controller(BaseController):
                     )
                 print("\r%d" % (epoch+1))
                 self.report(train_score, test_score)
+                if (return_score):
+                    for key, value in train_score.items():
+                        train_score_history[key].append(value)
+                    for key, value in test_score.items():
+                        test_score_history[key].append(value)
             else:
                 print("\r%d" % (epoch+1), end="")
+
+        if (return_score):
+            return train_score_history, test_score_history
             
 
     def evaluate(
@@ -220,13 +235,9 @@ class Controller(BaseController):
     ):
         self.agent.eval()
 
-        # initialize score dictionary
-        train_score = self.env.score([])
-        for key, _ in train_score.items():
-            train_score[key] = []
-        test_score = self.env.score([])
-        for key, _ in test_score.items():
-            test_score[key] = []
+        metrics = self.env.score([]).keys()
+        train_score = { metric: [] for metric in metrics }
+        test_score = { metric: [] for metric in metrics }
         
         # evaluate (train)
         for _ in range(n_train_eval):
