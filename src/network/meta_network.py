@@ -39,6 +39,11 @@ class MetaNetwork(type):
             )
             self.components = nn.ModuleList(components)
 
+        def _reset(
+            self
+        ):
+            pass
+
         def _forward(
             self,
             x
@@ -48,6 +53,7 @@ class MetaNetwork(type):
             return x
 
         namespace["__init__"] = _init
+        namespace["reset"] = _reset
         namespace["forward"] = _forward
         return super().__new__(cls, name, bases, namespace)
 

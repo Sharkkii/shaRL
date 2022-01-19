@@ -1,10 +1,11 @@
 from .meta_network import MetaNetwork
-from .network import BaseNetwork
-from .network import BasePolicyNetwork
 from .network import DefaultNetwork
 from .network import VNet
 from .network import QNet
 from .network import PiNet
+
+from .measure_network import BaseMeasureNetwork
+from .measure_network import BasePolicyNetwork
 
 from .value_network import ValueNetwork
 from .value_network import QValueNetwork

@@ -7,22 +7,14 @@ import torch.nn as nn
 
 from .meta_network import MetaNetwork
 
-class BaseNetwork(metaclass=ABCMeta):
+
+class BaseNetwork(nn.Module, metaclass=ABCMeta):
 
     @abstractmethod
     def __init__(
-        self,
-        network
+        self
     ):
-        assert(callable(network))
-        self.network = network
-
-    @abstractmethod
-    def __call__(
-        self,
-        **x
-    ):
-        return self.network(**x)
+        super().__init__()
 
     @abstractmethod
     def reset(
@@ -30,63 +22,7 @@ class BaseNetwork(metaclass=ABCMeta):
     ):
         pass
 
-    @abstractmethod
-    def setup(
-        self,
-        **kwargs
-    ):
-        pass
-
-    def train(
-        self
-    ):
-        self.network.train()
-
-    def eval(
-        self
-    ):
-        self.network.eval()
-    
-    def parameters(
-        self
-    ):
-        return self.network.parameters()
-
-    def save(
-        self,
-        path_to_network
-    ):
-        ext = ".pth"
-        path_to_network = path_to_network + ext
-        torch.save(self.network.state_dict(), path_to_network)
-
-    def load(
-        self,
-        path_to_network
-    ):
-        ext = ".pth"
-        path_to_network = path_to_network + ext
-        self.network.load_state_dict(torch.load(path_to_network))
-
-class BasePolicyNetwork(BaseNetwork, metaclass=ABCMeta):
-
-    @abstractmethod
-    def P(
-        self,
-        state,
-        action
-    ):
-        raise NotImplementedError
-
-    @abstractmethod
-    def logP(
-        self,
-        state,
-        action
-    ):
-        raise NotImplementedError
-
-class VNet(nn.Module):
+class VNet(BaseNetwork):
     
     def __init__(self, input_shape=4):
         super().__init__()
@@ -97,6 +33,9 @@ class VNet(nn.Module):
         self.l2 = nn.Linear(20, 20)
         # self.bn2 = nn.BatchNorm1d(20)
         self.l3 = nn.Linear(20, self.output_shape)
+        self.reset()
+
+    def reset(self):
         nn.init.normal_(self.l1.weight, mean=0., std=1.0)
         nn.init.normal_(self.l2.weight, mean=0., std=1.0)
         nn.init.normal_(self.l3.weight, mean=0., std=1.0)
@@ -109,7 +48,7 @@ class VNet(nn.Module):
         x = self.l3(x)
         return x
 
-class QNet(nn.Module):
+class QNet(BaseNetwork):
 
     def __init__(
         self,
@@ -124,6 +63,9 @@ class QNet(nn.Module):
         self.l2 = nn.Linear(20, 20)
         # self.bn2 = nn.BatchNorm1d(20)
         self.l3 = nn.Linear(20, self.output_shape)
+        self.reset()
+    
+    def reset(self):
         nn.init.normal_(self.l1.weight, mean=0., std=1.0)
         nn.init.normal_(self.l2.weight, mean=0., std=1.0)
         nn.init.normal_(self.l3.weight, mean=0., std=1.0)
@@ -145,7 +87,7 @@ class QNet(nn.Module):
             x = self.l3(x)
             return x
 
-class PiNet(nn.Module):
+class PiNet(BaseNetwork):
 
     def __init__(
         self,
@@ -160,6 +102,9 @@ class PiNet(nn.Module):
         self.l2 = nn.Linear(20, 20)
         # self.bn2 = nn.BatchNorm1d(20)
         self.l3 = nn.Linear(20, self.output_shape)
+        self.reset()
+    
+    def reset(self):
         nn.init.normal_(self.l1.weight, mean=0., std=1.0)
         nn.init.normal_(self.l2.weight, mean=0., std=1.0)
         nn.init.normal_(self.l3.weight, mean=0., std=1.0)
