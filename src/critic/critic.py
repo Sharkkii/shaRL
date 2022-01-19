@@ -5,7 +5,12 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from ..value import Value, QValue
+from ..value import Value
+from ..value import PseudoValue
+from ..value import QValue
+from ..value import PseudoQValue
+from ..value import cast_to_value
+from ..value import cast_to_qvalue
 
 
 class BaseCritic(metaclass=ABCMeta):
@@ -18,10 +23,10 @@ class BaseCritic(metaclass=ABCMeta):
         # smooth_v = 0.99,
         # smooth_q = 0.99,
     ):
-        self.value = None
-        self.qvalue = None
-        self.target_value = None
-        self.target_qvalue = None
+        self.value = cast_to_value(value)
+        self.qvalue = cast_to_qvalue(qvalue)
+        self.target_value = self.value.copy()
+        self.target_qvalue = self.qvalue.copy()
     
     @abstractmethod
     def reset(
@@ -139,10 +144,10 @@ class Critic(BaseCritic):
         value = None,
         qvalue = None
     ):
-        self.value = Value() if (value is None) else value
-        self.qvalue = QValue() if (qvalue is None) else qvalue
-        self.target_value = self.value.copy()
-        self.target_qvalue = self.qvalue.copy()
+        super().__init__(
+            value = value,
+            qvalue = qvalue
+        )
     
     def reset(
         self

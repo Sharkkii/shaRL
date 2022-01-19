@@ -6,8 +6,9 @@ import torch.nn.functional as F
 import gym
 
 from ..const import PhaseType
-from ..value import Value, DiscreteQValue
-from ..policy import Policy
+from ..policy import DiscretePolicy
+from ..value import PseudoValue
+from ..value import DiscreteQValue
 from ..actor import Actor
 from ..critic import Critic
 from ..agent import Agent
@@ -53,7 +54,7 @@ class SACDiscreteActor(Actor):
     ):
         assert(alpha >= 0.0)
         assert(0.0 < alpha_decay <= 1.0)
-        policy = Policy()
+        policy = DiscretePolicy()
         super().__init__(
             policy = policy
         )
@@ -120,7 +121,7 @@ class SACDiscreteCritic(Critic):
         assert(0.0 < gamma <= 1.0)
         assert(alpha >= 0.0)
         assert(0.0 <= tau <= 1.0)
-        value = Value()
+        value = PseudoValue()
         qvalue = DiscreteQValue()
         super().__init__(
             value = value,
@@ -164,5 +165,3 @@ class SACDiscreteCritic(Critic):
     ):
         for theta, target_theta in zip(self.qvalue.qvalue_network.parameters(), self.target_qvalue.qvalue_network.parameters()):
             target_theta.data = (1 - self.tau) * target_theta.data + self.tau * theta.data
-
-    

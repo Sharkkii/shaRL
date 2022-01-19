@@ -5,8 +5,9 @@ import torch
 import torch.nn.functional as F
 
 from ..const import PhaseType
-from ..value import Value, DiscreteQValue
 from ..policy import QBasedPolicy
+from ..value import PseudoValue
+from ..value import DiscreteQValue
 from ..actor import Actor
 from ..critic import Critic
 from ..agent import Agent
@@ -111,7 +112,7 @@ class DQNCritic(Critic):
     ):
         assert(0.0 < gamma <= 1.0)
         assert(0.0 <= tau <= 1.0)
-        value = None
+        value = PseudoValue()
         qvalue = DiscreteQValue()
         super().__init__(
             value = value,

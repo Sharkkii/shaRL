@@ -7,6 +7,8 @@ from gym.spaces import Box, Discrete
 
 from ..const import PhaseType
 from ..policy import Policy
+from ..policy import PseudoPolicy
+from ..policy import cast_to_policy
 
 
 class BaseActor(metaclass=ABCMeta):
@@ -16,8 +18,8 @@ class BaseActor(metaclass=ABCMeta):
         self,
         policy = None
     ):
-        self.policy = None
-        self.target_policy = None
+        self.policy = cast_to_policy(policy)
+        self.target_policy = self.policy.copy()
 
     @abstractmethod
     def reset(
@@ -114,8 +116,9 @@ class Actor(BaseActor):
         self,
         policy = None
     ):
-        self.policy = Policy() if (policy is None) else policy
-        self.target_policy = self.policy.copy()
+        super().__init__(
+            policy = policy
+        )
     
     def reset(
         self
