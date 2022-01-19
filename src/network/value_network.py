@@ -85,7 +85,4 @@ class ContinuousQValueNetwork(BaseMeasureNetwork):
     ):
         return self.network(state, action)
 
-DefaultValueNetwork = ValueNetwork
-DefaultQValueNetwork = QValueNetwork = DiscreteQValueNetwork
-DefaultDiscreteQValueNetwork = DiscreteQValueNetwork
-DefaultContinuousQValueNetwork = ContinuousQValueNetwork
+QValueNetwork = DiscreteQValueNetwork
