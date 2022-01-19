@@ -1,2 +1,3 @@
 from .network_helper import get_default_network
 from .network_helper import get_default_measure_network
+from .network_helper import cast_to_measure_network

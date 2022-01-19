@@ -1,4 +1,5 @@
 from .meta_network import MetaNetwork
+from .network import BaseNetwork
 from .network import DefaultNetwork
 from .network import VNet
 from .network import QNet
@@ -6,6 +7,7 @@ from .network import PiNet
 
 from .measure_network import BaseMeasureNetwork
 from .measure_network import BasePolicyNetwork
+from .measure_network import PseudoMeasureNetwork
 
 from .value_network import ValueNetwork
 from .value_network import QValueNetwork
@@ -28,3 +30,4 @@ from .policy_network import GaussianPolicyNetwork
 
 from .helper import get_default_network
 from .helper import get_default_measure_network
+from .helper import cast_to_measure_network

@@ -83,3 +83,56 @@ class BasePolicyNetwork(BaseMeasureNetwork, metaclass=ABCMeta):
         action
     ):
         raise NotImplementedError
+
+class PseudoMeasureNetwork(BaseMeasureNetwork):
+
+    @classmethod
+    def __raise_exception(cls):
+        raise Exception("`PseudoMeasureNetwork` cannot be used as a measure network.")
+
+    def __init__(
+        self,
+        network = None
+    ):
+        pass
+    
+    def reset(self):
+        pass
+
+    def setup(
+        self
+    ):
+        pass
+
+    def train(
+        self
+    ):
+        pass
+
+    def eval(
+        self
+    ):
+        pass
+
+    def __call__(
+        self,
+        x
+    ):
+        PseudoMeasureNetwork.__raise_exception()
+
+    def parameters(
+        self
+    ):
+        return []
+    
+    def save(
+        self,
+        path_to_network
+    ):
+        PseudoMeasureNetwork.__raise_exception()
+
+    def load(
+        self,
+        path_to_network
+    ):
+        PseudoMeasureNetwork.__raise_exception()

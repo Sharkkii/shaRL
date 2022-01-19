@@ -5,6 +5,8 @@ from ...const import MeasureType
 from ...const import cast_to_space_type
 from ...environment import get_compatible_interface
 from ...network import DefaultNetwork
+from ...network import BaseMeasureNetwork
+from ...network import PseudoMeasureNetwork
 from ...network import DefaultValueNetwork
 from ...network import DefaultDiscreteQValueNetwork
 from ...network import DefaultContinuousQValueNetwork
@@ -63,3 +65,11 @@ def get_default_measure_network(
         default_measure_network = None
 
     return default_measure_network
+
+def cast_to_measure_network(
+    measure_network
+):
+    if (isinstance(measure_network, BaseMeasureNetwork)):
+        return measure_network
+    else:
+        return PseudoMeasureNetwork()
