@@ -231,6 +231,82 @@ class ContinuousPolicy(BasePolicy):
         
 Policy = DiscretePolicy
 
+class PseudoPolicy(BasePolicy):
+
+    @classmethod
+    def __raise_exception(cls):
+        raise Exception("`PseudoPolicy` cannot be used as a policy.")
+
+    def __init__(
+        self,
+        policy_network = None,
+        policy_optimizer = None
+    ):
+        pass
+
+    def reset(
+        self
+    ):
+        pass
+
+    def setup(
+        self,
+        policy_network = None,
+        policy_optimizer = None
+    ):
+        pass
+    
+    def train(
+        self
+    ):
+        pass
+
+    def eval(
+        self
+    ):
+        pass
+
+    def __call__(
+        self,
+        state,
+        action = None
+    ):
+        PseudoPolicy.__raise_exception()
+
+    def P(
+        self,
+        state,
+        action = None
+    ):
+        PseudoPolicy.__raise_exception()
+
+    def logP(
+        self,
+        state,
+        action = None
+    ):
+        PseudoPolicy.__raise_exception()
+    
+    def sample(
+        self,
+        state,
+        action_space,
+        phase = PhaseType.NONE
+    ):
+        PseudoPolicy.__raise_exception()
+
+    def save(
+        self,
+        path_to_policy_network
+    ):
+        PseudoPolicy.__raise_exception()
+
+    def load(
+        self,
+        path_to_policy_network
+    ):
+        PseudoPolicy.__raise_exception()
+
 class QBasedPolicy(BasePolicy):
     
     def check_whether_available(f):

@@ -108,6 +108,59 @@ class Value(BaseValue):
             value_optimizer = value_optimizer
         )
 
+class PseudoValue(BaseValue):
+
+    @classmethod
+    def __raise_exception(cls):
+        raise Exception("`PseudoValue` cannot be used as a value function.")
+
+    def __init__(
+        self,
+        value_network = None,
+        value_optimizer = None
+    ):
+        pass
+
+    def reset(
+        self
+    ):
+        pass
+
+    def setup(
+        self,
+        value_network = None,
+        value_optimizer = None
+    ):
+        pass
+
+    def train(
+        self
+    ):
+        pass
+
+    def eval(
+        self
+    ):
+        pass
+
+    def __call__(
+        self,
+        state
+    ):
+        PseudoValue.__raise_exception()
+    
+    def save(
+        self,
+        path_to_value_network
+    ):
+        PseudoValue.__raise_exception()
+
+    def load(
+        self,
+        path_to_value_network
+    ):
+        PseudoValue.__raise_exception()
+
 class BaseQValue(metaclass=ABCMeta):
 
     @abstractmethod
@@ -246,3 +299,57 @@ class ContinuousQValue(BaseQValue):
         )
 
 QValue = DiscreteQValue
+
+class PseudoQValue(BaseQValue):
+
+    @classmethod
+    def __raise_exception(cls):
+        raise Exception("`PseudoQValue` cannot be used as a qvalue function.")
+
+    def __init__(
+        self,
+        qvalue_network = None,
+        qvalue_optimizer = None
+    ):
+        pass
+
+    def reset(
+        self
+    ):
+        pass
+
+    def setup(
+        self,
+        qvalue_network = None,
+        qvalue_optimizer = None
+    ):
+        pass
+
+    def train(
+        self
+    ):
+        pass
+
+    def eval(
+        self
+    ):
+        pass
+
+    def __call__(
+        self,
+        state,
+        action = None
+    ):
+        PseudoQValue.__raise_exception()
+    
+    def save(
+        self,
+        path_to_qvalue_network
+    ):
+        PseudoQValue.__raise_exception()
+
+    def load(
+        self,
+        path_to_qvalue_network
+    ):
+        PseudoQValue.__raise_exception()

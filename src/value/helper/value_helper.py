@@ -5,9 +5,13 @@ from ...const import MeasureType
 from ...const import cast_to_space_type
 from ...network import get_default_measure_network
 from ...optimizer import get_default_measure_optimizer
+from ..value import BaseValue
+from ..value import BaseQValue
 from ..value import Value
 from ..value import DiscreteQValue
 from ..value import ContinuousQValue
+from ..value import PseudoValue
+from ..value import PseudoQValue
 
 def get_default_value(
     env
@@ -48,3 +52,19 @@ def get_default_qvalue(
         default_qvalue = None
     
     return default_qvalue
+
+def cast_to_value(
+    value
+):
+    if (isinstance(value, BaseValue)):
+        return value
+    else:
+        return PseudoValue()
+
+def cast_to_qvalue(
+    qvalue
+):
+    if (isinstance(qvalue, BaseQValue)):
+        return qvalue
+    else:
+        return PseudoQValue()
