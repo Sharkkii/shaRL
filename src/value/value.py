@@ -6,6 +6,9 @@ import numpy as np
 import torch
 import torch.nn as nn
 
+from ..network import PseudoMeasureNetwork
+from ..network import BaseMeasureNetwork
+from ..network import cast_to_measure_network
 from ..optimizer import Optimizer
 
 class BaseValue(metaclass=ABCMeta):
@@ -16,7 +19,7 @@ class BaseValue(metaclass=ABCMeta):
         value_network = None,
         value_optimizer = None
     ):
-        self.value_network = value_network
+        self.value_network = cast_to_measure_network(value_network)
         self.value_optimizer = value_optimizer
 
     @abstractmethod
@@ -38,7 +41,7 @@ class BaseValue(metaclass=ABCMeta):
         value_network = None,
         value_optimizer = None
     ):
-        if ((self.value_network is None) and callable(value_network)):
+        if (isinstance(self.value_network, PseudoMeasureNetwork) and isinstance(value_network, BaseMeasureNetwork)):
             self.value_network = value_network
         if ((self.value_optimizer is None) and (type(value_optimizer) is Optimizer)):
             self.value_optimizer = value_optimizer
@@ -169,7 +172,7 @@ class BaseQValue(metaclass=ABCMeta):
         qvalue_network = None,
         qvalue_optimizer = None
     ):
-        self.qvalue_network = qvalue_network
+        self.qvalue_network = cast_to_measure_network(qvalue_network)
         self.qvalue_optimizer = qvalue_optimizer
 
     @abstractmethod
@@ -192,7 +195,7 @@ class BaseQValue(metaclass=ABCMeta):
         qvalue_network = None,
         qvalue_optimizer = None
     ):
-        if ((self.qvalue_network is None) and callable(qvalue_network)):
+        if ((isinstance(self.qvalue_network, PseudoMeasureNetwork)) and isinstance(qvalue_network, BaseMeasureNetwork)):
             self.qvalue_network = qvalue_network
         if ((self.qvalue_optimizer is None) and (type(qvalue_optimizer) is Optimizer)):
             self.qvalue_optimizer = qvalue_optimizer

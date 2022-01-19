@@ -5,6 +5,8 @@ import torch
 import torch.nn as nn
 import torch.optim
 
+from ..network import BaseMeasureNetwork
+from ..network import PseudoMeasureNetwork
 
 class BaseOptimizer(metaclass=ABCMeta):
 
@@ -72,7 +74,7 @@ class Optimizer(BaseOptimizer):
         self,
         network
     ):
-        if (callable(network)):
+        if (isinstance(network, BaseMeasureNetwork) and (not isinstance(network, PseudoMeasureNetwork))):
             self.optimizer = self.optimizer_factory(
                 network.parameters(),
                 **self.kwargs

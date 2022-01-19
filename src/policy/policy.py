@@ -9,6 +9,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from ..const import PhaseType
+from ..network import PseudoMeasureNetwork
+from ..network import BaseMeasureNetwork
+from ..network import cast_to_measure_network
 from ..optimizer import Optimizer
 
 class BasePolicy(metaclass=ABCMeta):
@@ -19,7 +22,7 @@ class BasePolicy(metaclass=ABCMeta):
         policy_network = None,
         policy_optimizer = None
     ):
-        self.policy_network = policy_network
+        self.policy_network = cast_to_measure_network(policy_network)
         self.policy_optimizer = policy_optimizer
 
     @abstractmethod
@@ -42,7 +45,7 @@ class BasePolicy(metaclass=ABCMeta):
         policy_network = None,
         policy_optimizer = None
     ):
-        if ((self.policy_network is None) and callable(policy_network)):
+        if (isinstance(self.policy_network, PseudoMeasureNetwork) and isinstance(policy_network, BaseMeasureNetwork)):
             self.policy_network = policy_network
         if ((self.policy_optimizer is None) and (type(policy_optimizer) is Optimizer)):
             self.policy_optimizer = policy_optimizer
