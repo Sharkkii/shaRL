@@ -20,6 +20,7 @@ class BaseActor(metaclass=ABCMeta):
     ):
         self.policy = cast_to_policy(policy)
         self.target_policy = self.policy.copy()
+        self._is_available = False
 
     @abstractmethod
     def reset(
@@ -58,6 +59,22 @@ class BaseActor(metaclass=ABCMeta):
         n_step
     ):
         raise NotImplementedError
+    
+    @property
+    def is_available(
+        self
+    ):
+        return self._is_available
+
+    def _become_available(
+        self
+    ):
+        self._is_available = True
+
+    def _become_unavailable(
+        self
+    ):
+        self._is_available = False
     
     def train(
         self

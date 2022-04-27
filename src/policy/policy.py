@@ -24,6 +24,7 @@ class BasePolicy(metaclass=ABCMeta):
     ):
         self.policy_network = cast_to_measure_network(policy_network)
         self.policy_optimizer = policy_optimizer
+        self._is_available = False
 
     @abstractmethod
     def __call__(
@@ -53,6 +54,22 @@ class BasePolicy(metaclass=ABCMeta):
                 network = self.policy_network
             )
             print(f"Policy.setup: { self.policy_network } & { self.policy_optimizer }")
+
+    @property
+    def is_available(
+        self
+    ):
+        return self._is_available
+
+    def _become_available(
+        self
+    ):
+        self._is_available = True
+
+    def _become_unavailable(
+        self
+    ):
+        self._is_available = False
 
     def train(
         self

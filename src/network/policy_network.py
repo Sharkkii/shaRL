@@ -12,9 +12,11 @@ class DiscretePolicyNetwork(BasePolicyNetwork):
 
     def __init__(
         self,
-        policy_network
+        policy_network = None
     ):
-        self.network = policy_network if callable(policy_network) else (lambda state: None)
+        super().__init__(
+            network = policy_network
+        )
 
     def reset(
         self
@@ -22,9 +24,12 @@ class DiscretePolicyNetwork(BasePolicyNetwork):
         pass
 
     def setup(
-        self
+        self,
+        policy_network = None
     ):
-        pass
+        super().setup(
+            network = policy_network
+        )
     
     def __call__(
         self,
@@ -70,9 +75,11 @@ class ContinuousPolicyNetwork(BasePolicyNetwork):
         pass
 
     def setup(
-        self
+        self,
+        policy_network = None
     ):
-        pass
+        assert(callable(policy_network))
+        self.network = policy_network
     
     def __call__(
         self,

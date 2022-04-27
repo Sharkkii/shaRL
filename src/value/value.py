@@ -21,6 +21,7 @@ class BaseValue(metaclass=ABCMeta):
     ):
         self.value_network = cast_to_measure_network(value_network)
         self.value_optimizer = value_optimizer
+        self._is_available = False
 
     @abstractmethod
     def __call__(
@@ -49,6 +50,22 @@ class BaseValue(metaclass=ABCMeta):
                 network = self.value_network
             )
         print(f"Value.setup: { self.value_network } & { self.value_optimizer }")
+
+    @property
+    def is_available(
+        self
+    ):
+        return self._is_available
+
+    def _become_available(
+        self
+    ):
+        self._is_available = True
+
+    def _become_unavailable(
+        self
+    ):
+        self._is_available = False
 
     def train(
         self
@@ -174,6 +191,7 @@ class BaseQValue(metaclass=ABCMeta):
     ):
         self.qvalue_network = cast_to_measure_network(qvalue_network)
         self.qvalue_optimizer = qvalue_optimizer
+        self._is_available = False
 
     @abstractmethod
     def __call__(
@@ -203,6 +221,22 @@ class BaseQValue(metaclass=ABCMeta):
                 network = self.qvalue_network
             )
             print(f"QValue.setup: { self.qvalue_network } & { self.qvalue_optimizer }")
+    
+    @property
+    def is_available(
+        self
+    ):
+        return self._is_available
+
+    def _become_available(
+        self
+    ):
+        self._is_available = True
+
+    def _become_unavailable(
+        self
+    ):
+        self._is_available = False
     
     def train(
         self

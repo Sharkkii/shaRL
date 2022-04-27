@@ -28,6 +28,7 @@ class BaseAgent(metaclass=ABCMeta):
         self.model = Model() if (model is None) else model
         self.memory = RLMemory() if (memory is None) else memory
         self.gamma = gamma
+        self._is_available = False
     
     @abstractmethod
     def reset(
@@ -86,6 +87,22 @@ class BaseAgent(metaclass=ABCMeta):
         n_step
     ):
         raise NotImplementedError
+
+    @property
+    def is_available(
+        self
+    ):
+        return self._is_available
+
+    def _become_available(
+        self
+    ):
+        self._is_available = True
+
+    def _become_unavailable(
+        self
+    ):
+        self._is_available = False
 
     def train(
         self

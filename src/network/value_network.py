@@ -11,10 +11,11 @@ class ValueNetwork(BaseMeasureNetwork):
 
     def __init__(
         self,
-        value_network
+        value_network = None
     ):
-        assert(callable(value_network))
-        self.network = value_network
+        super().__init__(
+            network = value_network
+        )
     
     def reset(
         self
@@ -22,10 +23,13 @@ class ValueNetwork(BaseMeasureNetwork):
         pass
 
     def setup(
-        self
+        self,
+        value_network = None
     ):
-        pass
-    
+        super().setup(
+            network = value_network
+        )
+
     def __call__(
         self,
         state
@@ -36,10 +40,11 @@ class DiscreteQValueNetwork(BaseMeasureNetwork):
 
     def __init__(
         self,
-        qvalue_network
+        qvalue_network = None
     ):
-        assert(callable(qvalue_network))
-        self.network = qvalue_network
+        super().__init__(
+            network = qvalue_network
+        )
 
     def reset(
         self
@@ -47,9 +52,12 @@ class DiscreteQValueNetwork(BaseMeasureNetwork):
         pass
 
     def setup(
-        self
+        self,
+        qvalue_network = None
     ):
-        pass
+        super().setup(
+            network = qvalue_network
+        )
     
     def __call__(
         self,
@@ -65,8 +73,9 @@ class ContinuousQValueNetwork(BaseMeasureNetwork):
         self,
         qvalue_network
     ):
-        assert(callable(qvalue_network))
-        self.network = qvalue_network
+        super().__init__(
+            network = qvalue_network
+        )
 
     def reset(
         self
@@ -74,9 +83,12 @@ class ContinuousQValueNetwork(BaseMeasureNetwork):
         pass
 
     def setup(
-        self
+        self,
+        qvalue_network = None
     ):
-        pass
+        super().setup(
+            network = qvalue_network
+        )
     
     def __call__(
         self,

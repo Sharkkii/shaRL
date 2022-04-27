@@ -14,48 +14,80 @@ class BaseController(metaclass=ABCMeta):
     @abstractmethod
     def __init__(
         self,
-        environment,
-        agent,
+        environment = None,
+        agent = None,
         config = None
     ):
-        raise NotImplementedError
+        self.env = environment
+        self.agent = agent
+        self.config = config
+        self._is_available = False
     
     @abstractmethod
     def setup(
-        self
+        self,
+        environment = None,
+        agent = None
     ):
-        raise NotImplementedError
+        if ((environment is not None) and (agent is not None)):
+            self.env = environment
+            self.agent = agent
+        if ((self.env is not None) and (self.agent is not None)):
+            self.env.setup()
+            self.agent.setup()
     
     @abstractmethod
     def reset(
         self
     ):
-        raise NotImplementedError
+        if ((self.env is not None) and (self.agent is not None)):
+            self.env.reset()
+            self.agent.reset()
+
+    @property
+    def is_available(
+        self
+    ):
+        return self._is_available
+
+    def _become_available(
+        self
+    ):
+        self._is_available = True
+
+    def _become_unavailable(
+        self
+    ):
+        self._is_available = False
 
 class Controller(BaseController):
 
     def __init__(
         self,
-        environment,
-        agent,
+        environment = None,
+        agent = None,
         config = {}
     ):
-
-        self.env = environment
-        self.agent = agent
-        self.config = config
+        super().__init__(
+            environment = environment,
+            agent = agent,
+            config = config
+        )
     
     def setup(
-        self
+        self,
+        environment = None,
+        agent = None
     ):
-        self.env.setup()
-        self.agent.setup()
+        super().setup(
+            environment = environment,
+            agent = agent
+        )
 
     def reset(
         self
     ):
-        self.env.reset()
-        self.agent.reset()
+        super().reset()
     
     def fit(
         self,

@@ -11,10 +11,12 @@ class BaseMeasureNetwork(metaclass=ABCMeta):
     @abstractmethod
     def __init__(
         self,
-        network
+        network = None
     ):
-        assert(callable(network))
-        self.network = network
+        self.network = None
+        self._is_available = False
+        if (network is not None):
+            self.setup(network)
 
     @abstractmethod
     def __call__(
@@ -31,9 +33,28 @@ class BaseMeasureNetwork(metaclass=ABCMeta):
 
     @abstractmethod
     def setup(
+        self,
+        network = None
+    ):
+        if (network is not None):
+            assert(callable(network))
+            self.network = network
+
+    @property
+    def is_available(
         self
     ):
-        pass
+        return self._is_available
+
+    def _become_available(
+        self
+    ):
+        self._is_available = True
+
+    def _become_unavailable(
+        self
+    ):
+        self._is_available = False
 
     def train(
         self
@@ -100,7 +121,8 @@ class PseudoMeasureNetwork(BaseMeasureNetwork):
         pass
 
     def setup(
-        self
+        self,
+        network = None
     ):
         pass
 

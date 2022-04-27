@@ -27,6 +27,7 @@ class BaseCritic(metaclass=ABCMeta):
         self.qvalue = cast_to_qvalue(qvalue)
         self.target_value = self.value.copy()
         self.target_qvalue = self.qvalue.copy()
+        self._is_available = False
     
     @abstractmethod
     def reset(
@@ -67,6 +68,22 @@ class BaseCritic(metaclass=ABCMeta):
         n_step
     ):
         raise NotImplementedError
+
+    @property
+    def is_available(
+        self
+    ):
+        return self._is_available
+
+    def _become_available(
+        self
+    ):
+        self._is_available = True
+
+    def _become_unavailable(
+        self
+    ):
+        self._is_available = False
 
     def train(
         self
