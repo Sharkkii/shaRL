@@ -8,13 +8,13 @@ from src.value import Value, QValue
 class TestValue():
 
     @pytest.mark.unit
-    def test_init(self):
+    def test_should_be_unavailable_on_empty_initialization(self):
         value = Value()
         assert value.is_available == False
 
 class TestQValue():
 
     @pytest.mark.unit
-    def test_init(self):
+    def test_should_be_unavailable_on_empty_initialization(self):
         value = QValue()
         assert value.is_available == False

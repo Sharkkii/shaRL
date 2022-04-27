@@ -8,6 +8,6 @@ from src.policy import Policy
 class TestPolicy():
 
     @pytest.mark.unit
-    def test_init(self):
+    def test_should_be_unavailable_on_empty_initialization(self):
         policy = Policy()
         assert policy.is_available == False
