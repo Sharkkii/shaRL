@@ -28,3 +28,19 @@ class TestController():
         controller = Controller()
         controller.setup(env, agent)
         assert controller.is_available == True
+
+    @pytest.mark.unit
+    def test_should_be_available_on_empty_initialization_with_use_default_true(self):
+        controller = Controller(use_default = True)
+        assert controller.is_available == True
+
+    @pytest.mark.unit
+    def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self):
+        env = Environment()
+        agent = Agent()
+        with pytest.raises(ValueError) as message:
+            controller = Controller(
+                env = env,
+                agent = agent,
+                use_default = True
+            )
