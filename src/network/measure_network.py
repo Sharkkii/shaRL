@@ -2,11 +2,19 @@
 
 from abc import ABCMeta, abstractmethod
 import os
+from tabnanny import check
 import torch
 import torch.nn as nn
 
 
 class BaseMeasureNetwork(metaclass=ABCMeta):
+
+    def check_whether_available(f):
+        def wrapper(self, *args, **kwargs):
+            if (not self.is_available):
+                raise Exception(f"'{ __class__.__name__ }' object must be setup before using `{ __class__.__name__ }.{ f.__name__ }`")
+            f(self, *args, **kwargs)
+        return wrapper
 
     @abstractmethod
     def __init__(
@@ -66,6 +74,7 @@ class BaseMeasureNetwork(metaclass=ABCMeta):
     ):
         self.network.eval()
     
+    @check_whether_available
     def parameters(
         self
     ):
