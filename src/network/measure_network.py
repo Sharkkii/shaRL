@@ -145,7 +145,8 @@ class PseudoMeasureNetwork(BaseMeasureNetwork):
     def parameters(
         self
     ):
-        return []
+        pseudo_parameters = (torch.zeros(1),)
+        return pseudo_parameters
     
     def save(
         self,

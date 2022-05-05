@@ -14,7 +14,8 @@ class BaseOptimizer(metaclass=ABCMeta):
     def __init__(
         self
     ):
-        raise NotImplementedError
+        self.optimizer = None
+        self.network = None
     
     @abstractmethod
     def reset(
@@ -52,12 +53,18 @@ class Optimizer(BaseOptimizer):
     def __init__(
         self,
         optimizer,
+        network = None,
         **kwargs
     ):
-        self.optimizer_factory = optimizer
+        self.optimizer_factory = optimizer # should be implemented as MetaClass
         self.optimizer = None
         self.network = None
-        self.kwargs = kwargs
+        self._is_available = False
+
+        self.setup(
+            network = network,
+            **kwargs
+        )
 
     def reset(
         self
@@ -72,15 +79,33 @@ class Optimizer(BaseOptimizer):
     
     def setup(
         self,
-        network
+        network,
+        **kwargs
     ):
-        if (isinstance(network, BaseMeasureNetwork) and (not isinstance(network, PseudoMeasureNetwork))):
+        if (isinstance(network, BaseMeasureNetwork)):
             self.optimizer = self.optimizer_factory(
                 network.parameters(),
-                **self.kwargs
+                **kwargs
             )
             self.network = network
+            self._become_available()
             print(f"Optimizer.setup: { self.optimizer_factory }({ network })")
+
+    @property
+    def is_available(
+        self
+    ):
+        return self._is_available
+
+    def _become_available(
+        self
+    ):
+        self._is_available = True
+
+    def _become_unavailable(
+        self
+    ):
+        self._is_available = False
 
     @check_whether_available
     def step(
