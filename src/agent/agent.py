@@ -29,6 +29,10 @@ class BaseAgent(metaclass=ABCMeta):
         self.memory = RLMemory() if (memory is None) else memory
         self.gamma = gamma
         self._is_available = False
+        self.setup(
+            actor = actor,
+            critic = critic
+        )
     
     @abstractmethod
     def reset(
@@ -42,35 +46,42 @@ class BaseAgent(metaclass=ABCMeta):
     @abstractmethod
     def setup(
         self,
-        env,
-        policy_network = None,
-        value_network = None,
-        qvalue_network = None,
-        policy_optimizer = None,
-        value_optimizer = None,
-        qvalue_optimizer = None
+        env = None, # will be deprecated
+        policy_network = None, # will be deprecated
+        value_network = None, # will be deprecated
+        qvalue_network = None, # will be deprecated
+        policy_optimizer = None, # will be deprecated
+        value_optimizer = None, # will be deprecated
+        qvalue_optimizer = None, # will be deprecated
+        actor = None,
+        critic = None
     ):
-        self.env = env
-        self.actor.setup(
-            env = env,
-            policy_network = policy_network,
-            policy_optimizer = policy_optimizer
-        )
-        self.critic.setup(
-            env = env,
-            value_network = value_network,
-            qvalue_network = qvalue_network,
-            value_optimizer = value_optimizer,
-            qvalue_optimizer = qvalue_optimizer,
-        )
-        self.actor.setup_with_critic(
-            critic = self.critic
-        )
-        self.critic.setup_with_actor(
-            actor = self.actor
-        )
-        self.model.setup(env)
-        self.memory.setup()
+        if ((actor is not None) and (critic is not None)):
+            self.actor = actor
+            self.critic = critic
+            self._become_available()
+
+        # self.env = env
+        # self.actor.setup(
+        #     env = env,
+        #     policy_network = policy_network,
+        #     policy_optimizer = policy_optimizer
+        # )
+        # self.critic.setup(
+        #     env = env,
+        #     value_network = value_network,
+        #     qvalue_network = qvalue_network,
+        #     value_optimizer = value_optimizer,
+        #     qvalue_optimizer = qvalue_optimizer,
+        # )
+        # self.actor.setup_with_critic(
+        #     critic = self.critic
+        # )
+        # self.critic.setup_with_actor(
+        #     actor = self.actor
+        # )
+        # self.model.setup(env)
+        # self.memory.setup()
     
     @abstractmethod
     def setup_on_every_epoch(
@@ -222,23 +233,30 @@ class Agent(BaseAgent):
 
     def setup(
         self,
-        env,
-        policy_network = None,
-        value_network = None,
-        qvalue_network = None,
-        policy_optimizer = None,
-        value_optimizer = None,
-        qvalue_optimizer = None
+        env = None, # will be deprecated
+        policy_network = None, # will be deprecated
+        value_network = None, # will be deprecated
+        qvalue_network = None, # will be deprecated
+        policy_optimizer = None, # will be deprecated
+        value_optimizer = None, # will be deprecated
+        qvalue_optimizer = None, # will be deprecated
+        actor = None,
+        critic = None
     ):
         super().setup(
-            env = env,
-            policy_network = policy_network,
-            value_network = value_network,
-            qvalue_network = qvalue_network,
-            policy_optimizer = policy_optimizer,
-            value_optimizer = value_optimizer,
-            qvalue_optimizer = qvalue_optimizer
+            actor = actor,
+            critic = critic
         )
+
+        # super().setup(
+        #     env = env,
+        #     policy_network = policy_network,
+        #     value_network = value_network,
+        #     qvalue_network = qvalue_network,
+        #     policy_optimizer = policy_optimizer,
+        #     value_optimizer = value_optimizer,
+        #     qvalue_optimizer = qvalue_optimizer
+        # )
     
     def setup_on_every_epoch(
         self,

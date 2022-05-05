@@ -23,11 +23,15 @@ class BaseCritic(metaclass=ABCMeta):
         # smooth_v = 0.99,
         # smooth_q = 0.99,
     ):
-        self.value = cast_to_value(value)
-        self.qvalue = cast_to_qvalue(qvalue)
-        self.target_value = self.value.copy()
-        self.target_qvalue = self.qvalue.copy()
+        self.value = None # cast_to_value(value)
+        self.qvalue = None # cast_to_qvalue(qvalue)
+        self.target_value = None # self.value.copy()
+        self.target_qvalue = None # self.qvalue.copy()
         self._is_available = False
+        self.setup(
+            value = value,
+            qvalue = qvalue
+        )
     
     @abstractmethod
     def reset(
@@ -38,13 +42,20 @@ class BaseCritic(metaclass=ABCMeta):
     @abstractmethod
     def setup(
         self,
-        env = None,
-        value_network = None,
-        qvalue_network = None,
-        value_optimizer = None,
-        qvalue_optimizer = None
+        env = None, # will be deprecated
+        value_network = None, # will be deprecated
+        qvalue_network = None, # will be deprecated
+        value_optimizer = None, # will be deprecated
+        qvalue_optimizer = None, # will be deprecated
+        value = None,
+        qvalue = None
     ):
-        raise NotImplementedError
+        if ((value is not None) and (qvalue is not None)):
+            self.value = value
+            self.qvalue = qvalue
+            self.target_value = self.value.copy()
+            self.target_qvalue = self.qvalue.copy()
+            self._become_available()
 
     @abstractmethod
     def setup_with_actor(
@@ -173,23 +184,29 @@ class Critic(BaseCritic):
 
     def setup(
         self,
-        env = None,
-        value_network = None,
-        qvalue_network = None,
-        value_optimizer = None,
-        qvalue_optimizer = None
+        env = None, # will be deprecated
+        value_network = None, # will be deprecated
+        qvalue_network = None, # will be deprecated
+        value_optimizer = None, # will be deprecated
+        qvalue_optimizer = None, # will be deprecated
+        value = None,
+        qvalue = None
     ):
-        self.env = env
-        self.value.setup(
-            value_network = value_network,
-            value_optimizer = value_optimizer
+        super().setup(
+            value = value,
+            qvalue = qvalue
         )
-        self.qvalue.setup(
-            qvalue_network = qvalue_network,
-            qvalue_optimizer = qvalue_optimizer
-        )
-        self.target_value = self.value.copy()
-        self.target_qvalue = self.qvalue.copy()
+        # self.env = env
+        # self.value.setup(
+        #     value_network = value_network,
+        #     value_optimizer = value_optimizer
+        # )
+        # self.qvalue.setup(
+        #     qvalue_network = qvalue_network,
+        #     qvalue_optimizer = qvalue_optimizer
+        # )
+        # self.target_value = self.value.copy()
+        # self.target_qvalue = self.qvalue.copy()
 
     def setup_with_actor(
         self,

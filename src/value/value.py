@@ -19,9 +19,13 @@ class BaseValue(metaclass=ABCMeta):
         value_network = None,
         value_optimizer = None
     ):
-        self.value_network = cast_to_measure_network(value_network)
-        self.value_optimizer = value_optimizer
+        self.value_network = None # cast_to_measure_network(value_network)
+        self.value_optimizer = None # value_optimizer
         self._is_available = False
+        self.setup(
+            value_network = value_network,
+            value_optimizer = value_optimizer
+        )
 
     @abstractmethod
     def __call__(
@@ -42,13 +46,13 @@ class BaseValue(metaclass=ABCMeta):
         value_network = None,
         value_optimizer = None
     ):
-        if (isinstance(self.value_network, PseudoMeasureNetwork) and isinstance(value_network, BaseMeasureNetwork)):
+        if ((value_network is not None) and (value_optimizer is not None)):
             self.value_network = value_network
-        if ((self.value_optimizer is None) and (type(value_optimizer) is Optimizer)):
             self.value_optimizer = value_optimizer
             self.value_optimizer.setup(
                 network = self.value_network
             )
+            self._become_available()
         print(f"Value.setup: { self.value_network } & { self.value_optimizer }")
 
     @property
@@ -189,9 +193,13 @@ class BaseQValue(metaclass=ABCMeta):
         qvalue_network = None,
         qvalue_optimizer = None
     ):
-        self.qvalue_network = cast_to_measure_network(qvalue_network)
-        self.qvalue_optimizer = qvalue_optimizer
+        self.qvalue_network = None # cast_to_measure_network(qvalue_network)
+        self.qvalue_optimizer = None # qvalue_optimizer
         self._is_available = False
+        self.setup(
+            qvalue_network = qvalue_network,
+            qvalue_optimizer = qvalue_optimizer
+        )
 
     @abstractmethod
     def __call__(
@@ -213,13 +221,13 @@ class BaseQValue(metaclass=ABCMeta):
         qvalue_network = None,
         qvalue_optimizer = None
     ):
-        if ((isinstance(self.qvalue_network, PseudoMeasureNetwork)) and isinstance(qvalue_network, BaseMeasureNetwork)):
+        if ((qvalue_network is not None) and (qvalue_optimizer is not None)):
             self.qvalue_network = qvalue_network
-        if ((self.qvalue_optimizer is None) and (type(qvalue_optimizer) is Optimizer)):
             self.qvalue_optimizer = qvalue_optimizer
             self.qvalue_optimizer.setup(
                 network = self.qvalue_network
             )
+            self._become_available()
             print(f"QValue.setup: { self.qvalue_network } & { self.qvalue_optimizer }")
     
     @property

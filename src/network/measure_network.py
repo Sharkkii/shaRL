@@ -15,8 +15,7 @@ class BaseMeasureNetwork(metaclass=ABCMeta):
     ):
         self.network = None
         self._is_available = False
-        if (network is not None):
-            self.setup(network)
+        self.setup(network)
 
     @abstractmethod
     def __call__(
@@ -39,6 +38,7 @@ class BaseMeasureNetwork(metaclass=ABCMeta):
         if (network is not None):
             assert(callable(network))
             self.network = network
+            self._become_available()
 
     @property
     def is_available(

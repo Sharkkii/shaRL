@@ -18,9 +18,12 @@ class BaseActor(metaclass=ABCMeta):
         self,
         policy = None
     ):
-        self.policy = cast_to_policy(policy)
-        self.target_policy = self.policy.copy()
+        self.policy = None # cast_to_policy(policy)
+        self.target_policy = None # self.policy.copy()
         self._is_available = False
+        self.setup(
+            policy = policy
+        )
 
     @abstractmethod
     def reset(
@@ -31,11 +34,15 @@ class BaseActor(metaclass=ABCMeta):
     @abstractmethod
     def setup(
         self,
-        env = None,
-        policy_network = None,
-        policy_optimizer = None
+        env = None, # will be deprecated
+        policy_network = None, # will be deprecated
+        policy_optimizer = None, # will be deprecated
+        policy = None
     ):
-        raise NotImplementedError
+        if (policy is not None):
+            self.policy = policy
+            self.target_policy = self.policy.copy()
+            self._become_available()
     
     @abstractmethod
     def setup_with_critic(
@@ -144,16 +151,20 @@ class Actor(BaseActor):
     
     def setup(
         self,
-        env = None,
-        policy_network = None,
-        policy_optimizer = None
+        env = None, # will be deprecated
+        policy_network = None, # will be deprecated
+        policy_optimizer = None, # will be deprecated
+        policy = None
     ):
-        self.env = env
-        self.policy.setup(
-            policy_network = policy_network,
-            policy_optimizer = policy_optimizer
+        super().setup(
+            policy = policy
         )
-        self.target_policy = self.policy.copy()
+        # self.env = env
+        # self.policy.setup(
+        #     policy_network = policy_network,
+        #     policy_optimizer = policy_optimizer
+        # )
+        # self.target_policy = self.policy.copy()
 
     def setup_with_critic(
         self,

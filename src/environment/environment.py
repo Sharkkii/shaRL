@@ -20,6 +20,12 @@ class BaseEnvironment(metaclass=ABCMeta):
         self
     ):
         raise NotImplementedError
+
+    @abstractmethod
+    def setup(
+        self
+    ):
+        raise NotImplementedError
     
     @abstractmethod
     def step(
@@ -57,6 +63,11 @@ class Environment(BaseEnvironment):
     ):
         observation = self.state = None
         return observation
+
+    def setup(
+        self
+    ):
+        pass
     
     def step(
         self,

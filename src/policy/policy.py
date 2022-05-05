@@ -22,9 +22,13 @@ class BasePolicy(metaclass=ABCMeta):
         policy_network = None,
         policy_optimizer = None
     ):
-        self.policy_network = cast_to_measure_network(policy_network)
-        self.policy_optimizer = policy_optimizer
+        self.policy_network = None # cast_to_measure_network(policy_network)
+        self.policy_optimizer = None # policy_optimizer
         self._is_available = False
+        self.setup(
+            policy_network = policy_network,
+            policy_optimizer = policy_optimizer
+        )
 
     @abstractmethod
     def __call__(
@@ -46,13 +50,13 @@ class BasePolicy(metaclass=ABCMeta):
         policy_network = None,
         policy_optimizer = None
     ):
-        if (isinstance(self.policy_network, PseudoMeasureNetwork) and isinstance(policy_network, BaseMeasureNetwork)):
+        if ((policy_network is not None) and (policy_optimizer is not None)):
             self.policy_network = policy_network
-        if ((self.policy_optimizer is None) and (type(policy_optimizer) is Optimizer)):
             self.policy_optimizer = policy_optimizer
             self.policy_optimizer.setup(
                 network = self.policy_network
             )
+            self._become_available()
             print(f"Policy.setup: { self.policy_network } & { self.policy_optimizer }")
 
     @property

@@ -22,19 +22,25 @@ class BaseController(metaclass=ABCMeta):
         self.agent = agent
         self.config = config
         self._is_available = False
+        self.setup(
+            environment = environment,
+            agent = agent,
+            config = config
+        )
     
     @abstractmethod
     def setup(
         self,
         environment = None,
-        agent = None
+        agent = None,
+        config = None
     ):
         if ((environment is not None) and (agent is not None)):
             self.env = environment
             self.agent = agent
-        if ((self.env is not None) and (self.agent is not None)):
             self.env.setup()
             self.agent.setup()
+            self._become_available()
     
     @abstractmethod
     def reset(
@@ -77,11 +83,13 @@ class Controller(BaseController):
     def setup(
         self,
         environment = None,
-        agent = None
+        agent = None,
+        config = None
     ):
         super().setup(
             environment = environment,
-            agent = agent
+            agent = agent,
+            config = config
         )
 
     def reset(
