@@ -10,6 +10,7 @@ from src.value import Value, QValue
 
 optimizer_factory = torch.optim.Adam
 
+@pytest.mark.L4
 class TestValue():
 
     @pytest.mark.unit
@@ -54,6 +55,7 @@ class TestValue():
                 use_default = True
             )
 
+@pytest.mark.L4
 class TestQValue():
 
     @pytest.mark.unit

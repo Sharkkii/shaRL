@@ -7,6 +7,7 @@ from src.critic import Critic
 from src.agent import Agent
 
 
+@pytest.mark.L2
 class TestAgent():
 
     @pytest.mark.unit

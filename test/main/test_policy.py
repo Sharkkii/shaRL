@@ -10,6 +10,7 @@ from src.policy import Policy
 
 optimizer_factory = torch.optim.Adam
 
+@pytest.mark.L4
 class TestPolicy():
 
     @pytest.mark.unit

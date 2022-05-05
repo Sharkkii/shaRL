@@ -13,6 +13,7 @@ class CallableObject():
     def __call__(x):
         return x
 
+@pytest.mark.L5
 class TestValueNetwork():
 
     @pytest.mark.unit
@@ -47,6 +48,7 @@ class TestValueNetwork():
         value_network.setup(network)
         assert value_network.is_available == True
 
+@pytest.mark.L5
 class TestQValueNetwork():
 
     @pytest.mark.unit
@@ -81,6 +83,7 @@ class TestQValueNetwork():
                 use_default = True
             )
 
+@pytest.mark.L5
 class TestPolicyNetwork():
 
     @pytest.mark.unit
