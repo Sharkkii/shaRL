@@ -6,6 +6,7 @@ from src.value import Value, QValue
 from src.critic import Critic
 
 
+@pytest.mark.L3
 class TestCritic():
 
     @pytest.mark.unit

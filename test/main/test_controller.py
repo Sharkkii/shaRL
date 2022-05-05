@@ -7,6 +7,7 @@ from src.agent import Agent
 from src.controller import Controller
 
 
+@pytest.mark.L1
 class TestController():
 
     @pytest.mark.unit
@@ -18,7 +19,10 @@ class TestController():
     def test_should_be_available_on_nonempty_initialization(self):
         env = Environment()
         agent = Agent()
-        controller = Controller(env, agent)
+        controller = Controller(
+            environment = env,
+            agent = agent
+        )
         assert controller.is_available == True
 
     @pytest.mark.unit
@@ -26,7 +30,10 @@ class TestController():
         env = Environment()
         agent = Agent()
         controller = Controller()
-        controller.setup(env, agent)
+        controller.setup(
+            environment = env,
+            agent = agent
+        )
         assert controller.is_available == True
 
     @pytest.mark.unit
@@ -40,7 +47,7 @@ class TestController():
         agent = Agent()
         with pytest.raises(ValueError) as message:
             controller = Controller(
-                env = env,
+                environment = env,
                 agent = agent,
                 use_default = True
             )

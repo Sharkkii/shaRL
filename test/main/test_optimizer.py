@@ -9,6 +9,7 @@ from src.optimizer import Optimizer
 
 optimizer_factory = torch.optim.Adam
 
+@pytest.mark.L5
 class TestOptimizer():
 
     @pytest.mark.unit

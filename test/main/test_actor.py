@@ -6,6 +6,7 @@ from src.policy import Policy
 from src.actor import Actor
 
 
+@pytest.mark.L3
 class TestActor():
 
     @pytest.mark.unit
