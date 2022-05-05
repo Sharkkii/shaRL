@@ -30,3 +30,19 @@ class TestCritic():
             qvalue = qvalue
         )
         assert critic.is_available == True
+
+    @pytest.mark.unit
+    def test_should_be_available_on_empty_initialization_with_use_default_true(self):
+        critic = Critic(use_default = True)
+        assert critic.is_available == True
+
+    @pytest.mark.unit
+    def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self):
+        value = Value()
+        qvalue = QValue()
+        with pytest.raises(ValueError) as message:
+            critic = Critic(
+                value = value,
+                qvalue = qvalue,
+                use_default = True
+            )

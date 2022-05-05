@@ -27,6 +27,20 @@ class TestValueNetwork():
         assert value_network.is_available == True
 
     @pytest.mark.unit
+    def test_should_be_available_on_empty_initialization_with_use_default_true(self):
+        value_network = ValueNetwork(use_default = True)
+        assert value_network.is_available == True
+
+    @pytest.mark.unit
+    def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self):
+        network = CallableObject()
+        with pytest.raises(ValueError) as message:
+            value_network = ValueNetwork(
+                value_network = network,
+                use_default = True
+            )
+
+    @pytest.mark.unit
     def test_should_be_available_after_setup(self):
         network = CallableObject()
         value_network = ValueNetwork()
@@ -53,6 +67,20 @@ class TestQValueNetwork():
         qvalue_network.setup(network)
         assert qvalue_network.is_available == True
 
+    @pytest.mark.unit
+    def test_should_be_available_on_empty_initialization_with_use_default_true(self):
+        qvalue_network = QValueNetwork(use_default = True)
+        assert qvalue_network.is_available == True
+
+    @pytest.mark.unit
+    def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self):
+        network = CallableObject()
+        with pytest.raises(ValueError) as message:
+            qvalue_network = QValueNetwork(
+                qvalue_network = network,
+                use_default = True
+            )
+
 class TestPolicyNetwork():
 
     @pytest.mark.unit
@@ -72,3 +100,17 @@ class TestPolicyNetwork():
         policy_network = PolicyNetwork()
         policy_network.setup(network)
         assert policy_network.is_available == True
+
+    @pytest.mark.unit
+    def test_should_be_available_on_empty_initialization_with_use_default_true(self):
+        policy_network = PolicyNetwork(use_default = True)
+        assert policy_network.is_available == True
+
+    @pytest.mark.unit
+    def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self):
+        network = CallableObject()
+        with pytest.raises(ValueError) as message:
+            policy_network = PolicyNetwork(
+                policy_network = network,
+                use_default = True
+            )
