@@ -26,5 +26,8 @@ class TestAgent():
         actor = Actor()
         critic = Critic()
         agent = Agent()
-        agent.setup(actor, critic)
+        agent.setup(
+            actor = actor,
+            critic = critic
+        )
         assert agent.is_available == True

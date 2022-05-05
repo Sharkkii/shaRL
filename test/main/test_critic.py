@@ -25,5 +25,8 @@ class TestCritic():
         value = Value()
         qvalue = QValue()
         critic = Critic()
-        critic.setup(value, qvalue)
+        critic.setup(
+            value = value,
+            qvalue = qvalue
+        )
         assert critic.is_available == True

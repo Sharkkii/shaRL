@@ -23,5 +23,7 @@ class TestActor():
     def test_should_be_available_after_setup(self):
         policy = Policy()
         actor = Actor()
-        actor.setup(policy)
+        actor.setup(
+            policy = policy
+        )
         assert actor.is_available == True
