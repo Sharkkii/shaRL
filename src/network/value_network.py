@@ -4,7 +4,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from .measure_network import BaseMeasureNetwork, PseudoMeasureNetwork
+from .measure_network import BaseMeasureNetwork
+from .network import PseudoNetwork
 
 
 class ValueNetwork(BaseMeasureNetwork):
@@ -17,7 +18,7 @@ class ValueNetwork(BaseMeasureNetwork):
         if (use_default):
             if (value_network is not None):
                 raise ValueError("`value_network` must be None if `use_default = True`")
-            value_network = PseudoMeasureNetwork()
+            value_network = PseudoNetwork()
             
         super().__init__(
             network = value_network
@@ -52,7 +53,7 @@ class DiscreteQValueNetwork(BaseMeasureNetwork):
         if (use_default):
             if (qvalue_network is not None):
                 raise ValueError("`qvalue_network` must be None if `use_default = True`")
-            qvalue_network = PseudoMeasureNetwork()
+            qvalue_network = PseudoNetwork()
 
         super().__init__(
             network = qvalue_network

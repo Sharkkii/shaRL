@@ -132,3 +132,12 @@ class PiNet(BaseNetwork):
 
 class DefaultNetwork(nn.Module, metaclass=MetaNetwork):
     spec = "default"
+
+class PseudoNetwork(nn.Module):
+    
+    def __init__(self):
+        super().__init__()
+        self.pseudo_parameters = nn.Parameter(torch.zeros(1))
+
+    def forward(self, x):
+        return x

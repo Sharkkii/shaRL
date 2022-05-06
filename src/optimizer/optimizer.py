@@ -47,7 +47,7 @@ class Optimizer(BaseOptimizer):
         def wrapper(self, *args, **kwargs):
             if (self.optimizer is None):
                 raise Exception(f"Call `Optimizer.setup` before using `Optimizer.{ f.__name__ }`")
-            f(self, *args, **kwargs)
+            return f(self, *args, **kwargs)
         return wrapper
 
     def __init__(

@@ -13,7 +13,7 @@ class BaseMeasureNetwork(metaclass=ABCMeta):
         def wrapper(self, *args, **kwargs):
             if (not self.is_available):
                 raise Exception(f"'{ __class__.__name__ }' object must be setup before using `{ __class__.__name__ }.{ f.__name__ }`")
-            f(self, *args, **kwargs)
+            return f(self, *args, **kwargs)
         return wrapper
 
     @abstractmethod

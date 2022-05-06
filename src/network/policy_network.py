@@ -5,7 +5,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .measure_network import BasePolicyNetwork, PseudoMeasureNetwork
+from .measure_network import BasePolicyNetwork
+from .network import PseudoNetwork
 
 
 class DiscretePolicyNetwork(BasePolicyNetwork):
@@ -18,7 +19,7 @@ class DiscretePolicyNetwork(BasePolicyNetwork):
         if (use_default):
             if (policy_network is not None):
                 raise ValueError("`policy_network` must be None if `use_default = True`")
-            policy_network = PseudoMeasureNetwork()
+            policy_network = PseudoNetwork()
 
         super().__init__(
             network = policy_network
