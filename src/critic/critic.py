@@ -20,9 +20,16 @@ class BaseCritic(metaclass=ABCMeta):
         self,
         value = None,
         qvalue = None,
+        use_default = False
         # smooth_v = 0.99,
         # smooth_q = 0.99,
     ):
+        if (use_default):
+            if (not ((value is None) and (qvalue is None))):
+                raise ValueError("`value` & `qvalue` must be None if `use_default = True`")
+            value = Value(use_default = True)
+            qvalue = QValue(use_default = True)
+
         self.value = None # cast_to_value(value)
         self.qvalue = None # cast_to_qvalue(qvalue)
         self.target_value = None # self.value.copy()
@@ -170,11 +177,13 @@ class Critic(BaseCritic):
     def __init__(
         self,
         value = None,
-        qvalue = None
+        qvalue = None,
+        use_default = False
     ):
         super().__init__(
             value = value,
-            qvalue = qvalue
+            qvalue = qvalue,
+            use_default = use_default
         )
     
     def reset(

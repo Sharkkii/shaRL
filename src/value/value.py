@@ -8,6 +8,8 @@ import torch.nn as nn
 
 from ..network import PseudoMeasureNetwork
 from ..network import BaseMeasureNetwork
+from ..network import ValueNetwork
+from ..network import QValueNetwork
 from ..network import cast_to_measure_network
 from ..optimizer import Optimizer
 
@@ -17,8 +19,15 @@ class BaseValue(metaclass=ABCMeta):
     def __init__(
         self,
         value_network = None,
-        value_optimizer = None
+        value_optimizer = None,
+        use_default = False
     ):
+        if (use_default):
+            if (not ((value_network is None) and (value_optimizer is None))):
+                raise ValueError("`value_network` & `value_optimizer` must be None if `use_default = True`")
+            value_network = ValueNetwork(use_default = True)
+            value_optimizer = Optimizer(torch.optim.Adam)
+
         self.value_network = None # cast_to_measure_network(value_network)
         self.value_optimizer = None # value_optimizer
         self._is_available = False
@@ -104,11 +113,13 @@ class Value(BaseValue):
     def __init__(
         self,
         value_network = None,
-        value_optimizer = None
+        value_optimizer = None,
+        use_default = False
     ):
         super().__init__(
             value_network = value_network,
-            value_optimizer = value_optimizer
+            value_optimizer = value_optimizer,
+            use_default = use_default
         )
 
     def __call__(
@@ -191,8 +202,15 @@ class BaseQValue(metaclass=ABCMeta):
     def __init__(
         self,
         qvalue_network = None,
-        qvalue_optimizer = None
+        qvalue_optimizer = None,
+        use_default = False
     ):
+        if (use_default):
+            if (not ((qvalue_network is None) and (qvalue_optimizer is None))):
+                raise ValueError("`qvalue_network` & `qvalue_optimizer` must be None if `use_default = True`")
+            qvalue_network = QValueNetwork(use_default = True)
+            qvalue_optimizer = Optimizer(torch.optim.Adam)
+
         self.qvalue_network = None # cast_to_measure_network(qvalue_network)
         self.qvalue_optimizer = None # qvalue_optimizer
         self._is_available = False
@@ -279,11 +297,13 @@ class DiscreteQValue(BaseQValue):
     def __init__(
         self,
         qvalue_network = None,
-        qvalue_optimizer = None
+        qvalue_optimizer = None,
+        use_default = False
     ):
         super().__init__(
             qvalue_network,
-            qvalue_optimizer
+            qvalue_optimizer,
+            use_default = use_default
         )
 
     def __call__(
@@ -314,11 +334,13 @@ class ContinuousQValue(BaseQValue):
     def __init__(
         self,
         qvalue_network = None,
-        qvalue_optimizer = None
+        qvalue_optimizer = None,
+        use_default = False
     ):
         super().__init__(
             qvalue_network,
-            qvalue_optimizer
+            qvalue_optimizer,
+            use_default = use_default
         )
 
     def __call__(

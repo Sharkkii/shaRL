@@ -20,8 +20,15 @@ class BaseAgent(metaclass=ABCMeta):
         critic = None,
         model = None,
         memory = None,
-        gamma = 1.0
+        gamma = 1.0,
+        use_default = False
     ):
+        if (use_default):
+            if (not ((actor is None) and (critic is None))):
+                raise ValueError("`actor` & `critic` must be None if `use_default = True`")
+            actor = Actor(use_default = True)
+            critic = Critic(use_default = True)
+
         self.actor = Actor() if (actor is None) else actor
         self.critic = Critic() if (critic is None) else critic
         self.env = None
@@ -216,14 +223,16 @@ class Agent(BaseAgent):
         critic = None,
         model = None,
         memory = None,
-        gamma = 1.0
+        gamma = 1.0,
+        use_default = False
     ):
         super().__init__(
             actor = actor,
             critic = critic,
             model = model,
             memory = memory,
-            gamma = gamma
+            gamma = gamma,
+            use_default = use_default
         )
     
     def reset(

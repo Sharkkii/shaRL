@@ -11,6 +11,7 @@ import torch.nn.functional as F
 from ..const import PhaseType
 from ..network import PseudoMeasureNetwork
 from ..network import BaseMeasureNetwork
+from ..network import PolicyNetwork
 from ..network import cast_to_measure_network
 from ..optimizer import Optimizer
 
@@ -20,8 +21,15 @@ class BasePolicy(metaclass=ABCMeta):
     def __init__(
         self,
         policy_network = None,
-        policy_optimizer = None
+        policy_optimizer = None,
+        use_default = False
     ):
+        if (use_default):
+            if (not ((policy_network is None) and (policy_optimizer is None))):
+                raise ValueError("`policy_network` & `policy_optimizer` must be None if `use_default = True`")
+            policy_network = PolicyNetwork(use_default = True)
+            policy_optimizer = Optimizer(torch.optim.Adam)
+
         self.policy_network = None # cast_to_measure_network(policy_network)
         self.policy_optimizer = None # policy_optimizer
         self._is_available = False
@@ -133,11 +141,13 @@ class DiscretePolicy(BasePolicy):
     def __init__(
         self,
         policy_network = None,
-        policy_optimizer = None
+        policy_optimizer = None,
+        use_default = False
     ):
         super().__init__(
             policy_network = policy_network,
-            policy_optimizer = policy_optimizer
+            policy_optimizer = policy_optimizer,
+            use_default = use_default
         )
         
     def reset(
@@ -195,11 +205,13 @@ class ContinuousPolicy(BasePolicy):
     def __init__(
         self,
         policy_network = None,
-        policy_optimizer = None
+        policy_optimizer = None,
+        use_default = False
     ):
         super().__init__(
             policy_network = policy_network,
-            policy_optimizer = policy_optimizer
+            policy_optimizer = policy_optimizer,
+            use_default = use_default
         )
     
     def reset(
