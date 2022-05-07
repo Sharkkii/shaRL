@@ -17,12 +17,16 @@ class BaseActor(metaclass=ABCMeta):
     def __init__(
         self,
         policy = None,
+        interface = None,
         use_default = False
     ):
         if (use_default):
             if (policy is not None):
                 raise ValueError("`policy` must be None if `use_default = True`")
-            policy = Policy(use_default = True)
+            policy = Policy(
+                interface = interface,
+                use_default = True
+            )
 
         self.policy = None # cast_to_policy(policy)
         self.target_policy = None # self.policy.copy()
@@ -145,10 +149,12 @@ class Actor(BaseActor):
     def __init__(
         self,
         policy = None,
+        interface = None,
         use_default = False
     ):
         super().__init__(
             policy = policy,
+            interface = interface,
             use_default = use_default
         )
     

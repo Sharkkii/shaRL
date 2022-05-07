@@ -5,6 +5,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from ..const import Interface
 from .measure_network import BasePolicyNetwork
 from .network import PseudoNetwork
 
@@ -14,11 +15,14 @@ class DiscretePolicyNetwork(BasePolicyNetwork):
     def __init__(
         self,
         policy_network = None,
+        interface = None,
         use_default = False
     ):
         if (use_default):
             if (policy_network is not None):
                 raise ValueError("`policy_network` must be None if `use_default = True`")
+            if (type(interface) is not Interface):
+                raise ValueError("`interface` must be 'Interface' object if `use_default = True`")
             policy_network = PseudoNetwork()
 
         super().__init__(
@@ -72,7 +76,9 @@ class ContinuousPolicyNetwork(BasePolicyNetwork):
 
     def __init__(
         self,
-        policy_network
+        policy_network,
+        interface = None,
+        use_default = False
     ):
         self.network = policy_network if callable(policy_network) else (lambda state, noise: None)
 
