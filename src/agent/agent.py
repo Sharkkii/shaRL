@@ -5,6 +5,7 @@ import numpy as np
 import torch
 
 from ..const import PhaseType
+from ..const import Interface
 from ..actor import Actor
 from ..critic import Critic
 from ..environment import Model
@@ -21,13 +22,22 @@ class BaseAgent(metaclass=ABCMeta):
         model = None,
         memory = None,
         gamma = 1.0,
+        interface = None,
         use_default = False
     ):
         if (use_default):
             if (not ((actor is None) and (critic is None))):
                 raise ValueError("`actor` & `critic` must be None if `use_default = True`")
-            actor = Actor(use_default = True)
-            critic = Critic(use_default = True)
+            if (type(interface) is not Interface):
+                raise ValueError("`interface` must be 'Interface' object if `use_default = True`")
+            actor = Actor(
+                interface = interface,
+                use_default = True
+            )
+            critic = Critic(
+                interface = interface,
+                use_default = True
+            )
 
         self.actor = Actor() if (actor is None) else actor
         self.critic = Critic() if (critic is None) else critic
@@ -224,6 +234,7 @@ class Agent(BaseAgent):
         model = None,
         memory = None,
         gamma = 1.0,
+        interface = None,
         use_default = False
     ):
         super().__init__(
@@ -232,6 +243,7 @@ class Agent(BaseAgent):
             model = model,
             memory = memory,
             gamma = gamma,
+            interface = interface,
             use_default = use_default
         )
     

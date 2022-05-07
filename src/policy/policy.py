@@ -9,6 +9,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from ..const import PhaseType
+from ..const import Interface
 from ..network import PseudoMeasureNetwork
 from ..network import BaseMeasureNetwork
 from ..network import PolicyNetwork
@@ -22,12 +23,18 @@ class BasePolicy(metaclass=ABCMeta):
         self,
         policy_network = None,
         policy_optimizer = None,
+        interface = None,
         use_default = False
     ):
         if (use_default):
             if (not ((policy_network is None) and (policy_optimizer is None))):
                 raise ValueError("`policy_network` & `policy_optimizer` must be None if `use_default = True`")
-            policy_network = PolicyNetwork(use_default = True)
+            if (type(interface) is not Interface):
+                raise ValueError("`interface` must be 'Interface' object if `use_default = True`")
+            policy_network = PolicyNetwork(
+                interface = interface,
+                use_default = True
+            )
             policy_optimizer = Optimizer(torch.optim.Adam)
 
         self.policy_network = None # cast_to_measure_network(policy_network)
@@ -142,11 +149,13 @@ class DiscretePolicy(BasePolicy):
         self,
         policy_network = None,
         policy_optimizer = None,
+        interface = None,
         use_default = False
     ):
         super().__init__(
             policy_network = policy_network,
             policy_optimizer = policy_optimizer,
+            interface = interface,
             use_default = use_default
         )
         
@@ -206,6 +215,7 @@ class ContinuousPolicy(BasePolicy):
         self,
         policy_network = None,
         policy_optimizer = None,
+        interface = None,
         use_default = False
     ):
         super().__init__(

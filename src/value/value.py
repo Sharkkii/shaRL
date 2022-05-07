@@ -20,12 +20,16 @@ class BaseValue(metaclass=ABCMeta):
         self,
         value_network = None,
         value_optimizer = None,
+        interface = None,
         use_default = False
     ):
         if (use_default):
             if (not ((value_network is None) and (value_optimizer is None))):
                 raise ValueError("`value_network` & `value_optimizer` must be None if `use_default = True`")
-            value_network = ValueNetwork(use_default = True)
+            value_network = ValueNetwork(
+                interface = interface,
+                use_default = True
+            )
             value_optimizer = Optimizer(torch.optim.Adam)
 
         self.value_network = None # cast_to_measure_network(value_network)
@@ -114,11 +118,13 @@ class Value(BaseValue):
         self,
         value_network = None,
         value_optimizer = None,
+        interface = None,
         use_default = False
     ):
         super().__init__(
             value_network = value_network,
             value_optimizer = value_optimizer,
+            interface = interface,
             use_default = use_default
         )
 
@@ -203,12 +209,16 @@ class BaseQValue(metaclass=ABCMeta):
         self,
         qvalue_network = None,
         qvalue_optimizer = None,
+        interface = None,
         use_default = False
     ):
         if (use_default):
             if (not ((qvalue_network is None) and (qvalue_optimizer is None))):
                 raise ValueError("`qvalue_network` & `qvalue_optimizer` must be None if `use_default = True`")
-            qvalue_network = QValueNetwork(use_default = True)
+            qvalue_network = QValueNetwork(
+                interface = interface,
+                use_default = True
+            )
             qvalue_optimizer = Optimizer(torch.optim.Adam)
 
         self.qvalue_network = None # cast_to_measure_network(qvalue_network)
@@ -298,11 +308,13 @@ class DiscreteQValue(BaseQValue):
         self,
         qvalue_network = None,
         qvalue_optimizer = None,
+        interface = None,
         use_default = False
     ):
         super().__init__(
             qvalue_network,
             qvalue_optimizer,
+            interface = interface,
             use_default = use_default
         )
 
