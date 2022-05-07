@@ -5,7 +5,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 
 from src.const import Interface
 from src.network import PolicyNetwork
-from src.optimizer import Optimizer
+from src.optimizer import MeasureOptimizer
 from src.policy import Policy
 
 
@@ -26,7 +26,7 @@ class TestPolicy():
             interface = interface,
             use_default = True
         )
-        policy_optimizer = Optimizer(optimizer_factory)
+        policy_optimizer = MeasureOptimizer(optimizer_factory)
         policy = Policy(
             policy_network = policy_network,
             policy_optimizer = policy_optimizer
@@ -40,7 +40,7 @@ class TestPolicy():
             interface = interface,
             use_default = True
         )
-        policy_optimizer = Optimizer(optimizer_factory)
+        policy_optimizer = MeasureOptimizer(optimizer_factory)
         policy = Policy()
         policy.setup(
             policy_network = policy_network,
@@ -72,7 +72,7 @@ class TestPolicy():
             interface = interface,
             use_default = True
         )
-        policy_optimizer = Optimizer(optimizer_factory)
+        policy_optimizer = MeasureOptimizer(optimizer_factory)
         with pytest.raises(ValueError) as message:
             policy = Policy(
                 policy_network = policy_network,
