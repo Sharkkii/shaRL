@@ -3,6 +3,7 @@ import pytest
 import sys, os
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 
+from src.const import Interface
 from src.network import ValueNetwork, QValueNetwork, PolicyNetwork
 
 class CallableObject():
@@ -29,15 +30,21 @@ class TestValueNetwork():
 
     @pytest.mark.unit
     def test_should_be_available_on_empty_initialization_with_use_default_true(self):
-        value_network = ValueNetwork(use_default = True)
+        interface = Interface(din = 0, dout = 0)
+        value_network = ValueNetwork(
+            interface = interface,
+            use_default = True
+        )
         assert value_network.is_available == True
 
     @pytest.mark.unit
     def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self):
         network = CallableObject()
+        interface = Interface(din = 0, dout = 0)
         with pytest.raises(ValueError) as message:
             value_network = ValueNetwork(
                 value_network = network,
+                interface = interface,
                 use_default = True
             )
 
@@ -71,15 +78,21 @@ class TestQValueNetwork():
 
     @pytest.mark.unit
     def test_should_be_available_on_empty_initialization_with_use_default_true(self):
-        qvalue_network = QValueNetwork(use_default = True)
+        interface = Interface(din = 0, dout = 0)
+        qvalue_network = QValueNetwork(
+            interface = interface,
+            use_default = True
+        )
         assert qvalue_network.is_available == True
 
     @pytest.mark.unit
     def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self):
         network = CallableObject()
+        interface = Interface(din = 0, dout = 0)
         with pytest.raises(ValueError) as message:
             qvalue_network = QValueNetwork(
                 qvalue_network = network,
+                interface = interface,
                 use_default = True
             )
 
@@ -106,14 +119,20 @@ class TestPolicyNetwork():
 
     @pytest.mark.unit
     def test_should_be_available_on_empty_initialization_with_use_default_true(self):
-        policy_network = PolicyNetwork(use_default = True)
+        interface = Interface(din = 0, dout = 0)
+        policy_network = PolicyNetwork(
+            interface = interface,
+            use_default = True
+        )
         assert policy_network.is_available == True
 
     @pytest.mark.unit
     def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self):
         network = CallableObject()
+        interface = Interface(din = 0, dout = 0)
         with pytest.raises(ValueError) as message:
             policy_network = PolicyNetwork(
                 policy_network = network,
+                interface = interface,
                 use_default = True
             )
