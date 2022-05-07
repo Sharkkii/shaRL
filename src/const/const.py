@@ -1,3 +1,5 @@
+from typing import Tuple, Union
+from functools import reduce
 import os
 from enum import Enum
 import gym
@@ -53,3 +55,30 @@ def cast_to_space_type(
         return SpaceType.CONTINUOUS
     else:
         return SpaceType.NONE
+
+class Interface:
+
+    def __init__(
+        self,
+        din: Union[int, Tuple[int, ...]],
+        dout: Union[int, Tuple[int, ...]]
+    ):
+        if (type(din) is int):
+            self.din = (din,)
+        elif (_is_tuple_of_int(din)):
+            self.din = din
+        else:
+            raise ValueError("din: Union[int, Tuple[int, ...]]")
+
+        if (type(dout) is int):
+            self.dout = (dout,)
+        elif (_is_tuple_of_int(dout)):
+            self.dout = dout
+        else:
+            raise ValueError("dout: Union[int, Tuple[int, ...]]")
+
+def _is_tuple_of_int(self, argument):
+    if (type(argument) is tuple):
+        return reduce(lambda acc, x: acc and (x is int), argument, True)
+    else:
+        return False
