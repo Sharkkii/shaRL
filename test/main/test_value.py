@@ -22,7 +22,11 @@ class TestValue():
 
     @pytest.mark.unit
     def test_should_be_available_on_nonempty_initialization(self):
-        value_network = ValueNetwork(use_default = True)
+        interface = Interface(din = 0, dout = 0)
+        value_network = ValueNetwork(
+            interface = interface,
+            use_default = True
+        )
         value_optimizer = Optimizer(optimizer_factory)
         value = Value(
             value_network = value_network,
@@ -32,7 +36,11 @@ class TestValue():
 
     @pytest.mark.unit
     def test_should_be_available_after_setup(self):
-        value_network = ValueNetwork(use_default = True)
+        interface = Interface(din = 0, dout = 0)
+        value_network = ValueNetwork(
+            interface = interface,
+            use_default = True
+        )
         value_optimizer = Optimizer(optimizer_factory)
         value = Value()
         value.setup(
@@ -60,9 +68,12 @@ class TestValue():
 
     @pytest.mark.unit
     def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self):
-        value_network = ValueNetwork(use_default = True)
-        value_optimizer = Optimizer(optimizer_factory)
         interface = Interface(din = 0, dout = 0)
+        value_network = ValueNetwork(
+            interface = interface,
+            use_default = True
+        )
+        value_optimizer = Optimizer(optimizer_factory)
         with pytest.raises(ValueError) as message:
             value = Value(
                 value_network = value_network,
@@ -81,7 +92,11 @@ class TestQValue():
 
     @pytest.mark.unit
     def test_should_be_available_on_nonempty_initialization(self):
-        qvalue_network = QValueNetwork(use_default = True)
+        interface = Interface(din = 0, dout = 0)
+        qvalue_network = QValueNetwork(
+            interface = interface,
+            use_default = True
+        )
         qvalue_optimizer = Optimizer(optimizer_factory)
         qvalue = QValue(
             qvalue_network = qvalue_network,
@@ -91,7 +106,11 @@ class TestQValue():
 
     @pytest.mark.unit
     def test_should_be_available_after_setup(self):
-        qvalue_network = QValueNetwork(use_default = True)
+        interface = Interface(din = 0, dout = 0)
+        qvalue_network = QValueNetwork(
+            interface = interface,
+            use_default = True
+        )
         qvalue_optimizer = Optimizer(optimizer_factory)
         qvalue = QValue()
         qvalue.setup(
@@ -119,9 +138,12 @@ class TestQValue():
 
     @pytest.mark.unit
     def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self):
-        qvalue_network = QValueNetwork(use_default = True)
-        qvalue_optimizer = Optimizer(optimizer_factory)
         interface = Interface(din = 0, dout = 0)
+        qvalue_network = QValueNetwork(
+            interface = interface,
+            use_default = True
+        )
+        qvalue_optimizer = Optimizer(optimizer_factory)
         with pytest.raises(ValueError) as message:
             qvalue = QValue(
                 qvalue_network = qvalue_network,
