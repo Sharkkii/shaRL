@@ -1,0 +1,20 @@
+1:
+  linear:
+    d_in: -1
+    d_out: 10
+2:
+  batchnorm: None
+3:
+  relu: None
+4:
+  linear:
+    d_in: -1
+    d_out: 20
+5:
+  batchnorm: None
+6:
+  relu: None
+7:
+  linear:
+    d_in: -1
+    d_out: -1

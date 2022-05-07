@@ -5,22 +5,9 @@ import os
 import torch
 import torch.nn as nn
 
+from .base import BaseNetwork
 from .meta_network import MetaNetwork
 
-
-class BaseNetwork(nn.Module, metaclass=ABCMeta):
-
-    @abstractmethod
-    def __init__(
-        self
-    ):
-        super().__init__()
-
-    @abstractmethod
-    def reset(
-        self
-    ):
-        pass
 
 class VNet(BaseNetwork):
     
@@ -130,7 +117,7 @@ class PiNet(BaseNetwork):
     #     x = nn.Softmax(dim=dim)(x)
     #     return x
 
-class DefaultNetwork(nn.Module, metaclass=MetaNetwork):
+class DefaultNetwork(metaclass=MetaNetwork):
     spec = "default"
 
 class PseudoNetwork(nn.Module):

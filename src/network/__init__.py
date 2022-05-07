@@ -1,5 +1,5 @@
 from .meta_network import MetaNetwork
-from .network import BaseNetwork
+from .base import BaseNetwork
 from .network import DefaultNetwork
 from .network import VNet
 from .network import QNet
