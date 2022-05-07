@@ -51,6 +51,14 @@ class TestValue():
         assert value.is_available == True
 
     @pytest.mark.unit
+    def test_should_raise_value_error_with_use_default_true_but_no_interface_specified(self):
+        with pytest.raises(ValueError) as message:
+            value = Value(
+                interface = None,
+                use_default = True
+            )
+
+    @pytest.mark.unit
     def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self):
         value_network = ValueNetwork(use_default = True)
         value_optimizer = Optimizer(optimizer_factory)
@@ -100,6 +108,14 @@ class TestQValue():
             use_default = True
         )
         assert qvalue.is_available == True
+
+    @pytest.mark.unit
+    def test_should_raise_value_error_with_use_default_true_but_no_interface_specified(self):
+        with pytest.raises(ValueError) as message:
+            qvalue = QValue(
+                interface = None,
+                use_default = True
+            )
 
     @pytest.mark.unit
     def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self):

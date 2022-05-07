@@ -42,6 +42,14 @@ class TestAgent():
             use_default = True
         )
         assert agent.is_available == True
+    
+    @pytest.mark.unit
+    def test_should_raise_value_error_with_use_default_true_but_no_interface_specified(self):
+        with pytest.raises(ValueError) as message:
+            agent = Agent(
+                interface = None,
+                use_default = True
+            )
 
     @pytest.mark.unit
     def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self):

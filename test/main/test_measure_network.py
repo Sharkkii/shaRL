@@ -38,6 +38,14 @@ class TestValueNetwork():
         assert value_network.is_available == True
 
     @pytest.mark.unit
+    def test_should_raise_value_error_with_use_default_true_but_no_interface_specified(self):
+        with pytest.raises(ValueError) as message:
+            value_network = ValueNetwork(
+                interface = None,
+                use_default = True
+            )
+
+    @pytest.mark.unit
     def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self):
         network = CallableObject()
         interface = Interface(din = 0, dout = 0)
@@ -86,6 +94,14 @@ class TestQValueNetwork():
         assert qvalue_network.is_available == True
 
     @pytest.mark.unit
+    def test_should_raise_value_error_with_use_default_true_but_no_interface_specified(self):
+        with pytest.raises(ValueError) as message:
+            qvalue_network = QValueNetwork(
+                interface = None,
+                use_default = True
+            )
+
+    @pytest.mark.unit
     def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self):
         network = CallableObject()
         interface = Interface(din = 0, dout = 0)
@@ -125,6 +141,14 @@ class TestPolicyNetwork():
             use_default = True
         )
         assert policy_network.is_available == True
+
+    @pytest.mark.unit
+    def test_should_raise_value_error_with_use_default_true_but_no_interface_specified(self):
+        with pytest.raises(ValueError) as message:
+            policy_network = PolicyNetwork(
+                interface = None,
+                use_default = True
+            )
 
     @pytest.mark.unit
     def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self):
