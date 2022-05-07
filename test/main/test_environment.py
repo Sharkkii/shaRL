@@ -55,8 +55,8 @@ class TestEnvironment():
         action = env.sample()
         observation, reward, done, info = env.step(action)
         assert type(observation) is np.ndarray
-        assert type(reward) in (int, float)
-        assert type(done) is bool
+        assert type(reward) in (np.float32, np.float64)
+        assert type(done) in (bool, np.bool_)
 
 @pytest.mark.L2
 class TestGymEnvironment():
@@ -94,3 +94,40 @@ class TestGymEnvironment():
             env = GymEnvironment(
                 name = "INVALID_NAME"
             )
+
+    @pytest.mark.unit
+    def test_should_have_observation_space(self):
+        env = Environment()
+        env.setup()
+        assert isinstance(env.observation_space, gym.Space)
+
+    @pytest.mark.unit
+    def test_should_have_action_space(self):
+        env = Environment()
+        env.setup()
+        assert isinstance(env.action_space, gym.Space)
+
+    @pytest.mark.unit
+    def test_reset_method_should_return_single_observation(self):
+        env = Environment()
+        env.setup()
+        observation = env.reset()
+        assert type(observation) is np.ndarray
+
+    @pytest.mark.unit
+    def test_sample_method_should_return_single_action(self):
+        env = Environment()
+        env.setup()
+        _ = env.reset()
+        action = env.sample()
+        assert action is not None
+
+    @pytest.mark.unit
+    def test_step_method_should_return_tuple_of_obs_r_done_info(self):
+        env = Environment()
+        env.setup()
+        action = env.sample()
+        observation, reward, done, info = env.step(action)
+        assert type(observation) is np.ndarray
+        assert type(reward) in (np.float32, np.float64)
+        assert type(done) in (bool, np.bool_)
