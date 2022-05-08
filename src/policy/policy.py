@@ -9,7 +9,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from ..const import PhaseType
-from ..const import Interface
+from ..common import AgentInterface
 from ..network import PseudoMeasureNetwork
 from ..network import BaseMeasureNetwork
 from ..network import PolicyNetwork
@@ -29,8 +29,8 @@ class BasePolicy(metaclass=ABCMeta):
         if (use_default):
             if (not ((policy_network is None) and (policy_optimizer is None))):
                 raise ValueError("`policy_network` & `policy_optimizer` must be None if `use_default = True`")
-            if (type(interface) is not Interface):
-                raise ValueError("`interface` must be 'Interface' object if `use_default = True`")
+            if (type(interface) is not AgentInterface):
+                raise ValueError("`interface` must be 'AgentInterface' object if `use_default = True`")
             policy_network = PolicyNetwork(
                 interface = interface,
                 use_default = True

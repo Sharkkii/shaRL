@@ -3,7 +3,7 @@ import pytest
 import sys, os
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 
-from src.const import Interface
+from src.common import AgentInterface
 from src.network import MetaNetwork
 from src.network import BaseNetwork
 from src.network import DefaultNetwork
@@ -16,7 +16,7 @@ class TestMetaNetwork():
         
         class C(metaclass=MetaNetwork):
             spec = "default"
-        interface = Interface(din = 1, dout = 1)
+        interface = AgentInterface(din = 1, dout = 1)
         network = C(interface = interface)
         assert isinstance(network, BaseNetwork)
     
@@ -25,7 +25,7 @@ class TestMetaNetwork():
         
         class C(metaclass=MetaNetwork):
             spec = "INVALID_SPEC"
-        interface = Interface(din = 1, dout = 1)
+        interface = AgentInterface(din = 1, dout = 1)
         with pytest.raises(ValueError) as message:
             network = C(interface = interface)
     

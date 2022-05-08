@@ -4,7 +4,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from ..const import Interface
+from ..common import AgentInterface
 from .measure_network import BaseMeasureNetwork
 from .network import PseudoNetwork
 
@@ -20,8 +20,8 @@ class ValueNetwork(BaseMeasureNetwork):
         if (use_default):
             if (value_network is not None):
                 raise ValueError("`value_network` must be None if `use_default = True`")
-            if (type(interface) is not Interface):
-                raise ValueError("`interface` must be 'Interface' object if `use_default = True`")
+            if (type(interface) is not AgentInterface):
+                raise ValueError("`interface` must be 'AgentInterface' object if `use_default = True`")
             value_network = PseudoNetwork()
             
         super().__init__(
@@ -58,8 +58,8 @@ class DiscreteQValueNetwork(BaseMeasureNetwork):
         if (use_default):
             if (qvalue_network is not None):
                 raise ValueError("`qvalue_network` must be None if `use_default = True`")
-            if (type(interface) is not Interface):
-                raise ValueError("`interface` must be 'Interface' object if `use_default = True`")
+            if (type(interface) is not AgentInterface):
+                raise ValueError("`interface` must be 'AgentInterface' object if `use_default = True`")
             qvalue_network = PseudoNetwork()
 
         super().__init__(

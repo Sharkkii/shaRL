@@ -5,7 +5,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from ..const import Interface
+from ..common import AgentInterface
 from ..value import Value
 from ..value import PseudoValue
 from ..value import QValue
@@ -29,8 +29,8 @@ class BaseCritic(metaclass=ABCMeta):
         if (use_default):
             if (not ((value is None) and (qvalue is None))):
                 raise ValueError("`value` & `qvalue` must be None if `use_default = True`")
-            if (type(interface) is not Interface):
-                raise ValueError("`interface` must be 'Interface' object if `use_default = True`")
+            if (type(interface) is not AgentInterface):
+                raise ValueError("`interface` must be 'AgentInterface' object if `use_default = True`")
             value = Value(
                 interface = interface,
                 use_default = True

@@ -2,7 +2,7 @@ import pytest
 import sys, os
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 
-from src.const import Interface
+from src.common import AgentInterface
 from src.value import Value, QValue
 from src.critic import Critic
 
@@ -35,7 +35,7 @@ class TestCritic():
 
     @pytest.mark.unit
     def test_should_be_available_on_empty_initialization_with_use_default_true(self):
-        interface = Interface(din = 0, dout = 0)
+        interface = AgentInterface(din = 0, dout = 0)
         critic = Critic(
             interface = interface,
             use_default = True
@@ -54,7 +54,7 @@ class TestCritic():
     def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self):
         value = Value()
         qvalue = QValue()
-        interface = Interface(din = 0, dout = 0)
+        interface = AgentInterface(din = 0, dout = 0)
         with pytest.raises(ValueError) as message:
             critic = Critic(
                 value = value,

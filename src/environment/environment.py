@@ -6,8 +6,8 @@ import numpy as np
 import torch
 import gym
 
-from ..const import EnvironmentInterface
-from ..const import cast_space_to_type
+from ..common import EnvironmentInterface
+from ..common import cast_space_to_type
 
 class BaseEnvironment(metaclass=ABCMeta):
 

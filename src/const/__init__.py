@@ -8,6 +8,3 @@ from .const import EnvironmentModelType
 from .const import AgentStrategyType
 from .const import AgentBehaviorType
 from .const import AgentLearningType
-from .const import Interface
-from .const import EnvironmentInterface
-from .const import cast_space_to_type

@@ -4,7 +4,7 @@ import pytest
 import sys, os
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 
-from src.const import Interface
+from src.common import AgentInterface
 from src.network import ValueNetwork, QValueNetwork
 from src.optimizer import MeasureOptimizer
 from src.value import Value, QValue
@@ -22,7 +22,7 @@ class TestValue():
 
     @pytest.mark.unit
     def test_should_be_available_on_nonempty_initialization(self):
-        interface = Interface(din = 0, dout = 0)
+        interface = AgentInterface(din = 0, dout = 0)
         value_network = ValueNetwork(
             interface = interface,
             use_default = True
@@ -36,7 +36,7 @@ class TestValue():
 
     @pytest.mark.unit
     def test_should_be_available_after_setup(self):
-        interface = Interface(din = 0, dout = 0)
+        interface = AgentInterface(din = 0, dout = 0)
         value_network = ValueNetwork(
             interface = interface,
             use_default = True
@@ -51,7 +51,7 @@ class TestValue():
 
     @pytest.mark.unit
     def test_should_be_available_on_empty_initialization_with_use_default_true(self):
-        interface = Interface(din = 0, dout = 0)
+        interface = AgentInterface(din = 0, dout = 0)
         value = Value(
             interface = interface,
             use_default = True
@@ -68,7 +68,7 @@ class TestValue():
 
     @pytest.mark.unit
     def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self):
-        interface = Interface(din = 0, dout = 0)
+        interface = AgentInterface(din = 0, dout = 0)
         value_network = ValueNetwork(
             interface = interface,
             use_default = True
@@ -92,7 +92,7 @@ class TestQValue():
 
     @pytest.mark.unit
     def test_should_be_available_on_nonempty_initialization(self):
-        interface = Interface(din = 0, dout = 0)
+        interface = AgentInterface(din = 0, dout = 0)
         qvalue_network = QValueNetwork(
             interface = interface,
             use_default = True
@@ -106,7 +106,7 @@ class TestQValue():
 
     @pytest.mark.unit
     def test_should_be_available_after_setup(self):
-        interface = Interface(din = 0, dout = 0)
+        interface = AgentInterface(din = 0, dout = 0)
         qvalue_network = QValueNetwork(
             interface = interface,
             use_default = True
@@ -121,7 +121,7 @@ class TestQValue():
 
     @pytest.mark.unit
     def test_should_be_available_on_empty_initialization_with_use_default_true(self):
-        interface = Interface(din = 0, dout = 0)
+        interface = AgentInterface(din = 0, dout = 0)
         qvalue = QValue(
             interface = interface,
             use_default = True
@@ -138,7 +138,7 @@ class TestQValue():
 
     @pytest.mark.unit
     def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self):
-        interface = Interface(din = 0, dout = 0)
+        interface = AgentInterface(din = 0, dout = 0)
         qvalue_network = QValueNetwork(
             interface = interface,
             use_default = True

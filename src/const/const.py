@@ -1,6 +1,3 @@
-from abc import ABCMeta, abstractmethod
-from typing import Tuple, Union
-from functools import reduce
 import os
 from enum import Enum
 import gym
@@ -53,65 +50,6 @@ def cast_to_space_type(
     if (type(env.action_space) is gym.spaces.Discrete):
         return SpaceType.DISCRETE
     elif (type(env.action_space) is gym.spaces.Box):
-        return SpaceType.CONTINUOUS
-    else:
-        return SpaceType.NONE
-
-class BaseInterface(metaclass=ABCMeta):
-    @abstractmethod
-    def __init__(self):
-        raise NotImplementedError
-    
-class Interface(BaseInterface):
-
-    def __init__(
-        self,
-        din: Union[int, Tuple[int, ...]],
-        dout: Union[int, Tuple[int, ...]]
-    ):
-        if (type(din) is int):
-            self.din = (din,)
-        elif (_is_tuple_of_int(din)):
-            self.din = din
-        else:
-            raise ValueError("din: Union[int, Tuple[int, ...]]")
-
-        if (type(dout) is int):
-            self.dout = (dout,)
-        elif (_is_tuple_of_int(dout)):
-            self.dout = dout
-        else:
-            raise ValueError("dout: Union[int, Tuple[int, ...]]")
-
-def _is_tuple_of_int(self, argument):
-    if (type(argument) is tuple):
-        return reduce(lambda acc, x: acc and (x is int), argument, True)
-    else:
-        return False
-
-class EnvironmentInterface(BaseInterface):
-
-    def __init__(
-        self,
-        observation_type: SpaceType,
-        action_type: SpaceType
-    ):
-        if (type(observation_type) is SpaceType):
-            self.observation_type = observation_type
-        else:
-            raise ValueError("observation_type: SpaceType")
-
-        if (type(action_type) is SpaceType):
-                self.action_type = action_type
-        else:
-            raise ValueError("action_type: SpaceType")
-
-def cast_space_to_type(
-    space
-):
-    if (type(space) is gym.spaces.Discrete):
-        return SpaceType.DISCRETE
-    elif (type(space) is gym.spaces.Box):
         return SpaceType.CONTINUOUS
     else:
         return SpaceType.NONE
