@@ -6,7 +6,8 @@ import numpy as np
 import torch
 import gym
 
-from ..const import SpaceType
+from ..const import EnvironmentInterface
+from ..const import cast_space_to_type
 
 class BaseEnvironment(metaclass=ABCMeta):
 
@@ -19,6 +20,7 @@ class BaseEnvironment(metaclass=ABCMeta):
         self.observation_space = None
         self.state = None
         self._is_available = False
+        self.interface = None
     
     @abstractmethod
     def reset(
@@ -90,28 +92,19 @@ class Environment(BaseEnvironment):
 
     def setup(
         self,
-        observation_type = SpaceType.CONTINUOUS,
-        action_type = SpaceType.DISCRETE
+        observation_space = gym.spaces.Box(low = 0.0, high = 1.0, shape=(1,)),
+        action_space = gym.spaces.Discrete(2)
     ):
-        if ((type(observation_type) is SpaceType) and (type(action_type) is SpaceType)):
-            
-            if (observation_type == SpaceType.CONTINUOUS):
-                self.observation_space = gym.spaces.Box(low = 0.0, high = 1.0, shape=(1,))
-                self.state_space = self.observation_space
-                self.state = None
+        if (isinstance(observation_space, gym.spaces.Space) and isinstance(action_space, gym.spaces.Space)):      
+            self.observation_space = self.state_space = observation_space
+            self.action_space = action_space 
+            self.state = None
+            self.interface = EnvironmentInterface(
+                observation_type = cast_space_to_type(observation_space),
+                action_type = cast_space_to_type(action_space),
 
-            elif (observation_type == SpaceType.DISCRETE):
-                self.observation_space = gym.spaces.Discrete(2)
-                self.state_space = self.observation_space
-                self.state = None
-
-            if (action_type == SpaceType.CONTINUOUS):
-                self.action_space = gym.spaces.Box(low = 0.0, high = 1.0, shape=(1,))
-
-            elif (action_type == SpaceType.DISCRETE):
-                self.action_space = gym.spaces.Discrete(2)
-            
-        self._become_available()
+            )
+            self._become_available()
     
     def step(
         self,
