@@ -4,6 +4,7 @@ import gym
 import sys, os
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 
+from src.const import SpaceType
 from src.environment import Environment
 from src.environment import GymEnvironment
 
@@ -32,6 +33,34 @@ class TestEnvironment():
         env = Environment()
         env.setup()
         assert isinstance(env.action_space, gym.Space)
+
+    @pytest.mark.unit
+    @pytest.mark.parametrize(
+        "input_observation_space, expected_observation_type",
+        [
+            (gym.spaces.Box(0, 1, shape=(1,)), SpaceType.CONTINUOUS),
+            (gym.spaces.Discrete(2), SpaceType.DISCRETE)
+        ]
+    )
+    @pytest.mark.parametrize(
+        "input_action_space, expected_action_type",
+        [
+            (gym.spaces.Box(0, 1, shape=(1,)), SpaceType.CONTINUOUS),
+            (gym.spaces.Discrete(2), SpaceType.DISCRETE)
+        ]
+    )
+    def test_spaces_can_be_configured(
+        self,
+        input_observation_space, input_action_space,
+        expected_observation_type, expected_action_type
+    ):
+        env = Environment()
+        env.setup(
+            observation_space = input_observation_space,
+            action_space = input_action_space
+        )
+        assert env.interface.observation_type is expected_observation_type
+        assert env.interface.action_type is expected_action_type
 
     @pytest.mark.unit
     def test_reset_method_should_return_single_observation(self):
