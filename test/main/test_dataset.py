@@ -3,8 +3,82 @@ import pytest
 import sys, os
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 
+from src.dataset import SA
+from src.dataset import SARS
+from src.dataset import SARSA
+from src.dataset import SAG
 from src.dataset import Dataset
 from src.dataset import DataLoader
+
+
+class TestSaData():
+
+    @pytest.mark.unit
+    def test_random_method_should_return_sa_objects(self):
+        N = 3
+        dataset = SA.random(n = N)
+        assert len(dataset) == N
+        assert all([ (type(data) is SA) for data in dataset ])
+
+    @pytest.mark.unit
+    def test_should_have_state_and_action(self):
+        data = SA.random(n = 1)[0]
+        assert hasattr(data, "state")
+        assert hasattr(data, "action")
+
+
+class TestSarsData():
+
+    @pytest.mark.unit
+    def test_random_method_should_return_sars_objects(self):
+        N = 3
+        dataset = SARS.random(n = N)
+        assert len(dataset) == N
+        assert all([ (type(data) is SARS) for data in dataset ])
+    
+    @pytest.mark.unit
+    def test_should_have_state_and_action_and_reward_and_nextaction(self):
+        data = SARS.random(n = 1)[0]
+        assert hasattr(data, "state")
+        assert hasattr(data, "action")
+        assert hasattr(data, "reward")
+        assert hasattr(data, "next_state")
+
+
+class TestSarsaData():
+
+    @pytest.mark.unit
+    def test_random_method_should_return_sarsa_objects(self):
+        N = 3
+        dataset = SARSA.random(n = N)
+        assert len(dataset) == N
+        assert all([ (type(data) is SARSA) for data in dataset ])
+
+    @pytest.mark.unit
+    def test_should_have_state_and_action_and_reward_and_nextstate_and_nextaction(self):
+        data = SARSA.random(n = 1)[0]
+        assert hasattr(data, "state")
+        assert hasattr(data, "action")
+        assert hasattr(data, "reward")
+        assert hasattr(data, "next_state")
+        assert hasattr(data, "next_action")
+
+
+class TestSagData():
+
+    @pytest.mark.unit
+    def test_random_method_should_return_sag_objects(self):
+        N = 3
+        dataset = SAG.random(n = N)
+        assert len(dataset) == N
+        assert all([ (type(data) is SAG) for data in dataset ])
+    
+    @pytest.mark.unit
+    def test_should_have_state_and_action_and_goal(self):
+        data = SAG.random(n = 1)[0]
+        assert hasattr(data, "state")
+        assert hasattr(data, "action")
+        assert hasattr(data, "goal")
 
 
 class TestDataset():
