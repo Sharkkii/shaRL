@@ -107,12 +107,13 @@ class TestDataset():
         assert dataset.is_available == True
 
     @pytest.mark.unit
-    def test_should_be_unavailable_after_invalid_setup(self):
+    def test_should_raise_value_error_on_invalid_setup(self):
+        collection = iter([ 1, 2, 3 ]) # invalid
         dataset = Dataset()
-        dataset.setup(
-            collection = iter([ 1, 2, 3 ]) # invalid
-        )
-        assert dataset.is_available == False
+        with pytest.raises(ValueError) as message:
+            dataset.setup(
+                collection = collection
+            )
 
 
 class TestSarsDataset():
@@ -136,8 +137,8 @@ class TestSarsDataset():
         "TDataset", [ SA, SARSA, SAG ]
     )
     def test_should_raise_value_error_on_invalid_setup(self, TDataset):
+        collection = TDataset.random(n = 3) # invalid
         dataset = SarsDataset()
-        collection = TDataset.random(n = 3)
         with pytest.raises(ValueError) as message:
             dataset.setup(
                 collection = collection
