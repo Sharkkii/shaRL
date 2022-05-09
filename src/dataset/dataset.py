@@ -65,6 +65,44 @@ class BaseDataset(TorchDataset, metaclass=ABCMeta):
     ):
         raise NotImplementedError
 
+    def add_collection(
+        self,
+        collection
+    ):
+        if (not self.check_whether_valid_collection(collection)):
+            raise ValueError("`collection` must be 'List' object.")
+        self.collection.extend(collection)
+
+    def add_item(
+        self,
+        item
+    ):
+        self.add_collection([ item ])
+
+    def add(
+        self,
+        collection
+    ):
+        self.add_collection(collection)
+
+    def remove_collection(
+        self,
+        n = 0
+    ):
+        if (n > 0):
+            del self.collection[:n]
+    
+    def remove_item(
+        self
+    ):
+        self.remove_collection(n = 1)
+
+    def remove(
+        self,
+        n = 0
+    ):
+        self.remove_collection(n = n)
+
     @property
     def is_available(
         self
@@ -164,6 +202,18 @@ class SarsDataset(Dataset):
             collection = collection,
             transform = transform
         )
+
+    def add_collection(
+        self,
+        collection
+    ):
+        if (not self.check_whether_valid_collection(collection)):
+            raise ValueError("`collection` must be 'List' object.")
+
+        if (not self.check_whether_valid_sars_collection(collection)):
+            raise ValueError("`collection` must be 'List[SARS]' object.")
+
+        super().add_collection(collection)
 
     def check_whether_valid_sars_collection(self, collection):
         return all([ (type(item) is SARS) for item in collection ])
