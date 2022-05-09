@@ -1,8 +1,14 @@
 #### Dataset ####
 
 from abc import ABCMeta, abstractmethod
-from sre_constants import CHCODES
+import numpy as np
+import torch
 from torch.utils.data import Dataset as TorchDataset
+
+
+# T_STATE = torch.tensor
+# T_ACTION = int
+# T_REWARD = float
 
 
 class BaseDataset(TorchDataset, metaclass=ABCMeta):
