@@ -145,9 +145,13 @@ class TestDataLoader():
     @pytest.mark.unit
     def test_should_be_unavailable_after_invalid_setup(self):
         dataset = Dataset(collection = [ 1, 2, 3 ])
-        dataloader = DataLoader()
+        dataloader = DataLoader(
+            batch_size = -1, # invalid
+            shuffle = True
+        )
         dataloader.setup(
             dataset = dataset,
             batch_size = -1, # invalid
+            shuffle = True
         )
-        assert dataloader.is_available == True
+        assert dataloader.is_available == False
