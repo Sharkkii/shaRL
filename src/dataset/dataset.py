@@ -41,11 +41,16 @@ class BaseDataset(TorchDataset, metaclass=ABCMeta):
         collection = None,
         transform = None
     ):
-        if (self.check_whether_valid_collection(collection)):
-            self.collection = collection
-            self._become_available()
+        if (collection is None):
+            return
+
+        if (not self.check_whether_valid_collection(collection)):
+            raise ValueError("`collection` must be 'List' object.")
+        
+        self.collection = collection
         if (self.check_whether_valid_transform(transform)):
             self.transform = transform
+        self._become_available()
 
     @abstractmethod
     def __len__(
