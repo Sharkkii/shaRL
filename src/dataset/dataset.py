@@ -5,6 +5,8 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset as TorchDataset
 
+from .data import SARS
+
 
 # T_STATE = torch.tensor
 # T_ACTION = int
@@ -125,3 +127,38 @@ class Dataset(BaseDataset):
         if (self.check_whether_valid_transform(self.transform)):
             item = self.transform(item)
         return item
+
+
+class SarsDataset(Dataset):
+
+    def __init__(
+        self,
+        collection = None,
+        transform = None
+    ):
+        super().__init__(
+            collection = collection,
+            transform = transform
+        )
+
+    def setup(
+        self,
+        collection = None,
+        transform = None
+    ):
+        if (collection is None):
+            return
+
+        if (not self.check_whether_valid_collection(collection)):
+            raise ValueError("`collection` must be 'List' object.")
+
+        if (not self.check_whether_valid_sars_collection(collection)):
+            raise ValueError("`collection` must be 'List[SARS]' object.")
+
+        super().setup(
+            collection = collection,
+            transform = transform
+        )
+
+    def check_whether_valid_sars_collection(self, collection):
+        return all([ (type(item) is SARS) for item in collection ])
