@@ -115,6 +115,49 @@ class TestDataset():
                 collection = collection
             )
 
+    @pytest.mark.unit
+    def test_add_collection_method_should_increase_dataset_size(self):
+        dataset = Dataset(collection = [ 1, 2, 3 ])
+        assert len(dataset) == 3
+        dataset.add_collection(collection = [ 4, 5 ])
+        assert len(dataset) == 5
+
+    @pytest.mark.unit
+    def test_add_item_method_should_increase_dataset_size(self):
+        dataset = Dataset(collection = [ 1, 2, 3 ])
+        assert len(dataset) == 3
+        dataset.add_item(item = 4)
+        assert len(dataset) == 4
+
+    @pytest.mark.unit
+    def test_add_method_should_be_alias_of_add_collection_method(self):
+        dataset = Dataset(collection = [ 1, 2, 3 ])
+        dataset.add([ 4, 5 ])
+        assert len(dataset) == 5
+        with pytest.raises(ValueError) as message:
+            dataset.add(6) # invalid
+
+    @pytest.mark.unit
+    def test_remove_collection_method_should_decrease_dataset_size(self):
+        dataset = Dataset(collection = [ 1, 2, 3, 4, 5 ])
+        assert len(dataset) == 5
+        dataset.remove_collection(n = 2)
+        assert len(dataset) == 3
+
+    @pytest.mark.unit
+    def test_remove_item_method_should_decrease_dataset_size_by_one(self):
+        dataset = Dataset(collection = [ 1, 2, 3, 4, 5 ])
+        assert len(dataset) == 5
+        dataset.remove_item()
+        assert len(dataset) == 4
+
+    @pytest.mark.unit
+    def test_remove_method_should_be_alias_of_remove_collection_method(self):
+        dataset = Dataset(collection = [ 1, 2, 3, 4, 5 ])
+        assert len(dataset) == 5
+        dataset.remove(n = 2)
+        assert len(dataset) == 3
+
 
 class TestSarsDataset():
 
@@ -143,6 +186,23 @@ class TestSarsDataset():
             dataset.setup(
                 collection = collection
             )
+
+    @pytest.mark.unit
+    def test_valid_collection_can_be_added_to_dataset(self):
+        dataset = SarsDataset(collection = SARS.random(n = 3))
+        assert len(dataset) == 3
+        dataset.add(SARS.random(n = 2))
+        assert len(dataset) == 5
+
+    @pytest.mark.unit
+    @pytest.mark.parametrize(
+        "TDataset", [ SA, SARSA, SAG ]
+    )
+    def test_invalid_collection_cannot_be_added_to_dataset(self, TDataset):
+        dataset = SarsDataset(collection = SARS.random(n = 3))
+        assert len(dataset) == 3
+        with pytest.raises(ValueError) as message:
+            dataset.add(TDataset.random(n = 2)) # invalid
 
 
 class TestDataLoader():
