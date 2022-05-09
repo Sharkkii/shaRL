@@ -8,6 +8,7 @@ from src.dataset import SARS
 from src.dataset import SARSA
 from src.dataset import SAG
 from src.dataset import Dataset
+from src.dataset import SarsDataset
 from src.dataset import DataLoader
 
 
@@ -112,6 +113,35 @@ class TestDataset():
             collection = iter([ 1, 2, 3 ]) # invalid
         )
         assert dataset.is_available == False
+
+
+class TestSarsDataset():
+
+    @pytest.mark.unit
+    def test_should_be_unavailable_on_initialization(self):
+        dataset = SarsDataset()
+        assert dataset.is_available == False
+
+    @pytest.mark.unit
+    def test_should_be_available_after_valid_setup(self):
+        collection = SARS.random(n = 3)
+        dataset = SarsDataset()
+        dataset.setup(
+            collection = collection
+        )
+        assert dataset.is_available == True
+
+    @pytest.mark.unit
+    @pytest.mark.parametrize(
+        "TDataset", [ SA, SARSA, SAG ]
+    )
+    def test_should_raise_value_error_on_invalid_setup(self, TDataset):
+        dataset = SarsDataset()
+        collection = TDataset.random(n = 3)
+        with pytest.raises(ValueError) as message:
+            dataset.setup(
+                collection = collection
+            )
 
 
 class TestDataLoader():
