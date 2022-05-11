@@ -1,5 +1,6 @@
 import pytest
 import numpy as np
+import torch
 import gym
 import sys, os
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
@@ -8,6 +9,8 @@ from src.const import SpaceType
 from src.environment import Environment
 from src.environment import GymEnvironment
 
+
+default_gymenvironment_name = "CartPole-v1"
 @pytest.mark.L2
 class TestEnvironment():
 
@@ -67,7 +70,8 @@ class TestEnvironment():
         env = Environment()
         env.setup()
         observation = env.reset()
-        assert type(observation) is np.ndarray
+        assert type(observation) is torch.Tensor
+        assert observation.dtype is torch.float32
 
     @pytest.mark.unit
     def test_sample_method_should_return_single_action(self):
@@ -83,9 +87,11 @@ class TestEnvironment():
         env.setup()
         action = env.sample()
         observation, reward, done, info = env.step(action)
-        assert type(observation) is np.ndarray
-        assert type(reward) in (np.float32, np.float64)
-        assert type(done) in (bool, np.bool_)
+        assert type(observation) is torch.Tensor
+        assert observation.dtype is torch.float32
+        assert type(reward) is torch.Tensor
+        assert reward.dtype is torch.float32
+        assert type(done) is bool
 
 @pytest.mark.L2
 class TestGymEnvironment():
@@ -126,37 +132,51 @@ class TestGymEnvironment():
 
     @pytest.mark.unit
     def test_should_have_observation_space(self):
-        env = Environment()
-        env.setup()
+        env = GymEnvironment()
+        env.setup(
+            name = default_gymenvironment_name
+        )
         assert isinstance(env.observation_space, gym.Space)
 
     @pytest.mark.unit
     def test_should_have_action_space(self):
-        env = Environment()
-        env.setup()
+        env = GymEnvironment()
+        env.setup(
+            name = default_gymenvironment_name
+        )
         assert isinstance(env.action_space, gym.Space)
 
     @pytest.mark.unit
     def test_reset_method_should_return_single_observation(self):
-        env = Environment()
-        env.setup()
+        env = GymEnvironment()
+        env.setup(
+            name = default_gymenvironment_name
+        )
         observation = env.reset()
-        assert type(observation) is np.ndarray
+        assert type(observation) is torch.Tensor
+        assert observation.dtype is torch.float32
 
     @pytest.mark.unit
     def test_sample_method_should_return_single_action(self):
-        env = Environment()
-        env.setup()
+        env = GymEnvironment()
+        env.setup(
+            name = default_gymenvironment_name
+        )
         _ = env.reset()
         action = env.sample()
         assert action is not None
 
     @pytest.mark.unit
     def test_step_method_should_return_tuple_of_obs_r_done_info(self):
-        env = Environment()
-        env.setup()
+        env = GymEnvironment()
+        env.setup(
+            name = default_gymenvironment_name
+        )
+        _ = env.reset()
         action = env.sample()
         observation, reward, done, info = env.step(action)
-        assert type(observation) is np.ndarray
-        assert type(reward) in (np.float32, np.float64)
-        assert type(done) in (bool, np.bool_)
+        assert type(observation) is torch.Tensor
+        assert observation.dtype is torch.float32
+        assert type(reward) is torch.Tensor
+        assert reward.dtype is torch.float32
+        assert type(done) is bool
