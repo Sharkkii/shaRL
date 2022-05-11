@@ -7,6 +7,8 @@ from src.policy import Policy
 from src.actor import Actor
 
 
+default_agent_interface = AgentInterface(din = 1, dout = 1)
+
 @pytest.mark.L3
 class TestActor():
 
@@ -32,7 +34,7 @@ class TestActor():
 
     @pytest.mark.unit
     def test_should_be_available_on_empty_initialization_with_use_default_true(self):
-        interface = AgentInterface(din = 0, dout = 0)
+        interface = default_agent_interface
         actor = Actor(
             interface = interface,
             use_default = True
@@ -50,7 +52,7 @@ class TestActor():
     @pytest.mark.unit
     def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self):
         policy = Policy()
-        interface = AgentInterface(din = 0, dout = 0)
+        interface = default_agent_interface
         with pytest.raises(ValueError) as message:
             actor = Actor(
                 policy = policy,

@@ -7,6 +7,8 @@ from src.value import Value, QValue
 from src.critic import Critic
 
 
+default_agent_interface = AgentInterface(din = 1, dout = 1)
+
 @pytest.mark.L3
 class TestCritic():
 
@@ -35,7 +37,7 @@ class TestCritic():
 
     @pytest.mark.unit
     def test_should_be_available_on_empty_initialization_with_use_default_true(self):
-        interface = AgentInterface(din = 0, dout = 0)
+        interface = default_agent_interface
         critic = Critic(
             interface = interface,
             use_default = True
@@ -54,7 +56,7 @@ class TestCritic():
     def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self):
         value = Value()
         qvalue = QValue()
-        interface = AgentInterface(din = 0, dout = 0)
+        interface = default_agent_interface
         with pytest.raises(ValueError) as message:
             critic = Critic(
                 value = value,

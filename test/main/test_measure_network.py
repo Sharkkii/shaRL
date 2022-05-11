@@ -10,6 +10,9 @@ from src.common import AgentInterface
 from src.environment import Environment
 from src.network import ValueNetwork, QValueNetwork, PolicyNetwork
 
+
+default_agent_interface = AgentInterface(din = 1, dout = 1)
+
 class CallableObject():
     
     def __init__(self):
@@ -34,7 +37,7 @@ class TestValueNetwork():
 
     @pytest.mark.unit
     def test_should_be_available_on_empty_initialization_with_use_default_true(self):
-        interface = AgentInterface(din = 0, dout = 0)
+        interface = default_agent_interface
         value_network = ValueNetwork(
             interface = interface,
             use_default = True
@@ -52,7 +55,7 @@ class TestValueNetwork():
     @pytest.mark.unit
     def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self):
         network = CallableObject()
-        interface = AgentInterface(din = 0, dout = 0)
+        interface = default_agent_interface
         with pytest.raises(ValueError) as message:
             value_network = ValueNetwork(
                 value_network = network,
@@ -90,7 +93,7 @@ class TestQValueNetwork():
 
     @pytest.mark.unit
     def test_should_be_available_on_empty_initialization_with_use_default_true(self):
-        interface = AgentInterface(din = 0, dout = 0)
+        interface = default_agent_interface
         qvalue_network = QValueNetwork(
             interface = interface,
             use_default = True
@@ -108,7 +111,7 @@ class TestQValueNetwork():
     @pytest.mark.unit
     def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self):
         network = CallableObject()
-        interface = AgentInterface(din = 0, dout = 0)
+        interface = default_agent_interface
         with pytest.raises(ValueError) as message:
             qvalue_network = QValueNetwork(
                 qvalue_network = network,
@@ -139,7 +142,7 @@ class TestPolicyNetwork():
 
     @pytest.mark.unit
     def test_should_be_available_on_empty_initialization_with_use_default_true(self):
-        interface = AgentInterface(din = 0, dout = 0)
+        interface = default_agent_interface
         policy_network = PolicyNetwork(
             interface = interface,
             use_default = True
@@ -157,7 +160,7 @@ class TestPolicyNetwork():
     @pytest.mark.unit
     def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self):
         network = CallableObject()
-        interface = AgentInterface(din = 0, dout = 0)
+        interface = default_agent_interface
         with pytest.raises(ValueError) as message:
             policy_network = PolicyNetwork(
                 policy_network = network,

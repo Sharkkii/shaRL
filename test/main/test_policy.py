@@ -10,6 +10,7 @@ from src.policy import Policy
 
 
 optimizer_factory = torch.optim.Adam
+default_agent_interface = AgentInterface(din = 1, dout = 1)
 
 @pytest.mark.L4
 class TestPolicy():
@@ -21,7 +22,7 @@ class TestPolicy():
 
     @pytest.mark.unit
     def test_should_be_available_on_nonempty_initialization(self):
-        interface = AgentInterface(din = 0, dout = 0)
+        interface = default_agent_interface
         policy_network = PolicyNetwork(
             interface = interface,
             use_default = True
@@ -35,7 +36,7 @@ class TestPolicy():
 
     @pytest.mark.unit
     def test_should_be_available_after_setup(self):
-        interface = AgentInterface(din = 0, dout = 0)
+        interface = default_agent_interface
         policy_network = PolicyNetwork(
             interface = interface,
             use_default = True
@@ -50,7 +51,7 @@ class TestPolicy():
 
     @pytest.mark.unit
     def test_should_be_available_on_empty_initialization_with_use_default_true(self):
-        interface = AgentInterface(din = 0, dout = 0)
+        interface = default_agent_interface
         policy = Policy(
             interface = interface,
             use_default = True
@@ -67,7 +68,7 @@ class TestPolicy():
 
     @pytest.mark.unit
     def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self):
-        interface = AgentInterface(din = 0, dout = 0)
+        interface = default_agent_interface
         policy_network = PolicyNetwork(
             interface = interface,
             use_default = True
