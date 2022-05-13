@@ -8,7 +8,10 @@ from src.critic import Critic
 from src.agent import Agent
 
 
-default_agent_interface = AgentInterface(din = 1, dout = 1)
+default_agent_interface = AgentInterface(
+    sin = 1,
+    sout = 1
+)
 
 @pytest.mark.L2
 class TestAgent():

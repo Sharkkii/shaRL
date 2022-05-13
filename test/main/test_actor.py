@@ -7,7 +7,10 @@ from src.policy import Policy
 from src.actor import Actor
 
 
-default_agent_interface = AgentInterface(din = 1, dout = 1)
+default_agent_interface = AgentInterface(
+    sin = 1,
+    sout = 1
+)
 
 @pytest.mark.L3
 class TestActor():

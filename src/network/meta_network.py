@@ -93,7 +93,7 @@ class MetaNetwork(ABCMeta, type):
         dins = []
         douts = []
         dins.append(-1)
-        douts.append(interface.din[0])
+        douts.append(interface.sin[0])
         components.append("")
 
         # `key` will be ignored
@@ -123,7 +123,7 @@ class MetaNetwork(ABCMeta, type):
                 douts.append(d_out)
                 components.append("batchnorm")
         
-        dins.append(interface.dout[0])
+        dins.append(interface.sout[0])
         douts.append(-1)
         components.append("")
 
@@ -144,7 +144,7 @@ class MetaNetwork(ABCMeta, type):
             if (components[idx] in ["relu", "batchnorm"]):
                 dout = MetaNetwork._match(douts[idx], dins[idx])
                 douts[idx] = dins[idx] = dout
-            
+
         for idx in range(1, len(components)-1):
 
             if (components[idx] == "linear"):

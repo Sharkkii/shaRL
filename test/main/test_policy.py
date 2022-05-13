@@ -10,7 +10,10 @@ from src.policy import Policy
 
 
 optimizer_factory = torch.optim.Adam
-default_agent_interface = AgentInterface(din = 1, dout = 1)
+default_agent_interface = AgentInterface(
+    sin = 1,
+    sout = 1
+)
 
 @pytest.mark.L4
 class TestPolicy():

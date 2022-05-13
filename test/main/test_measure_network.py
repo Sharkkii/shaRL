@@ -11,7 +11,10 @@ from src.environment import Environment
 from src.network import ValueNetwork, QValueNetwork, PolicyNetwork
 
 
-default_agent_interface = AgentInterface(din = 1, dout = 1)
+default_agent_interface = AgentInterface(
+    sin = 1,
+    sout = 1
+)
 
 class CallableObject():
     
