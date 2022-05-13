@@ -12,8 +12,8 @@ def cast_space_to_type(
     else:
         return SpaceType.NONE
 
-def _is_tuple_of_int(argument):
+def is_tuple_of_int(argument):
     if (type(argument) is tuple):
-        return reduce(lambda acc, x: acc and (x is int), argument, True)
+        return reduce(lambda acc, x: acc and (type(x) is int), argument, True)
     else:
         return False
