@@ -2,10 +2,13 @@
 
 from abc import ABCMeta, abstractmethod
 import warnings
+import random
 import numpy as np
 import torch
 import gym
 
+from .helper import get_environment_interface
+from ..const import SpaceType
 from ..common import EnvironmentInterface
 from ..common import cast_space_to_type
 
@@ -77,6 +80,7 @@ class BaseEnvironment(metaclass=ABCMeta):
     ):
         raise NotImplementedError
 
+
 class Environment(BaseEnvironment):
 
     def __init__(
@@ -87,7 +91,9 @@ class Environment(BaseEnvironment):
     def reset(
         self
     ):
-        observation = self.state = self.observation_space.sample()
+        observation = self.observation_space.sample()
+        observation = torch.from_numpy(observation.astype(np.float32))
+        self.state = observation
         return observation
 
     def setup(
@@ -99,10 +105,9 @@ class Environment(BaseEnvironment):
             self.observation_space = self.state_space = observation_space
             self.action_space = action_space 
             self.state = None
-            self.interface = EnvironmentInterface(
-                observation_type = cast_space_to_type(observation_space),
-                action_type = cast_space_to_type(action_space),
-
+            self.interface = get_environment_interface(
+                self.observation_space,
+                self.action_space
             )
             self._become_available()
     
@@ -112,8 +117,10 @@ class Environment(BaseEnvironment):
     ):
         warnings.warn("`step` is not implemented.")
         observation = self.observation_space.sample()
-        reward = np.random.choice([0.0, 1.0])
-        done = np.random.choice([True, False])
+        observation = torch.from_numpy(observation.astype(np.float32))
+        reward = np.random.rand()
+        reward = torch.tensor(reward, dtype=torch.float32)
+        done = random.choice([True, False])
         info = None
         return observation, reward, done, info
 
@@ -162,7 +169,9 @@ class GymEnvironment(BaseEnvironment):
     def reset(
         self
     ):
-        observation = self.state = self.env.reset()
+        observation = self.env.reset()
+        observation = torch.from_numpy(observation.astype(np.float32))
+        self.state = observation
         return observation
 
     def setup(
@@ -183,12 +192,14 @@ class GymEnvironment(BaseEnvironment):
         action
     ):
         observation, reward, done, info = self.env.step(action)
+        observation = torch.from_numpy(observation.astype(np.float32))
+        reward = torch.tensor(reward, dtype=torch.float32)
         return (observation, reward, done, info)
 
     def sample(
         self
     ):
-        action = self.env.sample()
+        action = self.action_space.sample()
         return action
 
 class CartPoleEnvironment(GymEnvironment):
