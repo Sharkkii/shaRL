@@ -1,11 +1,14 @@
 import pytest
 import sys, os
+import gym
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 
+from src.const import SpaceType
 from src.common import AgentInterface
 from src.actor import Actor
 from src.critic import Critic
 from src.agent import Agent
+from src.environment import Environment
 
 
 default_agent_interface = AgentInterface(
@@ -68,3 +71,81 @@ class TestAgent():
                 interface = interface,
                 use_default = True
             )
+
+    @pytest.mark.unit
+    @pytest.mark.parametrize(
+        "env_observation_space, env_action_space, agent_interface",
+        [
+            (
+                gym.spaces.Box(low = 0.0, high = 1.0, shape = (1,)),
+                gym.spaces.Discrete(2),
+                AgentInterface(sin = 1, sout = 1, tin = SpaceType.CONTINUOUS, tout = SpaceType.DISCRETE)
+            ),
+            (
+                gym.spaces.Box(low = 0.0, high = 1.0, shape = (1,)),
+                gym.spaces.Box(low = 0.0, high = 1.0, shape = (1,)),
+                AgentInterface(sin = 1, sout = 1, tin = SpaceType.CONTINUOUS, tout = SpaceType.CONTINUOUS)
+            )
+        ]
+    )
+    def test_action_should_be_accepted_if_valid(
+        self,
+        env_observation_space,
+        env_action_space,
+        agent_interface
+    ):
+        
+        env = Environment()
+        env.setup(
+            observation_space = env_observation_space,
+            action_space = env_action_space
+        )
+
+        agent = Agent(
+            interface = agent_interface,
+            use_default = True
+        )
+        
+        state = env.reset()
+        action = agent.choose_action(state)
+        assert env.can_accept_action(action = action) == True
+
+    @pytest.mark.unit
+    @pytest.mark.parametrize(
+        "env_observation_space, env_action_space, agent_interface",
+        [
+            (
+                # Discrete(X) -> sout = 1
+                gym.spaces.Box(low = 0.0, high = 1.0, shape = (1,)),
+                gym.spaces.Discrete(2),
+                AgentInterface(sin = 1, sout = 10, tin = SpaceType.CONTINUOUS, tout = SpaceType.DISCRETE)
+            ),
+            (
+                # Box(shape = X) -> sout = X
+                gym.spaces.Box(low = 0.0, high = 1.0, shape = (1,)),
+                gym.spaces.Box(low = 0.0, high = 1.0, shape = (1,)),
+                AgentInterface(sin = 1, sout = 10, tin = SpaceType.CONTINUOUS, tout = SpaceType.CONTINUOUS)
+            )
+        ]
+    )
+    def test_action_should_be_rejected_if_invalid(
+        self,
+        env_observation_space,
+        env_action_space,
+        agent_interface
+    ):
+        
+        env = Environment()
+        env.setup(
+            observation_space = env_observation_space,
+            action_space = env_action_space
+        )
+
+        agent = Agent(
+            interface = agent_interface,
+            use_default = True
+        )
+        
+        state = env.reset()
+        action = agent.choose_action(state)
+        assert env.can_accept_action(action = action) == False
