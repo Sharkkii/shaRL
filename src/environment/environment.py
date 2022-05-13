@@ -9,8 +9,6 @@ import gym
 
 from .helper import get_environment_interface
 from ..const import SpaceType
-from ..common import EnvironmentInterface
-from ..common import cast_space_to_type
 
 class BaseEnvironment(metaclass=ABCMeta):
 
@@ -52,6 +50,25 @@ class BaseEnvironment(metaclass=ABCMeta):
         self
     ):
         self._is_available = False
+
+    def can_accept_action(
+        self,
+        action
+    ):
+        flag = False
+
+        if (not self.is_available):
+            return flag
+
+        if (type(action) is torch.Tensor):
+
+            if (self.interface.observation_type is SpaceType.DISCRETE):
+                flag = (action.dtype is torch.long) and (tuple(action.size()) == (1,))
+        
+            elif (self.interface.observation_type is SpaceType.CONTINUOUS):
+                flag = (action.dtype is torch.float32) and (tuple(action.size()) == self.interface.observation_shape)
+        
+        return flag
     
     @abstractmethod
     def step(

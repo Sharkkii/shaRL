@@ -6,6 +6,7 @@ import torch
 from gym.spaces import Box, Discrete
 
 from ..const import PhaseType
+from ..const import SpaceType
 from ..policy import Policy
 from ..policy import PseudoPolicy
 from ..policy import cast_to_policy
@@ -206,12 +207,8 @@ class Actor(BaseActor):
         action_space = None, # deprecated
         phase = PhaseType.NONE
     ):
-        action_space = self.env.action_space
         action = self.policy(state)
-        if (action is None):
-            action = action_space.sample()
-        else:
-            action = torch.argmax(action) if (type(action_space) is Discrete) else action
+        action = torch.argmax(action) if (type(action_space) is SpaceType.DISCRETE) else action
         return action
     
     def update_policy(

@@ -116,6 +116,16 @@ class BaseAgent(metaclass=ABCMeta):
     ):
         raise NotImplementedError
 
+    def choose_action(
+        self,
+        state,
+        action_space = None
+    ):
+        return self.actor.choose_action(
+            state = state,
+            action_space = action_space
+        )
+
     @property
     def is_available(
         self
