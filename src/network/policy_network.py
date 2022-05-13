@@ -7,7 +7,7 @@ import torch.nn.functional as F
 
 from ..common import AgentInterface
 from .measure_network import BasePolicyNetwork
-from .network import PseudoNetwork
+from .network import DefaultNetwork
 
 
 class DiscretePolicyNetwork(BasePolicyNetwork):
@@ -23,7 +23,9 @@ class DiscretePolicyNetwork(BasePolicyNetwork):
                 raise ValueError("`policy_network` must be None if `use_default = True`")
             if (type(interface) is not AgentInterface):
                 raise ValueError("`interface` must be 'AgentInterface' object if `use_default = True`")
-            policy_network = PseudoNetwork()
+            policy_network = DefaultNetwork(
+                interface = interface
+            )
 
         super().__init__(
             network = policy_network

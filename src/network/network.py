@@ -1,7 +1,6 @@
 #### Network ####
 
 from abc import ABCMeta, abstractmethod
-import os
 import torch
 import torch.nn as nn
 
@@ -117,14 +116,47 @@ class PiNet(BaseNetwork):
     #     x = nn.Softmax(dim=dim)(x)
     #     return x
 
-class DefaultNetwork(metaclass=MetaNetwork):
-    spec = "default"
-
-class PseudoNetwork(nn.Module):
+class DefaultNetwork(BaseNetwork, nn.Module):
     
-    def __init__(self):
-        super().__init__()
+    def __init__(
+        self,
+        interface = None
+    ):
+        BaseNetwork.__init__(self, interface)
+        nn.Module.__init__(self)
+        self.l1 = nn.Linear(self.interface.sin[0], 20)
+        self.l2 = nn.Linear(20, 20)
+        self.l3 = nn.Linear(20, self.interface.sout[0])
+        self.reset()
+
+    def reset(self):
+        nn.init.normal_(self.l1.weight, mean=0., std=1.0)
+        nn.init.normal_(self.l2.weight, mean=0., std=1.0)
+        nn.init.normal_(self.l3.weight, mean=0., std=1.0)
+        
+    def forward(self, x):
+        x = nn.ReLU()(self.l1(x))
+        x = nn.ReLU()(self.l2(x))
+        x = self.l3(x)
+        return x
+
+class PseudoNetwork(BaseNetwork, nn.Module):
+    
+    def __init__(
+        self,
+        interface = None
+    ):
+        BaseNetwork.__init__(
+            self,
+            interface = interface
+        )
+        nn.Module.__init__(
+            self
+        )
         self.pseudo_parameters = nn.Parameter(torch.zeros(1))
+
+    def reset(self):
+        pass
 
     def forward(self, x):
         return x

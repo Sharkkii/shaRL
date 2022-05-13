@@ -6,7 +6,6 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 from src.common import AgentInterface
 from src.network import MetaNetwork
 from src.network import BaseNetwork
-from src.network import DefaultNetwork
 
 default_agent_interface = AgentInterface(
     sin = 1,
@@ -34,4 +33,6 @@ class TestMetaNetwork():
     
     @pytest.mark.unit
     def test_should_be_metaclass_of_default_network(self):
-        assert(MetaNetwork in DefaultNetwork.__metaclass__)
+        class C(metaclass=MetaNetwork):
+            spec = "default"
+        assert(MetaNetwork in C.__metaclass__)
