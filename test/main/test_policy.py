@@ -148,6 +148,26 @@ class TestDiscretePolicy():
         action = policy(state)
         assert type(action) is torch.Tensor
         assert action.dtype is torch.long
+    
+    @pytest.mark.unit
+    def test_we_can_check_whether_pointwise_estimation_is_available(self):
+        interface = default_agent_interface_with_discrete_action
+        policy = DiscretePolicy(
+            interface = interface,
+            use_default = True
+        )
+        flag = policy.can_pointwise_estimate
+        assert type(flag) is bool
+
+    @pytest.mark.unit
+    def test_we_can_check_whether_density_estimation_is_available(self):
+        interface = default_agent_interface_with_discrete_action
+        policy = DiscretePolicy(
+            interface = interface,
+            use_default = True
+        )
+        flag = policy.can_density_estimate
+        assert type(flag) is bool
 
 
 @pytest.mark.L4
@@ -263,3 +283,23 @@ class TestContinuousPolicy():
         action = policy(state)
         assert type(action) is torch.Tensor
         assert action.dtype is torch.float32
+
+    @pytest.mark.unit
+    def test_we_can_check_whether_pointwise_estimation_is_available(self):
+        interface = default_agent_interface_with_continuous_action
+        policy = ContinuousPolicy(
+            interface = interface,
+            use_default = True
+        )
+        flag = policy.can_pointwise_estimate
+        assert type(flag) is bool
+
+    @pytest.mark.unit
+    def test_we_can_check_whether_density_estimation_is_available(self):
+        interface = default_agent_interface_with_continuous_action
+        policy = ContinuousPolicy(
+            interface = interface,
+            use_default = True
+        )
+        flag = policy.can_density_estimate
+        assert type(flag) is bool
