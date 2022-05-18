@@ -127,6 +127,13 @@ class BaseActor(metaclass=ABCMeta):
         self.policy.load(path_to_policy)
 
     @abstractmethod
+    def __call__(
+        self,
+        state
+    ):
+        raise NotImplementedError
+
+    @abstractmethod
     def choose_action(
         self,
         state
@@ -210,16 +217,22 @@ class Actor(BaseActor):
         n_step
     ):
         pass
-    
+
+    def __call__(
+        self,
+        state
+    ):
+        return self.choose_action(
+            state = state
+        )
+
     def choose_action(
         self,
-        state,
-        action_space = None, # deprecated
-        phase = PhaseType.NONE
+        state
     ):
-        action = self.policy(state)
-        action = torch.argmax(action) if (type(action_space) is SpaceType.DISCRETE) else action
-        return action
+        return self.policy.choose_action(
+            state = state
+        )
     
     def update_policy(
         self,

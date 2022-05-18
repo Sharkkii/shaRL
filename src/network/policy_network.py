@@ -111,9 +111,8 @@ class ContinuousPolicyNetwork(BasePolicyNetwork):
     def __call__(
         self,
         state,
-        action # = None
     ):
-        return self.network(state, action)
+        return self.network(state)
 
     def P(
         self,

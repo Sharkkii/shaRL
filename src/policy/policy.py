@@ -187,7 +187,17 @@ class DiscretePolicy(BasePolicy):
         self,
         state
     ):
-        return self.policy_network(state)
+        return self.choose_action(
+            state = state
+        )
+
+    def choose_action(
+        self,
+        state
+    ):
+        action = self.policy_network(state)
+        action = torch.argmax(action)
+        return action
 
     def P(
         self,
@@ -251,10 +261,18 @@ class ContinuousPolicy(BasePolicy):
 
     def __call__(
         self,
-        state,
-        action = None
+        state
     ):
-        return self.policy_network(state, action)
+        return self.choose_action(
+            state = state
+        )
+
+    def choose_action(
+        self,
+        state
+    ):
+        action = self.policy_network(state)
+        return action
     
     def P(
         self,
