@@ -103,6 +103,18 @@ class BaseActor(metaclass=ABCMeta):
         self
     ):
         self._is_available = False
+
+    @property
+    def can_pointwise_estimate(
+        self
+    ):
+        return (self.is_available and self.policy.can_pointwise_estimate)
+
+    @property
+    def can_density_estimate(
+        self
+    ):
+        return (self.is_available and self.policy.can_density_estimate)
     
     def train(
         self

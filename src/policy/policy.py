@@ -99,6 +99,18 @@ class BasePolicy(metaclass=ABCMeta):
     ):
         self._is_available = False
 
+    @property
+    def can_pointwise_estimate(
+        self
+    ):
+        return False
+
+    @property
+    def can_density_estimate(
+        self
+    ):
+        return False
+
     def train(
         self
     ):
