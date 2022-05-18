@@ -1,3 +1,5 @@
+import torch
+import gym
 import pytest
 import sys, os
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
@@ -8,14 +10,26 @@ from src.policy import Policy
 from src.policy import DiscretePolicy
 from src.policy import ContinuousPolicy
 from src.actor import Actor
+from src.environment import Environment
 
+default_discrete_observation_space = gym.spaces.Discrete(2)
+default_continuous_observation_space = gym.spaces.Box(0, 1, shape=(1,))
+default_discrete_action_space = gym.spaces.Box(0, 1, shape=(1,))
+default_continuous_action_space = gym.spaces.Discrete(2)
 
-default_agent_interface = AgentInterface(
+default_agent_interface_with_discrete_action = AgentInterface(
     sin = 1,
     sout = 1,
     tin = SpaceType.CONTINUOUS,
     tout = SpaceType.DISCRETE
 )
+default_agent_interface_with_continuous_action = AgentInterface(
+    sin = 1,
+    sout = 1,
+    tin = SpaceType.CONTINUOUS,
+    tout = SpaceType.CONTINUOUS
+)
+default_agent_interface = default_agent_interface_with_discrete_action
 
 @pytest.mark.L3
 class TestActor():
@@ -95,3 +109,79 @@ class TestActor():
             use_default = True
         )
         assert type(actor.policy) is ContinuousPolicy
+
+    @pytest.mark.unit
+    def test_choose_action_should_return_valid_discrete_action(self):
+        interface = default_agent_interface_with_discrete_action
+        actor = Actor(
+            interface = interface,
+            use_default = True
+        )
+
+        env = Environment()
+        env.setup(
+            observation_space = default_continuous_observation_space,
+            action_space = default_discrete_action_space
+        )
+        state = env.reset()
+        action = actor.choose_action(state)
+        _ = env.step(action) # check whether valid
+        assert type(action) is torch.Tensor
+        assert action.dtype is torch.long
+
+    @pytest.mark.unit
+    def test_call_should_return_valid_discrete_action(self):
+        interface = default_agent_interface_with_discrete_action
+        actor = Actor(
+            interface = interface,
+            use_default = True
+        )
+
+        env = Environment()
+        env.setup(
+            observation_space = default_continuous_observation_space,
+            action_space = default_discrete_action_space
+        )
+        state = env.reset()
+        action = actor(state)
+        _ = env.step(action) # check whether valid
+        assert type(action) is torch.Tensor
+        assert action.dtype is torch.long
+
+    @pytest.mark.unit
+    def test_choose_action_should_return_valid_continuous_action(self):
+        interface = default_agent_interface_with_continuous_action
+        actor = Actor(
+            interface = interface,
+            use_default = True
+        )
+
+        env = Environment()
+        env.setup(
+            observation_space = default_continuous_observation_space,
+            action_space = default_continuous_action_space
+        )
+        state = env.reset()
+        action = actor.choose_action(state)
+        _ = env.step(action) # check whether valid
+        assert type(action) is torch.Tensor
+        assert action.dtype is torch.float32
+
+    @pytest.mark.unit
+    def test_call_should_return_valid_continuous_action(self):
+        interface = default_agent_interface_with_continuous_action
+        actor = Actor(
+            interface = interface,
+            use_default = True
+        )
+
+        env = Environment()
+        env.setup(
+            observation_space = default_continuous_observation_space,
+            action_space = default_continuous_action_space
+        )
+        state = env.reset()
+        action = actor(state)
+        _ = env.step(action) # check whether valid
+        assert type(action) is torch.Tensor
+        assert action.dtype is torch.float32

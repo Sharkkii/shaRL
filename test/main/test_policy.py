@@ -1,5 +1,5 @@
-from curses.ascii import SP
 import torch
+import gym
 import pytest
 import sys, os
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
@@ -12,9 +12,16 @@ from src.network import ContinuousPolicyNetwork
 from src.optimizer import MeasureOptimizer
 from src.policy import DiscretePolicy
 from src.policy import ContinuousPolicy
+from src.environment import Environment
 
 
 optimizer_factory = torch.optim.Adam
+
+default_discrete_observation_space = gym.spaces.Discrete(2)
+default_continuous_observation_space = gym.spaces.Box(0, 1, shape=(1,))
+default_discrete_action_space = gym.spaces.Box(0, 1, shape=(1,))
+default_continuous_action_space = gym.spaces.Discrete(2)
+
 default_agent_interface_with_discrete_action = AgentInterface(
     sin = 1,
     sout = 1,
@@ -105,6 +112,42 @@ class TestDiscretePolicy():
             use_default = True
         )
         assert type(policy.policy_network) is DiscretePolicyNetwork
+    
+    @pytest.mark.unit
+    def test_choose_action_should_return_valid_action(self):
+        interface = default_agent_interface_with_discrete_action
+        policy = DiscretePolicy(
+            interface = interface,
+            use_default = True
+        )
+
+        env = Environment()
+        env.setup(
+            observation_space = default_continuous_observation_space,
+            action_space = default_discrete_action_space
+        )
+        state = env.reset()
+        action = policy.choose_action(state)
+        assert type(action) is torch.Tensor
+        assert action.dtype is torch.long
+
+    @pytest.mark.unit
+    def test_call_should_should_return_valid_action(self):
+        interface = default_agent_interface_with_discrete_action
+        policy = DiscretePolicy(
+            interface = interface,
+            use_default = True
+        )
+
+        env = Environment()
+        env.setup(
+            observation_space = default_continuous_observation_space,
+            action_space = default_discrete_action_space
+        )
+        state = env.reset()
+        action = policy(state)
+        assert type(action) is torch.Tensor
+        assert action.dtype is torch.long
 
 
 @pytest.mark.L4
@@ -184,3 +227,39 @@ class TestContinuousPolicy():
             use_default = True
         )
         assert type(policy.policy_network) is ContinuousPolicyNetwork
+
+    @pytest.mark.unit
+    def test_choose_action_should_return_valid_action(self):
+        interface = default_agent_interface_with_continuous_action
+        policy = ContinuousPolicy(
+            interface = interface,
+            use_default = True
+        )
+
+        env = Environment()
+        env.setup(
+            observation_space = default_continuous_observation_space,
+            action_space = default_continuous_action_space
+        )
+        state = env.reset()
+        action = policy.choose_action(state)
+        assert type(action) is torch.Tensor
+        assert action.dtype is torch.float32
+
+    @pytest.mark.unit
+    def test_call_should_return_valid_action(self):
+        interface = default_agent_interface_with_continuous_action
+        policy = ContinuousPolicy(
+            interface = interface,
+            use_default = True
+        )
+
+        env = Environment()
+        env.setup(
+            observation_space = default_continuous_observation_space,
+            action_space = default_continuous_action_space
+        )
+        state = env.reset()
+        action = policy(state)
+        assert type(action) is torch.Tensor
+        assert action.dtype is torch.float32
