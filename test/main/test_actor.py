@@ -185,3 +185,35 @@ class TestActor():
         _ = env.step(action) # check whether valid
         assert type(action) is torch.Tensor
         assert action.dtype is torch.float32
+    
+    @pytest.mark.unit
+    @pytest.mark.parametrize(
+        "interface",
+        [
+            default_agent_interface_with_discrete_action,
+            default_agent_interface_with_continuous_action
+        ]
+    )
+    def test_we_can_check_whether_pointwise_estimation_is_available(self, interface):
+        actor = Actor(
+            interface = interface,
+            use_default = True
+        )
+        flag = actor.can_pointwise_estimate
+        assert type(flag) is bool
+
+    @pytest.mark.unit
+    @pytest.mark.parametrize(
+        "interface",
+        [
+            default_agent_interface_with_discrete_action,
+            default_agent_interface_with_continuous_action
+        ]
+    )
+    def test_we_can_check_whether_density_estimation_is_available(self, interface):
+        actor = Actor(
+            interface = interface,
+            use_default = True
+        )
+        flag = actor.can_density_estimate
+        assert type(flag) is bool
