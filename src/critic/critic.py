@@ -5,11 +5,12 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
+from ..const import SpaceType
 from ..common import AgentInterface
 from ..value import Value
-from ..value import PseudoValue
 from ..value import QValue
-from ..value import PseudoQValue
+from ..value import DiscreteQValue
+from ..value import ContinuousQValue
 from ..value import cast_to_value
 from ..value import cast_to_qvalue
 
@@ -35,10 +36,18 @@ class BaseCritic(metaclass=ABCMeta):
                 interface = interface,
                 use_default = True
             )
-            qvalue = QValue(
-                interface = interface,
-                use_default = True
-            )
+            if (interface.tout is SpaceType.DISCRETE):
+                qvalue = DiscreteQValue(
+                    interface = interface,
+                    use_default = True
+                )
+            elif (interface.tout is SpaceType.CONTINUOUS):
+                qvalue = ContinuousQValue(
+                    interface = interface,
+                    use_default = True
+                )
+            else:
+                raise ValueError("invalid interface")
 
         self.value = None # cast_to_value(value)
         self.qvalue = None # cast_to_qvalue(qvalue)

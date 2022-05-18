@@ -6,10 +6,12 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from ..network import PseudoMeasureNetwork
-from ..network import BaseMeasureNetwork
+from ..const import SpaceType
+from ..common import AgentInterface
 from ..network import ValueNetwork
 from ..network import QValueNetwork
+from ..network import DiscreteQValueNetwork
+from ..network import ContinuousQValueNetwork
 from ..network import cast_to_measure_network
 from ..optimizer import Optimizer
 
@@ -215,10 +217,20 @@ class BaseQValue(metaclass=ABCMeta):
         if (use_default):
             if (not ((qvalue_network is None) and (qvalue_optimizer is None))):
                 raise ValueError("`qvalue_network` & `qvalue_optimizer` must be None if `use_default = True`")
-            qvalue_network = QValueNetwork(
-                interface = interface,
-                use_default = True
-            )
+            if (type(interface) is not AgentInterface):
+                raise ValueError("`interface` must be 'AgentInterface' object if `use_default = True`")
+            if (interface.tout is SpaceType.DISCRETE):
+                qvalue_network = DiscreteQValueNetwork(
+                    interface = interface,
+                    use_default = True
+                )
+            elif (interface.tout is SpaceType.CONTINUOUS):
+                qvalue_network = ContinuousQValueNetwork(
+                    interface = interface,
+                    use_default = True
+                )
+            else:
+                raise ValueError("invalid interface")
             qvalue_optimizer = Optimizer(torch.optim.Adam)
 
         self.qvalue_network = None # cast_to_measure_network(qvalue_network)
@@ -347,18 +359,20 @@ class ContinuousQValue(BaseQValue):
         self,
         qvalue_network = None,
         qvalue_optimizer = None,
+        interface = None,
         use_default = False
     ):
         super().__init__(
             qvalue_network,
             qvalue_optimizer,
+            interface = interface,
             use_default = use_default
         )
 
     def __call__(
         self,
         state,
-        action
+        action = None
     ):
         return self.qvalue_network(state, action)
 

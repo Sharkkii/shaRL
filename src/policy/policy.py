@@ -8,11 +8,12 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from ..const import SpaceType
 from ..const import PhaseType
 from ..common import AgentInterface
-from ..network import PseudoMeasureNetwork
-from ..network import BaseMeasureNetwork
 from ..network import PolicyNetwork
+from ..network import DiscretePolicyNetwork
+from ..network import ContinuousPolicyNetwork
 from ..network import cast_to_measure_network
 from ..optimizer import Optimizer
 
@@ -31,10 +32,18 @@ class BasePolicy(metaclass=ABCMeta):
                 raise ValueError("`policy_network` & `policy_optimizer` must be None if `use_default = True`")
             if (type(interface) is not AgentInterface):
                 raise ValueError("`interface` must be 'AgentInterface' object if `use_default = True`")
-            policy_network = PolicyNetwork(
-                interface = interface,
-                use_default = True
-            )
+            if (interface.tout is SpaceType.DISCRETE):
+                policy_network = DiscretePolicyNetwork(
+                    interface = interface,
+                    use_default = True
+                )
+            elif (interface.tout is SpaceType.CONTINUOUS):
+                policy_network = ContinuousPolicyNetwork(
+                    interface = interface,
+                    use_default = True
+                )
+            else:
+                raise ValueError("invalid interface")
             policy_optimizer = Optimizer(torch.optim.Adam)
 
         self.policy_network = None # cast_to_measure_network(policy_network)
@@ -221,6 +230,7 @@ class ContinuousPolicy(BasePolicy):
         super().__init__(
             policy_network = policy_network,
             policy_optimizer = policy_optimizer,
+            interface = interface,
             use_default = use_default
         )
     
@@ -242,7 +252,7 @@ class ContinuousPolicy(BasePolicy):
     def __call__(
         self,
         state,
-        action
+        action = None
     ):
         return self.policy_network(state, action)
     

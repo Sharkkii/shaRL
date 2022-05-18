@@ -95,10 +95,19 @@ class ContinuousQValueNetwork(BaseMeasureNetwork):
 
     def __init__(
         self,
-        qvalue_network,
+        qvalue_network = None,
         interface = None,
         use_default = False
     ):
+        if (use_default):
+            if (qvalue_network is not None):
+                raise ValueError("`qvalue_network` must be None if `use_default = True`")
+            if (type(interface) is not AgentInterface):
+                raise ValueError("`interface` must be 'AgentInterface' object if `use_default = True`")
+            qvalue_network = DefaultNetwork(
+                interface = interface
+            )
+
         super().__init__(
             network = qvalue_network
         )
@@ -119,7 +128,7 @@ class ContinuousQValueNetwork(BaseMeasureNetwork):
     def __call__(
         self,
         state,
-        action
+        action = None
     ):
         return self.network(state, action)
 

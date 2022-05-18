@@ -78,11 +78,22 @@ class ContinuousPolicyNetwork(BasePolicyNetwork):
 
     def __init__(
         self,
-        policy_network,
+        policy_network = None,
         interface = None,
         use_default = False
     ):
-        self.network = policy_network if callable(policy_network) else (lambda state, noise: None)
+        if (use_default):
+            if (policy_network is not None):
+                raise ValueError("`policy_network` must be None if `use_default = True`")
+            if (type(interface) is not AgentInterface):
+                raise ValueError("`interface` must be 'AgentInterface' object if `use_default = True`")
+            policy_network = DefaultNetwork(
+                interface = interface
+            )
+
+        super().__init__(
+            network = policy_network
+        )
 
     def reset(
         self
@@ -93,13 +104,14 @@ class ContinuousPolicyNetwork(BasePolicyNetwork):
         self,
         policy_network = None
     ):
-        assert(callable(policy_network))
-        self.network = policy_network
+        super().setup(
+            network = policy_network
+        )
     
     def __call__(
         self,
         state,
-        action
+        action # = None
     ):
         return self.network(state, action)
 

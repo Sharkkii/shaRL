@@ -7,8 +7,8 @@ from gym.spaces import Box, Discrete
 
 from ..const import PhaseType
 from ..const import SpaceType
-from ..policy import Policy
-from ..policy import PseudoPolicy
+from ..policy import DiscretePolicy
+from ..policy import ContinuousPolicy
 from ..policy import cast_to_policy
 
 
@@ -24,10 +24,20 @@ class BaseActor(metaclass=ABCMeta):
         if (use_default):
             if (policy is not None):
                 raise ValueError("`policy` must be None if `use_default = True`")
-            policy = Policy(
-                interface = interface,
-                use_default = True
-            )
+            if (interface is None):
+                raise ValueError("invalid interface")
+            if (interface.tout is SpaceType.DISCRETE):
+                policy = DiscretePolicy(
+                    interface = interface,
+                    use_default = True
+                )
+            elif (interface.tout is SpaceType.CONTINUOUS):
+                policy = ContinuousPolicy(
+                    interface = interface,
+                    use_default = True
+                )
+            else:
+                raise ValueError("invalid interface")
 
         self.policy = None # cast_to_policy(policy)
         self.target_policy = None # self.policy.copy()
