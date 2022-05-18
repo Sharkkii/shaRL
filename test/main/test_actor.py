@@ -2,14 +2,19 @@ import pytest
 import sys, os
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 
+from src.const import SpaceType
 from src.common import AgentInterface
 from src.policy import Policy
+from src.policy import DiscretePolicy
+from src.policy import ContinuousPolicy
 from src.actor import Actor
 
 
 default_agent_interface = AgentInterface(
     sin = 1,
-    sout = 1
+    sout = 1,
+    tin = SpaceType.CONTINUOUS,
+    tout = SpaceType.DISCRETE
 )
 
 @pytest.mark.L3
@@ -62,3 +67,31 @@ class TestActor():
                 interface = interface,
                 use_default = True
             )
+
+    @pytest.mark.unit
+    def test_should_have_discrete_policy_if_interface_specifies_so(self):
+        interface = AgentInterface(
+            sin = 1,
+            sout = 1,
+            tin = SpaceType.CONTINUOUS,
+            tout = SpaceType.DISCRETE
+        )
+        actor = Actor(
+            interface = interface,
+            use_default = True
+        )
+        assert type(actor.policy) is DiscretePolicy
+    
+    @pytest.mark.unit
+    def test_should_have_continuous_policy_if_interface_specifies_so(self):
+        interface = AgentInterface(
+            sin = 1,
+            sout = 1,
+            tin = SpaceType.CONTINUOUS,
+            tout = SpaceType.CONTINUOUS
+        )
+        actor = Actor(
+            interface = interface,
+            use_default = True
+        )
+        assert type(actor.policy) is ContinuousPolicy
