@@ -6,6 +6,7 @@ import torch
 
 from ..const import PhaseType
 from ..common import AgentInterface
+from ..dataset import SARS
 from ..actor import Actor
 from ..critic import Critic
 from ..environment import Model
@@ -119,11 +120,11 @@ class BaseAgent(metaclass=ABCMeta):
     def choose_action(
         self,
         state,
-        action_space = None
+        # action_space = None
     ):
         return self.actor.choose_action(
             state = state,
-            action_space = action_space
+            # action_space = action_space
         )
 
     @property
@@ -214,7 +215,7 @@ class BaseAgent(metaclass=ABCMeta):
     #     raise NotImplementedError
 
     @abstractmethod
-    def interact_with(
+    def interact_with_env(
         self,
         env,
         use_info
@@ -335,11 +336,13 @@ class Agent(BaseAgent):
             n_times = n_times
         )
 
-    def interact_with(
+    def interact_with_env(
         self,
         env,
-        n_times = 1,
-        n_limit = 1000,
+        # n_times = 1, # deprecated -> use `n_episode`
+        # n_limit = 1000, # deprecated -> use `max_nstep`
+        n_episode = 1,
+        max_nstep = 1000,
         phase = PhaseType.NONE,
         use_info = False,
         verbose = False
@@ -348,19 +351,20 @@ class Agent(BaseAgent):
         history = []
         info_history = []
 
-        for _ in range(n_times):
+        for _ in range(n_episode):
 
             t = 0
             state = env.reset()
             done = False
-            for _ in range(n_limit):
+            for _ in range(max_nstep):
                 if (done): break
                 action = self.actor.choose_action(
                     state = state,
-                    phase = phase
+                    # phase = phase
                 )
                 next_state, reward, done, info = env.step(action)
-                history.append((state, action, reward, next_state))
+                data = SARS(state, action, reward, next_state)
+                history.append(data)
                 state = next_state
                 if (use_info):
                     info_history.append(info)
@@ -389,5 +393,3 @@ class Agent(BaseAgent):
         return self.memory.replay(
             n_sample = n_sample
         )
-
-    

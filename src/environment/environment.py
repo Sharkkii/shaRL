@@ -62,11 +62,11 @@ class BaseEnvironment(metaclass=ABCMeta):
 
         if (type(action) is torch.Tensor):
 
-            if (self.interface.observation_type is SpaceType.DISCRETE):
-                flag = (action.dtype is torch.long) and (tuple(action.size()) == (1,))
+            if (self.interface.action_type is SpaceType.DISCRETE):
+                flag = (action.dtype is torch.long) and (tuple(action.shape) in ((), (1,)))
         
-            elif (self.interface.observation_type is SpaceType.CONTINUOUS):
-                flag = (action.dtype is torch.float32) and (tuple(action.size()) == self.interface.observation_shape)
+            elif (self.interface.action_type is SpaceType.CONTINUOUS):
+                flag = (action.dtype is torch.float32) and (tuple(action.shape) == self.interface.action_shape)
         
         return flag
     
