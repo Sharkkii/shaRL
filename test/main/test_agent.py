@@ -1,3 +1,4 @@
+from curses.ascii import SP
 import pytest
 import sys, os
 import gym
@@ -5,6 +6,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 
 from src.const import SpaceType
 from src.common import AgentInterface
+from src.common.helper import is_list_of_data
 from src.actor import Actor
 from src.critic import Critic
 from src.agent import Agent
@@ -13,7 +15,9 @@ from src.environment import Environment
 
 default_agent_interface = AgentInterface(
     sin = 1,
-    sout = 1
+    sout = 1,
+    tin = SpaceType.CONTINUOUS,
+    tout = SpaceType.DISCRETE
 )
 
 @pytest.mark.L2
@@ -85,7 +89,12 @@ class TestAgent():
                 gym.spaces.Box(low = 0.0, high = 1.0, shape = (1,)),
                 gym.spaces.Box(low = 0.0, high = 1.0, shape = (1,)),
                 AgentInterface(sin = 1, sout = 1, tin = SpaceType.CONTINUOUS, tout = SpaceType.CONTINUOUS)
-            )
+            ),
+            (
+                gym.spaces.Box(low = 0.0, high = 1.0, shape = (5,)),
+                gym.spaces.Discrete(2),
+                AgentInterface(sin = 5, sout = 1, tin = SpaceType.CONTINUOUS, tout = SpaceType.DISCRETE)
+            ),
         ]
     )
     def test_action_should_be_accepted_if_valid(
@@ -114,12 +123,12 @@ class TestAgent():
     @pytest.mark.parametrize(
         "env_observation_space, env_action_space, agent_interface",
         [
-            (
+            # (
                 # Discrete(X) -> sout = 1
-                gym.spaces.Box(low = 0.0, high = 1.0, shape = (1,)),
-                gym.spaces.Discrete(2),
-                AgentInterface(sin = 1, sout = 10, tin = SpaceType.CONTINUOUS, tout = SpaceType.DISCRETE)
-            ),
+                # gym.spaces.Box(low = 0.0, high = 1.0, shape = (1,)),
+                # gym.spaces.Discrete(2),
+                # AgentInterface(sin = 1, sout = 10, tin = SpaceType.CONTINUOUS, tout = SpaceType.DISCRETE)
+            # ),
             (
                 # Box(shape = X) -> sout = X
                 gym.spaces.Box(low = 0.0, high = 1.0, shape = (1,)),
@@ -149,3 +158,48 @@ class TestAgent():
         state = env.reset()
         action = agent.choose_action(state)
         assert env.can_accept_action(action = action) == False
+
+    @pytest.mark.integration
+    def test_can_interact_with_environment_for_one_step(self):
+        
+        env = Environment()
+        env.setup(
+            observation_space = gym.spaces.Box(low = 0.0, high = 1.0, shape = (1,)),
+            action_space = gym.spaces.Discrete(2)
+        )
+
+        agent = Agent(
+            interface = default_agent_interface,
+            use_default = True
+        )
+
+        state = env.reset()
+        action = agent.choose_action(state)
+        assert env.can_accept_action(action) == True
+        state, reward, done, info = env.step(action)
+
+    @pytest.mark.unit
+    @pytest.mark.integration
+    @pytest.mark.parametrize(
+        "max_nstep",
+        [
+            1, 10, 100, 1000
+        ]
+    )
+    def test_can_interact_with_env(self, max_nstep):
+
+        env = Environment()
+        env.setup(
+            observation_space = gym.spaces.Box(low = 0.0, high = 1.0, shape = (1,)),
+            action_space = gym.spaces.Discrete(2)
+        )
+
+        agent = Agent(
+            interface = default_agent_interface,
+            use_default = True
+        )
+        history = agent.interact_with_env(
+            env = env,
+            max_nstep = max_nstep
+        )
+        assert is_list_of_data(history) == True
