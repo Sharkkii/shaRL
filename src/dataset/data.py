@@ -37,7 +37,11 @@ class BaseData:
         return goal_set
 
 
-class SA(BaseData):
+class Data(BaseData):
+    pass
+
+
+class SA(Data):
 
     def __init__(
         self,
@@ -60,7 +64,7 @@ class SA(BaseData):
         return dataset
 
 
-class SARS(BaseData):
+class SARS(Data):
 
     def __init__(
         self,
@@ -89,7 +93,7 @@ class SARS(BaseData):
         return dataset
 
 
-class SARSA(BaseData):
+class SARSA(Data):
 
     def __init__(
         self,
@@ -121,7 +125,7 @@ class SARSA(BaseData):
         return dataset
 
 
-class SAG(BaseData):
+class SAG(Data):
 
     def __init__(
         self,

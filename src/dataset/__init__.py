@@ -1,3 +1,4 @@
+from .data import Data
 from .data import SA
 from .data import SARS
 from .data import SARSA
