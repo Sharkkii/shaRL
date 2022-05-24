@@ -5,6 +5,7 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset as TorchDataset
 
+from ..common import check_whether_available
 from .data import SARS
 
 
@@ -153,18 +154,23 @@ class Dataset(BaseDataset):
             transform = transform
         )
 
+    @check_whether_available
     def __len__(
         self
     ):
-        if (self.is_available):
+        if (len(self.collection) > 0):
             return len(self.collection)
         else:
-            return 0
+            return 1
     
+    @check_whether_available
     def __getitem__(
         self,
         index
     ):
+        if (len(self.collection) == 0):
+            return None
+
         index = index % len(self)
         item = self.collection[index]
         if (self.check_whether_valid_transform(self.transform)):
@@ -202,6 +208,13 @@ class SarsDataset(Dataset):
             collection = collection,
             transform = transform
         )
+
+    def __getitem__(
+        self,
+        index
+    ):
+        sars = super().__getitem__(index = index)
+        return (sars.state, sars.action, sars.reward, sars.next_state)
 
     def add_collection(
         self,

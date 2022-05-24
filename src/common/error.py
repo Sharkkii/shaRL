@@ -1,0 +1,2 @@
+class UninitializedComponentException(Exception):
+    pass
