@@ -87,6 +87,17 @@ class BaseDataLoader(Component, metaclass=ABCMeta):
     def check_whether_valid_dataset(self, dataset):
         return isinstance(dataset, BaseDataset) and dataset.is_available
 
+    @Component.check_whether_available
+    def add(
+        self,
+        collection
+    ):
+        self.dataset.add(collection = collection)
+
+    @Component.check_whether_available
+    def save(self, collection):
+        self.add(collection = collection)
+
 
 class DataLoader(BaseDataLoader):
 

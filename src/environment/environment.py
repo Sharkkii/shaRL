@@ -93,7 +93,7 @@ class BaseEnvironment(metaclass=ABCMeta):
     def score(
         self,
         history,
-        info_history
+        info_history = None
     ):
         raise NotImplementedError
 
@@ -155,7 +155,7 @@ class Environment(BaseEnvironment):
     def score(
         self,
         history,
-        info_history
+        info_history = None
     ):
         warnings.warn("`score` is not implemented.")
         score_dictionary = {}

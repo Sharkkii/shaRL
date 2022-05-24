@@ -7,6 +7,7 @@ from ..const import PhaseType
 from ..const import EnvironmentModelType, AgentStrategyType, AgentBehaviorType, AgentLearningType
 from ..memory import RLDataset, RLDataLoader
 from ..memory import TensorConverter
+from ..dataset import SarsDataset, DataLoader
 
 
 class BaseController(metaclass=ABCMeta):
@@ -96,7 +97,8 @@ class Controller(BaseController):
         self
     ):
         super().reset()
-    
+
+    # alias of `train` (for compatibility)
     def fit(
         self,
         n_epoch = 1,
@@ -113,9 +115,43 @@ class Controller(BaseController):
         shuffle = True,
         return_score = True,
     ):
+        return self.train(
+            self,
+            n_epoch = n_epoch,
+            n_sample = n_sample,
+            n_sample_start = n_sample_start,
+            n_eval = n_eval, # deprecated
+            n_train_eval = n_train_eval,
+            n_test_eval = n_test_eval,
+            n_eval_interval = n_eval_interval,
+            n_env_step = env_step,
+            n_gradient_step = gradient_step, # supported only when `gradient_step` < 0
+            max_dataset_size = dataset_size,
+            batch_size = batch_size,
+            shuffle = shuffle,
+            return_score = return_score,
+        )
+    
+    def train(
+        self,
+        n_epoch = 1,
+        n_sample = 1,
+        n_sample_start = 1,
+        n_eval = None, # deprecated
+        n_train_eval = 1,
+        n_test_eval = 0,
+        n_eval_interval = 10,
+        n_env_step = 1,
+        n_gradient_step = -1, # supported only when `gradient_step` < 0
+        max_dataset_size = 100000,
+        batch_size = 100,
+        shuffle = True,
+        return_score = True,
+    ):
 
-        if (gradient_step > 0):
+        if (n_gradient_step >= 0):
             warnings.warn("`gradient_step` controlls how many batches we use to update parameters. It's better to use the default value -1 (use all batches).")
+            n_gradient_step = -1
 
         if (n_eval is not None):
             warnings.warn("`n_eval` is deprecated. Use `n_train_eval` & `n_test_eval` instead.")
@@ -130,13 +166,23 @@ class Controller(BaseController):
         # assert(n_sample <= n_sample_start <= self.agent.memory.capacity)
 
         # FIXME: define dataset & dataloader
-        transform = TensorConverter()
-        dataset = RLDataset(
-            min_size = batch_size,
-            max_size = dataset_size,
-            transform = transform
+        # transform = TensorConverter()
+        # dataset = RLDataset(
+        #     min_size = batch_size,
+        #     max_size = max_dataset_size,
+        #     transform = transform
+        # )
+        # dataloader = RLDataLoader(
+        #     dataset = dataset,
+        #     batch_size = batch_size,
+        #     shuffle = shuffle
+        # )
+
+        dataset = SarsDataset(
+            collection = [],
+            transform = None
         )
-        dataloader = RLDataLoader(
+        dataloader = DataLoader(
             dataset = dataset,
             batch_size = batch_size,
             shuffle = shuffle
@@ -161,26 +207,26 @@ class Controller(BaseController):
             trajs_env = []
             trajs_model = []
 
-            for step in range(env_step):
+            for step in range(n_env_step):
 
                 self.agent.setup_on_every_step(
                     step = step,
-                    n_step = env_step
+                    n_step = n_env_step
                 )
 
                 # interact w/ environment
                 if (model_type == EnvironmentModelType.MODEL_FREE):
-                    trajs_env = self.agent.interact_with(
-                        self.env,
-                        n_times = 1,
+                    trajs_env = self.agent.interact_with_env(
+                        env = self.env,
+                        n_episode = 1,
                         phase = PhaseType.TRAINING
                     )
 
                 # interact w/ model    
                 if (model_type == EnvironmentModelType.MODEL_BASED):
-                    trajs_model = self.agent.interact_with(
-                        self.agent.model,
-                        n_times = 1,
+                    trajs_model = self.agent.interact_with_env(
+                        env = self.agent.model,
+                        n_episode = 1,
                         phase = PhaseType.TRAINING
                     )
 
@@ -204,7 +250,7 @@ class Controller(BaseController):
             #         continue
 
             # optimize policy & value
-            if (gradient_step <= 0):
+            if (n_gradient_step <= 0):
                 
                 # use all data
                 # NOTE: history: {(s,a,r,s)}
