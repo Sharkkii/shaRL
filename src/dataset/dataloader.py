@@ -5,7 +5,7 @@ from tabnanny import check
 from torch.utils.data import DataLoader as TorchDataLoader
 from torch.utils.data._utils.collate import default_collate
 
-from ..common import check_whether_available
+from ..common import Component
 from .dataset import BaseDataset
 
 
@@ -15,7 +15,7 @@ def custom_collate_fn(batch):
     return default_collate(batch)
 
 
-class BaseDataLoader(metaclass=ABCMeta):
+class BaseDataLoader(Component, metaclass=ABCMeta):
 
     @abstractmethod
     def __init__(
@@ -24,11 +24,11 @@ class BaseDataLoader(metaclass=ABCMeta):
         batch_size = 1,
         shuffle = True
     ):
+        Component.__init__(self)
         self.dataset = None
         self.dataloader = None
         self.batch_size = None
         self.shuffle = None
-        self._is_available = False
         self.setup(
             dataset = dataset,
             batch_size = batch_size,
@@ -65,7 +65,7 @@ class BaseDataLoader(metaclass=ABCMeta):
             )
             self._become_available()
 
-    @check_whether_available
+    @Component.check_whether_available
     def __iter__(
         self
     ):
@@ -77,22 +77,6 @@ class BaseDataLoader(metaclass=ABCMeta):
         if (len(self.dataset.collection) == 0):
             return _iterator()
         return iter(self.dataloader)
-
-    @property
-    def is_available(
-        self
-    ):
-        return self._is_available
-
-    def _become_available(
-        self
-    ):
-        self._is_available = True
-
-    def _become_unavailable(
-        self
-    ):
-        self._is_available = False
 
     def check_whether_valid_size(self, size):
         return (type(size) is int) and (size > 0)

@@ -6,23 +6,17 @@ from tabnanny import check
 import torch
 import torch.nn as nn
 
+from ..common import Component
 
-class BaseMeasureNetwork(metaclass=ABCMeta):
-
-    def check_whether_available(f):
-        def wrapper(self, *args, **kwargs):
-            if (not self.is_available):
-                raise Exception(f"'{ __class__.__name__ }' object must be setup before using `{ __class__.__name__ }.{ f.__name__ }`")
-            return f(self, *args, **kwargs)
-        return wrapper
+class BaseMeasureNetwork(Component, metaclass=ABCMeta):
 
     @abstractmethod
     def __init__(
         self,
         network = None
     ):
+        Component.__init__(self)
         self.network = None
-        self._is_available = False
         self.setup(network)
 
     @abstractmethod
@@ -48,22 +42,6 @@ class BaseMeasureNetwork(metaclass=ABCMeta):
             self.network = network
             self._become_available()
 
-    @property
-    def is_available(
-        self
-    ):
-        return self._is_available
-
-    def _become_available(
-        self
-    ):
-        self._is_available = True
-
-    def _become_unavailable(
-        self
-    ):
-        self._is_available = False
-
     def train(
         self
     ):
@@ -74,7 +52,7 @@ class BaseMeasureNetwork(metaclass=ABCMeta):
     ):
         self.network.eval()
     
-    @check_whether_available
+    @Component.check_whether_available
     def parameters(
         self
     ):

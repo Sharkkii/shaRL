@@ -5,4 +5,4 @@ from .helper import cast_space_to_type
 
 from .error import UninitializedComponentException
 
-from .checker import check_whether_available
+from .component import Component

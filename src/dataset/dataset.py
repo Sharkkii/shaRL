@@ -5,7 +5,7 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset as TorchDataset
 
-from ..common import check_whether_available
+from ..common import Component
 from .data import SARS
 
 
@@ -14,7 +14,7 @@ from .data import SARS
 # T_REWARD = float
 
 
-class BaseDataset(TorchDataset, metaclass=ABCMeta):
+class BaseDataset(Component, TorchDataset, metaclass=ABCMeta):
 
     @abstractmethod
     def __init__(
@@ -22,9 +22,9 @@ class BaseDataset(TorchDataset, metaclass=ABCMeta):
         collection = None,
         transform = None
     ):
+        Component.__init__(self)
         self.collection = None      
         self.transform = None
-        self._is_available = False
         self.setup(
             collection = collection,
             transform = transform
@@ -104,22 +104,6 @@ class BaseDataset(TorchDataset, metaclass=ABCMeta):
     ):
         self.remove_collection(n = n)
 
-    @property
-    def is_available(
-        self
-    ):
-        return self._is_available
-
-    def _become_available(
-        self
-    ):
-        self._is_available = True
-
-    def _become_unavailable(
-        self
-    ):
-        self._is_available = False
-
     def check_whether_valid_collection(self, collection):
         return (collection is not None) and (hasattr(collection, "__iter__")) and (hasattr(collection, "__getitem__"))
 
@@ -154,7 +138,7 @@ class Dataset(BaseDataset):
             transform = transform
         )
 
-    @check_whether_available
+    @Component.check_whether_available
     def __len__(
         self
     ):
@@ -163,7 +147,7 @@ class Dataset(BaseDataset):
         else:
             return 1
     
-    @check_whether_available
+    @Component.check_whether_available
     def __getitem__(
         self,
         index

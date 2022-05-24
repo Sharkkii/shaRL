@@ -5,23 +5,17 @@ import torch
 import torch.nn as nn
 import torch.optim
 
+from ..common import Component
 from ..network import BaseMeasureNetwork
 from ..network import PseudoMeasureNetwork
 
-class BaseMeasureOptimizer(metaclass=ABCMeta):
-
-    def check_whether_available(f):
-        def wrapper(self, *args, **kwargs):
-            if (self.is_available):
-                raise Exception(f"Call `Optimizer.setup` before using `Optimizer.{ f.__name__ }`")
-            return f(self, *args, **kwargs)
-        return wrapper
+class BaseMeasureOptimizer(Component, metaclass=ABCMeta):
 
     @abstractmethod
     def __init__(
         self
     ):
-        raise NotImplementedError
+        Component.__init__(self)
     
     @abstractmethod
     def reset(
@@ -35,35 +29,19 @@ class BaseMeasureOptimizer(metaclass=ABCMeta):
     ):
         raise NotImplementedError
 
-    @property
-    def is_available(
-        self
-    ):
-        return self._is_available
-
-    def _become_available(
-        self
-    ):
-        self._is_available = True
-
-    def _become_unavailable(
-        self
-    ):
-        self._is_available = False
-
-    @check_whether_available
+    @Component.check_whether_available
     def zero_grad(
         self
     ):
         self.optimizer.zero_grad()
 
-    @check_whether_available
+    @Component.check_whether_available
     def step(
         self
     ):
         self.optimizer.step()
 
-    @check_whether_available
+    @Component.check_whether_available
     def clip_grad_value(
         self,
         value = 1.0
@@ -71,7 +49,7 @@ class BaseMeasureOptimizer(metaclass=ABCMeta):
         for parameter in self.network.parameters():
             torch.nn.utils.clip_grad_value_(parameter.grad, value)
     
-    @check_whether_available
+    @Component.check_whether_available
     def clip_grad_norm(
         self,
         value = 1.0
@@ -92,8 +70,8 @@ class TemplateMeasureOptimizer(BaseMeasureOptimizer):
         network = None,
         **kwargs
     ):
+        BaseMeasureOptimizer.__init__(self)
         self.optimizer = None
-        self._is_available = False
 
         self.setup(
             network = network,
