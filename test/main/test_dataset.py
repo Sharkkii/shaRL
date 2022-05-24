@@ -90,7 +90,12 @@ class TestDataset():
         assert dataset.is_available == False
 
     @pytest.mark.unit
-    def test_should_be_unavailable_on_nonempty_initialization(self):
+    def test_should_be_available_on_nonempty_initialization_with_empty_collection(self):
+        dataset = Dataset(collection = [])
+        assert dataset.is_available == True
+
+    @pytest.mark.unit
+    def test_should_be_unavailable_on_nonempty_initialization_with_nonempty_collection(self):
         collection = [ 1, 2, 3 ]
         dataset = Dataset(
             collection = collection
@@ -162,9 +167,22 @@ class TestDataset():
 class TestSarsDataset():
 
     @pytest.mark.unit
-    def test_should_be_unavailable_on_initialization(self):
+    def test_should_be_unavailable_on_empty_initialization(self):
         dataset = SarsDataset()
         assert dataset.is_available == False
+
+    @pytest.mark.unit
+    def test_should_be_available_on_nonempty_initialization_with_empty_collection(self):
+        dataset = SarsDataset(collection = [])
+        assert dataset.is_available == True
+
+    @pytest.mark.unit
+    def test_should_be_unavailable_on_nonempty_initialization_with_nonempty_collection(self):
+        collection = SARS.random(n = 3)
+        dataset = Dataset(
+            collection = collection
+        )
+        assert dataset.is_available == True
 
     @pytest.mark.unit
     def test_should_be_available_after_valid_setup(self):
@@ -246,3 +264,63 @@ class TestDataLoader():
             shuffle = True
         )
         assert dataloader.is_available == False
+
+    @pytest.mark.unit
+    def test_should_allow_dataset_with_empty_collection(self):
+        dataset = Dataset(collection = [])
+        dataloader = DataLoader(
+            dataset = dataset,
+            batch_size = 1,
+            shuffle = False
+        )
+        assert dataloader.is_available == True
+
+    @pytest.mark.unit
+    def test_should_yield_item_in_random_order(self):
+        dataset = Dataset(collection = [ "a", "b", "c" ])
+        dataloader = DataLoader(
+            dataset = dataset,
+            batch_size = 1,
+            shuffle = True
+        )
+
+        loader = iter(dataloader)
+        collection = set()
+        for _ in range(3):
+            item = next(loader)
+            collection.add(item[0])
+        assert collection == { "a", "b", "c" }
+
+    @pytest.mark.unit
+    def test_should_yield_item_in_order(self):
+        dataset = Dataset(collection = [ "a", "b", "c" ])
+        dataloader = DataLoader(
+            dataset = dataset,
+            batch_size = 1,
+            shuffle = False
+        )
+
+        loader = iter(dataloader)
+        item = next(loader)
+        assert item[0] == "a"
+        item = next(loader)
+        assert item[0] == "b"
+        item = next(loader)
+        assert item[0] == "c"
+
+    @pytest.mark.unit
+    def test_should_yield_batch_in_order(self):
+        dataset = Dataset(collection = [ "a", "b", "c", "d" ])
+        dataloader = DataLoader(
+            dataset = dataset,
+            batch_size = 2,
+            shuffle = False
+        )
+
+        loader = iter(dataloader)
+        batch = next(loader)
+        assert batch[0] == "a"
+        assert batch[1] == "b"
+        batch = next(loader)
+        assert batch[0] == "c"
+        assert batch[1] == "d"
