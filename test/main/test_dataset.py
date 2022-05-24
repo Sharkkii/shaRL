@@ -3,6 +3,7 @@ import pytest
 import sys, os
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 
+from src.common import UninitializedComponentException
 from src.dataset import SA
 from src.dataset import SARS
 from src.dataset import SARSA
@@ -163,6 +164,18 @@ class TestDataset():
         dataset.remove(n = 2)
         assert len(dataset) == 3
 
+    @pytest.mark.unit
+    def test_should_raise_value_error_if_collection_is_none(self):
+        dataset = Dataset(collection = None)
+        with pytest.raises(UninitializedComponentException) as message:
+            _ = dataset[0]
+
+    @pytest.mark.unit
+    def test_should_return_none_if_collection_is_empty(self):
+        dataset = Dataset(collection = [])
+        for idx in [ 0, 1, 10, 100, 1000, 10000 ]:
+            assert dataset[idx] is None
+
 
 class TestSarsDataset():
 
@@ -274,6 +287,27 @@ class TestDataLoader():
             shuffle = False
         )
         assert dataloader.is_available == True
+
+    @pytest.mark.unit
+    def test_should_raise_value_error_if_collection_is_none(self):
+        dataset = Dataset(collection = None)
+        dataloader = DataLoader(
+            dataset = dataset
+        )
+        with pytest.raises(UninitializedComponentException) as message:
+            loader = iter(dataloader)
+            _ = next(loader)
+
+    @pytest.mark.unit
+    def test_should_return_none_if_collection_is_empty(self):
+        dataset = Dataset(collection = [])
+        dataloader = DataLoader(
+            dataset = dataset
+        )
+        loader = iter(dataloader)
+        for _ in range(3):
+            batch = next(loader)
+            assert batch is None
 
     @pytest.mark.unit
     def test_should_yield_item_in_random_order(self):
