@@ -235,21 +235,42 @@ class GymEnvironment(BaseEnvironment):
         action = self.action_space.sample()
         return action
 
+    def score(
+        self,
+        history,
+        info_history = None
+    ):
+        score_dictionary = {
+            "total_reward": None
+        }
+        if (len(history) > 0):
+            total_reward = 0
+            for sars in history:
+                total_reward = total_reward + sars.reward
+            total_reward = int(total_reward)
+            score_dictionary["total_reward"] = total_reward
+        return score_dictionary
+
 class CartPoleEnvironment(GymEnvironment):
 
     def __init__(
-        self
+        self,
+        version = "v1"
     ):
+        if (version not in ("v0", "v1")):
+            raise ValueError("`version`: ('v0', 'v1')")
+        self.name = "CartPole-" + version
+
         super().__init__(
-            name = "CartPole-v0"
+            configuration = { "name": self.name }
         )
-        self._t = 0
-        self._T = 200
+        self.t = 0
+        self.T = 500 if (version == "v1") else 200
 
     def reset(
         self
     ):
-        self._t = 0
+        self.t = 0
         return super().reset()
     
     def step(
@@ -257,12 +278,16 @@ class CartPoleEnvironment(GymEnvironment):
         action
     ):
         observation, reward, done, info = self.env.step(action)
-        self._t += 1
+        self.t += 1
+
         if (done):
-            reward = 1.0 if (self._t >= self._T) else -1.0
+            reward = 1.0 if (self.t >= self.T) else -1.0
         else:
-            reward = 0.1
-        return observation, reward, done, info
+            reward = 1.0
+
+        observation = torch.from_numpy(observation.astype(np.float32))
+        reward = torch.tensor(reward, dtype=torch.float32)
+        return (observation, reward, done, info)
     
     def score(
         self,
