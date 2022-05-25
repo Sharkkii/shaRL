@@ -5,8 +5,6 @@ from abc import ABCMeta, abstractmethod
 
 from ..const import PhaseType
 from ..const import EnvironmentModelType, AgentStrategyType, AgentBehaviorType, AgentLearningType
-from ..memory import RLDataset, RLDataLoader
-from ..memory import TensorConverter
 from ..dataset import SarsDataset, DataLoader
 
 
@@ -125,7 +123,7 @@ class Controller(BaseController):
         n_test_eval = 0,
         n_eval_interval = 10,
         env_step = 1,
-        gradient_step = -1, # supported only when `gradient_step` < 0
+        gradient_step = 1,
         dataset_size = 100000,
         batch_size = 100,
         shuffle = True,
@@ -141,7 +139,7 @@ class Controller(BaseController):
             n_test_eval = n_test_eval,
             n_eval_interval = n_eval_interval,
             n_env_step = env_step,
-            n_gradient_step = gradient_step, # supported only when `gradient_step` < 0
+            n_gradient_step = gradient_step,
             max_dataset_size = dataset_size,
             batch_size = batch_size,
             shuffle = shuffle,
@@ -158,16 +156,15 @@ class Controller(BaseController):
         n_test_eval = 0,
         n_eval_interval = 10,
         n_env_step = 1,
-        n_gradient_step = -1, # supported only when `gradient_step` < 0
+        n_gradient_step = 1,
         max_dataset_size = 100000,
         batch_size = 100,
         shuffle = True,
         return_score = True,
     ):
 
-        if (n_gradient_step >= 0):
-            warnings.warn("`gradient_step` controlls how many batches we use to update parameters. It's better to use the default value -1 (use all batches).")
-            n_gradient_step = -1
+        if (n_gradient_step < 0):
+            raise ValueError("`n_gradient_step` must be greater than 0.")
 
         if (n_eval is not None):
             warnings.warn("`n_eval` is deprecated. Use `n_train_eval` & `n_test_eval` instead.")
@@ -180,19 +177,6 @@ class Controller(BaseController):
         learning_type = AgentLearningType.OFFLINE
 
         # assert(n_sample <= n_sample_start <= self.agent.memory.capacity)
-
-        # FIXME: define dataset & dataloader
-        # transform = TensorConverter()
-        # dataset = RLDataset(
-        #     min_size = batch_size,
-        #     max_size = max_dataset_size,
-        #     transform = transform
-        # )
-        # dataloader = RLDataLoader(
-        #     dataset = dataset,
-        #     batch_size = batch_size,
-        #     shuffle = shuffle
-        # )
 
         dataset = SarsDataset(
             collection = [],
@@ -235,7 +219,9 @@ class Controller(BaseController):
                     trajs_env = self.agent.interact_with_env(
                         env = self.env,
                         n_episode = 1,
-                        phase = PhaseType.TRAINING
+                        information = {
+                            "phase": PhaseType.TRAINING
+                        }
                     )
 
                 # interact w/ model    
@@ -243,7 +229,9 @@ class Controller(BaseController):
                     trajs_model = self.agent.interact_with_env(
                         env = self.agent.model,
                         n_episode = 1,
-                        phase = PhaseType.TRAINING
+                        information = {
+                            "phase": PhaseType.TRAINING
+                        }
                     )
 
             trajs = trajs_env + trajs_model
@@ -266,12 +254,11 @@ class Controller(BaseController):
             #         continue
 
             # optimize policy & value
-            if (n_gradient_step <= 0):
-                
-                # use all data
+            for step in range(n_gradient_step):
+
                 # NOTE: history: {(s,a,r,s)}
                 for history in dataloader:
-
+                    
                     # guard
                     if (len(history[0]) < batch_size):
                         continue
@@ -285,23 +272,6 @@ class Controller(BaseController):
                     # learn dynamics
                     # if (model_type == EnvironmentModelType.MODEL_BASED):
                     #     self.agent.update_model(history, n_times=1)
-
-            else:
-                assert(False)
-
-                # use the number (designated by `gradient_step`) of batches
-                # NOT supported now
-                for _ in range(gradient_step):
-
-                    # update value function (critic)
-                    self.agent.update_critic(trajs, n_times=1)
-
-                    # update policy (actor)
-                    self.agent.update_actor(trajs, n_times=1)
-
-                    # learn dynamics
-                    if (model_type == EnvironmentModelType.MODEL_BASED):
-                        self.agent.update_model(trajs, n_times=1)
 
             # TODO: learn something if needed
             # self.agent.update_every_epoch(
@@ -343,10 +313,12 @@ class Controller(BaseController):
         
         # evaluate (train)
         for _ in range(n_train_eval):
-            history, info_history = self.agent.interact_with(
+            history, info_history = self.agent.interact_with_env(
                 self.env,
-                n_times = 1,
-                phase = PhaseType.TRAINING,
+                n_episode = 1,
+                information = {
+                    "phase": PhaseType.TRAINING
+                },
                 use_info = True
             )
             score = self.env.score(
@@ -358,12 +330,15 @@ class Controller(BaseController):
         
         # evlauate (test)
         for _ in range(n_test_eval):
-            history, info_history = self.agent.interact_with(
+            history, info_history = self.agent.interact_with_env(
                 self.env,
-                n_times = 1,
-                phase = PhaseType.TEST,
+                n_episode = 1,
+                information = {
+                    "phase": PhaseType.TEST
+                },
                 use_info = True
             )
+
             score = self.env.score(
                 history,
                 info_history
