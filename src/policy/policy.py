@@ -7,17 +7,18 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import gym
 
 from ..const import SpaceType
 from ..const import PhaseType
 from ..common import AgentInterface
+from ..common import Component
 from ..network import PolicyNetwork
 from ..network import DiscretePolicyNetwork
 from ..network import ContinuousPolicyNetwork
-from ..network import cast_to_measure_network
 from ..optimizer import Optimizer
 
-class BasePolicy(metaclass=ABCMeta):
+class BasePolicy(Component, metaclass=ABCMeta):
 
     @abstractmethod
     def __init__(
@@ -27,6 +28,7 @@ class BasePolicy(metaclass=ABCMeta):
         interface = None,
         use_default = False
     ):
+        Component.__init__(self)
         if (use_default):
             if (not ((policy_network is None) and (policy_optimizer is None))):
                 raise ValueError("`policy_network` & `policy_optimizer` must be None if `use_default = True`")
@@ -44,11 +46,10 @@ class BasePolicy(metaclass=ABCMeta):
                 )
             else:
                 raise ValueError("invalid interface")
-            policy_optimizer = Optimizer(torch.optim.Adam)
+            policy_optimizer = Optimizer(torch.optim.Adam, lr=1e-3)
 
-        self.policy_network = None # cast_to_measure_network(policy_network)
-        self.policy_optimizer = None # policy_optimizer
-        self._is_available = False
+        self.policy_network = None
+        self.policy_optimizer = None
         self.setup(
             policy_network = policy_network,
             policy_optimizer = policy_optimizer
@@ -82,22 +83,6 @@ class BasePolicy(metaclass=ABCMeta):
             )
             self._become_available()
             print(f"Policy.setup: { self.policy_network } & { self.policy_optimizer }")
-
-    @property
-    def is_available(
-        self
-    ):
-        return self._is_available
-
-    def _become_available(
-        self
-    ):
-        self._is_available = True
-
-    def _become_unavailable(
-        self
-    ):
-        self._is_available = False
 
     @property
     def can_pointwise_estimate(
@@ -205,7 +190,8 @@ class DiscretePolicy(BasePolicy):
 
     def choose_action(
         self,
-        state
+        state,
+        information = None
     ):
         action = self.policy_network(state)
         action = torch.argmax(action)
@@ -281,7 +267,8 @@ class ContinuousPolicy(BasePolicy):
 
     def choose_action(
         self,
-        state
+        state,
+        information = None
     ):
         action = self.policy_network(state)
         return action
@@ -393,25 +380,22 @@ class PseudoPolicy(BasePolicy):
     ):
         PseudoPolicy.__raise_exception()
 
-class QBasedPolicy(BasePolicy):
-    
-    def check_whether_available(f):
-        def wrapper(self, *args, **kwargs):
-            if (self.reference_qvalue is None):
-                raise Exception(f"Call `QBasedPolicy.setup` before using `QBasedPolicy.{ f.__name__ }`")
-            return f(self, *args, **kwargs)
-        return wrapper
+class QValueBasedPolicy(BasePolicy):
 
     def __init__(
         self,
         policy_network = None,
         policy_optimizer = None,
-        reference_qvalue = None # read-only
+        reference_qvalue = None, # read-only
+        interface = None,
+        use_default = False
     ):
         super().__init__(
             policy_network = policy_network,
-            policy_optimizer = policy_optimizer
-        )
+            policy_optimizer = policy_optimizer,
+            interface = interface,
+            use_default = use_default
+        )   
         if (reference_qvalue is not None):
             self.setup_reference_qvalue(reference_qvalue)
 
@@ -431,26 +415,38 @@ class QBasedPolicy(BasePolicy):
             policy_optimizer = policy_optimizer
         )
         if (reference_qvalue is not None):
+            # self.policy_network = policy_network
+            # self.policy_optimizer = policy_optimizer
+            # self.policy_optimizer.setup(
+            #     network = self.policy_network
+            # )
             self.setup_reference_qvalue(reference_qvalue)
+            self._become_available()
+            # print(f"Policy.setup: { self.policy_network } & { self.policy_optimizer }")
+
+        # super().setup(
+        #     policy_network = policy_network,
+        #     policy_optimizer = policy_optimizer
+        # )
     
     def setup_reference_qvalue(
         self,
         reference_qvalue
     ):
-        assert(reference_qvalue is not None)
+        if (reference_qvalue is None):
+            raise ValueError("`reference_qvalue` must not be None.")
         self.reference_qvalue = reference_qvalue.copy()
 
-    @check_whether_available
+    @Component.check_whether_available
     def __call__(
         self,
-        state,
-        action = None
+        state
     ):
-        assert(action is None)
-        q = self.reference_qvalue(state)
-        return q
+        return self.choose_action(
+            state = state
+        )
 
-    @check_whether_available
+    @Component.check_whether_available
     def P(
         self,
         state,
@@ -465,7 +461,7 @@ class QBasedPolicy(BasePolicy):
         else:
             return p[action]
     
-    @check_whether_available
+    @Component.check_whether_available
     def logP(
         self,
         state,
@@ -480,29 +476,62 @@ class QBasedPolicy(BasePolicy):
         else:
             return log_p[action]
 
-    @check_whether_available
-    def sample(
+    @Component.check_whether_available
+    def choose_action(
         self,
         state,
-        action_space,
-        phase,
-        eps = 0.0
+        information = None,
+        # random = False # will be in `information`
     ):
+        if (type(information) is not dict):
+            raise ValueError("`information` must be a 'dictionary' object.")
+
+        # action_space
+        if ("action_space" not in information):
+            raise ValueError("`information` must have 'action_space' key.")
+        if (not isinstance(information["action_space"], gym.Space)):
+            raise ValueError("`action_space` must be a 'gym.spaces' object.")
+        action_space = information["action_space"]
+
+        # phase
+        if ("phase" not in information):
+            raise ValueError("`information` must have 'phase' key.")
+        if (type(information["phase"]) is not PhaseType):
+            raise ValueError("`phase` must be 'PhaseType'.")
+        phase = information["phase"]
+
+        # eps
+        if ("eps" not in information):
+            raise ValueError("`information` must have 'eps' key.")
+        if (type(information["eps"]) is not float):
+            raise ValueError("`eps` must be 'float'.")
+        eps = information["eps"]
+
         # epsilon-greedy
         with torch.no_grad():
 
-            state = torch.from_numpy(state)
             q = self.reference_qvalue(state).numpy()
 
-            if (phase in [PhaseType.TRAINING]):
+            if (phase in [PhaseType.TEST]):
+                action = np.argmax(q)
+            
+            else:
                 r = np.random.rand()
                 if (r <= action_space.n * eps):
                     action = action_space.sample()
                 else:
                     action = np.argmax(q)
 
-            elif (phase in [PhaseType.TEST]):
-                action = np.argmax(q)
-
         action = np.int64(action)
         return action
+
+    @Component.check_whether_available
+    def sample(
+        self,
+        state,
+        information = None
+    ):
+        return self.choose_action(
+            state,
+            information = information
+        )

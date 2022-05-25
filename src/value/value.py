@@ -8,14 +8,14 @@ import torch.nn as nn
 
 from ..const import SpaceType
 from ..common import AgentInterface
+from ..common import Component
 from ..network import ValueNetwork
 from ..network import QValueNetwork
 from ..network import DiscreteQValueNetwork
 from ..network import ContinuousQValueNetwork
-from ..network import cast_to_measure_network
-from ..optimizer import Optimizer
+from ..optimizer import MeasureOptimizer
 
-class BaseValue(metaclass=ABCMeta):
+class BaseValue(Component, metaclass=ABCMeta):
 
     @abstractmethod
     def __init__(
@@ -25,6 +25,7 @@ class BaseValue(metaclass=ABCMeta):
         interface = None,
         use_default = False
     ):
+        Component.__init__(self)
         if (use_default):
             if (not ((value_network is None) and (value_optimizer is None))):
                 raise ValueError("`value_network` & `value_optimizer` must be None if `use_default = True`")
@@ -32,11 +33,10 @@ class BaseValue(metaclass=ABCMeta):
                 interface = interface,
                 use_default = True
             )
-            value_optimizer = Optimizer(torch.optim.Adam)
+            value_optimizer = MeasureOptimizer(torch.optim.Adam, lr=1e-3)
 
-        self.value_network = None # cast_to_measure_network(value_network)
-        self.value_optimizer = None # value_optimizer
-        self._is_available = False
+        self.value_network = None
+        self.value_optimizer = None
         self.setup(
             value_network = value_network,
             value_optimizer = value_optimizer
@@ -69,22 +69,6 @@ class BaseValue(metaclass=ABCMeta):
             )
             self._become_available()
         print(f"Value.setup: { self.value_network } & { self.value_optimizer }")
-
-    @property
-    def is_available(
-        self
-    ):
-        return self._is_available
-
-    def _become_available(
-        self
-    ):
-        self._is_available = True
-
-    def _become_unavailable(
-        self
-    ):
-        self._is_available = False
 
     def train(
         self
@@ -204,7 +188,7 @@ class PseudoValue(BaseValue):
     ):
         PseudoValue.__raise_exception()
 
-class BaseQValue(metaclass=ABCMeta):
+class BaseQValue(Component, metaclass=ABCMeta):
 
     @abstractmethod
     def __init__(
@@ -214,6 +198,7 @@ class BaseQValue(metaclass=ABCMeta):
         interface = None,
         use_default = False
     ):
+        Component.__init__(self)
         if (use_default):
             if (not ((qvalue_network is None) and (qvalue_optimizer is None))):
                 raise ValueError("`qvalue_network` & `qvalue_optimizer` must be None if `use_default = True`")
@@ -231,11 +216,10 @@ class BaseQValue(metaclass=ABCMeta):
                 )
             else:
                 raise ValueError("invalid interface")
-            qvalue_optimizer = Optimizer(torch.optim.Adam)
+            qvalue_optimizer = MeasureOptimizer(torch.optim.Adam, lr=1e-3)
 
-        self.qvalue_network = None # cast_to_measure_network(qvalue_network)
-        self.qvalue_optimizer = None # qvalue_optimizer
-        self._is_available = False
+        self.qvalue_network = None
+        self.qvalue_optimizer = None
         self.setup(
             qvalue_network = qvalue_network,
             qvalue_optimizer = qvalue_optimizer
@@ -269,22 +253,6 @@ class BaseQValue(metaclass=ABCMeta):
             )
             self._become_available()
             print(f"QValue.setup: { self.qvalue_network } & { self.qvalue_optimizer }")
-    
-    @property
-    def is_available(
-        self
-    ):
-        return self._is_available
-
-    def _become_available(
-        self
-    ):
-        self._is_available = True
-
-    def _become_unavailable(
-        self
-    ):
-        self._is_available = False
     
     def train(
         self

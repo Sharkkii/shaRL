@@ -148,7 +148,8 @@ class BaseActor(metaclass=ABCMeta):
     @abstractmethod
     def choose_action(
         self,
-        state
+        state,
+        information = None
     ):
         raise NotImplementedError
 
@@ -232,18 +233,22 @@ class Actor(BaseActor):
 
     def __call__(
         self,
-        state
+        state,
+        information = None
     ):
         return self.choose_action(
-            state = state
+            state = state,
+            information = information
         )
 
     def choose_action(
         self,
-        state
+        state,
+        information = None
     ):
         return self.policy.choose_action(
-            state = state
+            state = state,
+            information = information
         )
     
     def update_policy(

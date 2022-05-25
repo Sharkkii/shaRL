@@ -6,14 +6,15 @@ import torch
 
 from ..const import PhaseType
 from ..common import AgentInterface
-from ..dataset import SARS
+from ..common import Component
+from ..common import SARS
 from ..actor import Actor
 from ..critic import Critic
 from ..environment import Model
 from ..memory import RLMemory
 
 
-class BaseAgent(metaclass=ABCMeta):
+class BaseAgent(Component, metaclass=ABCMeta):
 
     @abstractmethod
     def __init__(
@@ -27,6 +28,7 @@ class BaseAgent(metaclass=ABCMeta):
         gamma = 1.0, # will be in `configuration`
         use_default = False
     ):
+        Component.__init__(self)
         if (use_default):
             if (not ((actor is None) and (critic is None))):
                 raise ValueError("`actor` & `critic` must be None if `use_default = True`")
@@ -50,7 +52,6 @@ class BaseAgent(metaclass=ABCMeta):
         self.model = Model() if (model is None) else model
         self.memory = RLMemory() if (memory is None) else memory
         self.gamma = gamma
-        self._is_available = False
         self.setup(
             actor = actor,
             critic = critic
@@ -81,9 +82,14 @@ class BaseAgent(metaclass=ABCMeta):
         if ((actor is not None) and (critic is not None)):
             self.actor = actor
             self.critic = critic
+            self.critic.setup_with_actor(
+                actor = self.actor
+            )
+            self.actor.setup_with_critic(
+                critic = self.critic
+            )
             self._become_available()
 
-        # self.env = env
         # self.actor.setup(
         #     env = env,
         #     policy_network = policy_network,
@@ -95,12 +101,6 @@ class BaseAgent(metaclass=ABCMeta):
         #     qvalue_network = qvalue_network,
         #     value_optimizer = value_optimizer,
         #     qvalue_optimizer = qvalue_optimizer,
-        # )
-        # self.actor.setup_with_critic(
-        #     critic = self.critic
-        # )
-        # self.critic.setup_with_actor(
-        #     actor = self.actor
         # )
         # self.model.setup(env)
         # self.memory.setup()
@@ -124,28 +124,12 @@ class BaseAgent(metaclass=ABCMeta):
     def choose_action(
         self,
         state,
-        # action_space = None
+        information = None
     ):
         return self.actor.choose_action(
             state = state,
-            # action_space = action_space
+            information = information
         )
-
-    @property
-    def is_available(
-        self
-    ):
-        return self._is_available
-
-    def _become_available(
-        self
-    ):
-        self._is_available = True
-
-    def _become_unavailable(
-        self
-    ):
-        self._is_available = False
 
     def train(
         self
@@ -222,7 +206,8 @@ class BaseAgent(metaclass=ABCMeta):
     def interact_with_env(
         self,
         env,
-        use_info
+        information = None,
+        use_info = False
     ):
         raise NotImplementedError
     
@@ -349,10 +334,19 @@ class Agent(BaseAgent):
         # n_limit = 1000, # deprecated -> use `max_nstep`
         n_episode = 1,
         max_nstep = 1000,
-        phase = PhaseType.NONE,
+        information = None,
         use_info = False,
-        verbose = False
+        verbose = False,
     ):
+
+        if (information is None):
+            information = {}
+
+        if (type(information) is not dict):
+            raise ValueError("`information` must be a 'dictionary' object.")
+
+        # action_space
+        information["action_space"] = env.action_space
 
         history = []
         info_history = []
@@ -366,7 +360,7 @@ class Agent(BaseAgent):
                 if (done): break
                 action = self.actor.choose_action(
                     state = state,
-                    # phase = phase
+                    information = information
                 )
                 next_state, reward, done, info = env.step(action)
                 data = SARS(state, action, reward, next_state)
