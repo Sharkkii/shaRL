@@ -10,7 +10,7 @@ from src.environment import Environment
 from src.environment import GymEnvironment
 
 
-default_gymenvironment_name = "CartPole-v1"
+default_gymenvironment_configuration = { "name": "CartPole-v1" }
 @pytest.mark.L2
 class TestEnvironment():
 
@@ -103,38 +103,56 @@ class TestGymEnvironment():
 
     @pytest.mark.unit
     def test_should_be_available_on_valid_initialization(self):
+        configuration = { "name": "CartPole-v1" }
         env = GymEnvironment(
-            name = "CartPole-v1"
+            configuration = configuration
         )
         assert env.is_available == True
 
     @pytest.mark.unit
-    def test_should_raise_value_error_on_invalid_intialization(self):
+    @pytest.mark.parametrize(
+        "configuration",
+        [
+            { "name": "INVALID_NAME" },
+            { "key": "value" }
+        ]
+    )
+    def test_should_raise_value_error_on_invalid_intialization(self, configuration):
         with pytest.raises(ValueError) as message:
             env = GymEnvironment(
-                name = "INVALID_NAME"
+                configuration = configuration
             )
 
     @pytest.mark.unit
     def test_should_be_available_after_valid_setup(self):
+        configuration = { "name": "CartPole-v1" }
         env = GymEnvironment()
         env.setup(
-            name = "CartPole-v1"
+            configuration = configuration
         )
         assert env.is_available == True
 
-    def test_should_raise_value_error_after_invalid_setup(self):
+    @pytest.mark.unit
+    @pytest.mark.parametrize(
+        "configuration",
+        [
+            { "name": "INVALID_NAME" },
+            { "key": "value" }
+        ]
+    )
+    def test_should_raise_value_error_after_invalid_setup(self, configuration):
+        configuration = configuration
         env = GymEnvironment()
         with pytest.raises(ValueError) as message:
             env = GymEnvironment(
-                name = "INVALID_NAME"
+               configuration = configuration
             )
 
     @pytest.mark.unit
     def test_should_have_observation_space(self):
         env = GymEnvironment()
         env.setup(
-            name = default_gymenvironment_name
+            configuration = default_gymenvironment_configuration
         )
         assert isinstance(env.observation_space, gym.Space)
 
@@ -142,7 +160,7 @@ class TestGymEnvironment():
     def test_should_have_action_space(self):
         env = GymEnvironment()
         env.setup(
-            name = default_gymenvironment_name
+            configuration = default_gymenvironment_configuration
         )
         assert isinstance(env.action_space, gym.Space)
 
@@ -150,7 +168,7 @@ class TestGymEnvironment():
     def test_reset_method_should_return_single_observation(self):
         env = GymEnvironment()
         env.setup(
-            name = default_gymenvironment_name
+            configuration = default_gymenvironment_configuration
         )
         observation = env.reset()
         assert type(observation) is torch.Tensor
@@ -160,7 +178,7 @@ class TestGymEnvironment():
     def test_sample_method_should_return_single_action(self):
         env = GymEnvironment()
         env.setup(
-            name = default_gymenvironment_name
+            configuration = default_gymenvironment_configuration
         )
         _ = env.reset()
         action = env.sample()
@@ -170,7 +188,7 @@ class TestGymEnvironment():
     def test_step_method_should_return_tuple_of_obs_r_done_info(self):
         env = GymEnvironment()
         env.setup(
-            name = default_gymenvironment_name
+            configuration = default_gymenvironment_configuration
         )
         _ = env.reset()
         action = env.sample()

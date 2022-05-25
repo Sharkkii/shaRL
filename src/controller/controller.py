@@ -17,16 +17,17 @@ class BaseController(metaclass=ABCMeta):
         self,
         environment = None,
         agent = None,
-        config = None
+        config_e = None,
+        config_a = None
     ):
         self.env = environment
         self.agent = agent
-        self.config = config
         self._is_available = False
         self.setup(
             environment = environment,
             agent = agent,
-            config = config
+            config_e = config_e,
+            config_a = config_a
         )
     
     @abstractmethod
@@ -34,13 +35,24 @@ class BaseController(metaclass=ABCMeta):
         self,
         environment = None,
         agent = None,
-        config = None
+        config_e = None,
+        config_a = None
     ):
         if ((environment is not None) and (agent is not None)):
+            
             self.env = environment
             self.agent = agent
-            self.env.setup()
-            self.agent.setup()
+            
+            if (config_e is None):
+                self.env.setup()
+            else:
+                self.env.setup(config_e)
+
+            if (config_a is None):
+                self.agent.setup()
+            else:
+                self.agent.setup(config_a)
+
             self._become_available()
     
     @abstractmethod
@@ -73,24 +85,28 @@ class Controller(BaseController):
         self,
         environment = None,
         agent = None,
-        config = {}
+        config_e = None,
+        config_a = None
     ):
         super().__init__(
             environment = environment,
             agent = agent,
-            config = config
+            config_e = config_e,
+            config_a = config_a
         )
     
     def setup(
         self,
         environment = None,
         agent = None,
-        config = None
+        config_e = None,
+        config_a = None
     ):
         super().setup(
             environment = environment,
             agent = agent,
-            config = config
+            config_e = config_e,
+            config_a = config_a
         )
 
     def reset(

@@ -14,7 +14,8 @@ class BaseEnvironment(metaclass=ABCMeta):
 
     @abstractmethod
     def __init__(
-        self
+        self,
+        configuration = None
     ):
         self.state_space = None
         self.action_space = None
@@ -22,6 +23,7 @@ class BaseEnvironment(metaclass=ABCMeta):
         self.state = None
         self._is_available = False
         self.interface = None
+        self.configuration = None
     
     @abstractmethod
     def reset(
@@ -31,7 +33,8 @@ class BaseEnvironment(metaclass=ABCMeta):
 
     @abstractmethod
     def setup(
-        self
+        self,
+        configuration = None
     ):
         self._become_available()
 
@@ -101,9 +104,12 @@ class BaseEnvironment(metaclass=ABCMeta):
 class Environment(BaseEnvironment):
 
     def __init__(
-        self
+        self,
+        configuration = None
     ):
-       super().__init__()
+       super().__init__(
+           configuration = configuration
+       )
     
     def reset(
         self
@@ -115,8 +121,9 @@ class Environment(BaseEnvironment):
 
     def setup(
         self,
-        observation_space = gym.spaces.Box(low = 0.0, high = 1.0, shape=(1,)),
-        action_space = gym.spaces.Discrete(2)
+        configuration = None,
+        observation_space = gym.spaces.Box(low = 0.0, high = 1.0, shape=(1,)), # will be in `configuration`
+        action_space = gym.spaces.Discrete(2) # will be in `configuration`
     ):
         if (isinstance(observation_space, gym.spaces.Space) and isinstance(action_space, gym.spaces.Space)):      
             self.observation_space = self.state_space = observation_space
@@ -165,11 +172,13 @@ class GymEnvironment(BaseEnvironment):
 
     def __init__(
         self,
-        name = None
+        configuration = None
     ):
         self.env = None
         self._is_available = False
-        self.setup(name)
+        self.setup(
+            configuration = configuration
+        )
 
     @property
     def observation_space(
@@ -193,8 +202,15 @@ class GymEnvironment(BaseEnvironment):
 
     def setup(
         self,
-        name = ""
+        configuration = None
     ):
+        if (configuration is None): return
+        if (type(configuration) is not dict):
+            raise ValueError("`configuration` must be 'Dictionary' object.")
+        if ("name" not in configuration):
+            raise ValueError("`configuration` must have 'name' key.")
+        
+        name = configuration["name"]
         if (type(name) is str):
             try:
                 self.env = gym.make(name)

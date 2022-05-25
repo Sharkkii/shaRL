@@ -20,10 +20,11 @@ class BaseAgent(metaclass=ABCMeta):
         self,
         actor = None,
         critic = None,
-        model = None,
-        memory = None,
-        gamma = 1.0,
         interface = None,
+        configuration = None,
+        model = None, # will be in `component`
+        memory = None, # will be in `component`
+        gamma = 1.0, # will be in `configuration`
         use_default = False
     ):
         if (use_default):
@@ -39,6 +40,9 @@ class BaseAgent(metaclass=ABCMeta):
                 interface = interface,
                 use_default = True
             )
+
+        if ((configuration is not None) and (type(configuration) is not dict)):
+            raise ValueError("`configuration` must be 'Dictionary' object or None")
 
         self.actor = Actor() if (actor is None) else actor
         self.critic = Critic() if (critic is None) else critic
@@ -242,19 +246,21 @@ class Agent(BaseAgent):
         self,
         actor = None,
         critic = None,
-        model = None,
-        memory = None,
-        gamma = 1.0,
         interface = None,
+        configuration = None,
+        model = None, # will be in `component`
+        memory = None, # will be in `component`
+        gamma = 1.0, # will be in `configuration`
         use_default = False
     ):
         super().__init__(
             actor = actor,
             critic = critic,
+            interface = interface,
+            configuration = configuration,
             model = model,
             memory = memory,
             gamma = gamma,
-            interface = interface,
             use_default = use_default
         )
     

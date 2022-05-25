@@ -1,4 +1,4 @@
-from curses.ascii import SP
+from email.policy import default
 import pytest
 import sys, os
 import gym
@@ -74,6 +74,34 @@ class TestAgent():
                 critic = critic,
                 interface = interface,
                 use_default = True
+            )
+
+    @pytest.mark.unit
+    def test_should_accept_dictionary_type_configuration(self):
+        actor = Actor()
+        critic = Critic()
+        interface = default_agent_interface
+        configuration = { "key": "value" }
+        agent = Agent(
+            actor = actor,
+            critic = critic,
+            interface = interface,
+            configuration = configuration
+        )
+        assert agent.is_available == True
+
+    @pytest.mark.unit
+    def test_should_reject_non_dictionary_type_configuration(self):
+        actor = Actor()
+        critic = Critic()
+        interface = default_agent_interface
+        configuration = ( "value1", "value2", "value3" )
+        with pytest.raises(ValueError) as message:
+            agent = Agent(
+                actor = actor,
+                critic = critic,
+                interface = interface,
+                configuration = configuration
             )
 
     @pytest.mark.unit
