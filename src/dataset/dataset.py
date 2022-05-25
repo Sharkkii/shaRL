@@ -6,7 +6,7 @@ import torch
 from torch.utils.data import Dataset as TorchDataset
 
 from ..common import Component
-from .data import SARS
+from ..common.data import SARS
 
 
 # T_STATE = torch.tensor

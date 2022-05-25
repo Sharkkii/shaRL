@@ -1,7 +1,7 @@
 import gym
 from functools import reduce
 from ...const import SpaceType
-from ...dataset import Data
+from ..data import Data
 
 def cast_space_to_type(
     space

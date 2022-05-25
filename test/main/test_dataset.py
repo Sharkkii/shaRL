@@ -4,10 +4,10 @@ import sys, os
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 
 from src.common import UninitializedComponentException
-from src.dataset import SA
-from src.dataset import SARS
-from src.dataset import SARSA
-from src.dataset import SAG
+from src.common import SA
+from src.common import SARS
+from src.common import SARSA
+from src.common import SAG
 from src.dataset import Dataset
 from src.dataset import SarsDataset
 from src.dataset import DataLoader
