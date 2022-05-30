@@ -10,7 +10,9 @@ from src.common.helper import is_list_of_data
 from src.actor import Actor
 from src.critic import Critic
 from src.agent import Agent
+from src.agent import GoalConditionedAgent
 from src.environment import Environment
+from src.environment import GoalReachingTaskEnvironment
 
 
 default_agent_interface = AgentInterface(
@@ -187,6 +189,7 @@ class TestAgent():
         action = agent.choose_action(state)
         assert env.can_accept_action(action = action) == False
 
+    @pytest.mark.unit
     @pytest.mark.integration
     def test_can_interact_with_environment_for_one_step(self):
         
@@ -223,6 +226,58 @@ class TestAgent():
         )
 
         agent = Agent(
+            interface = default_agent_interface,
+            use_default = True
+        )
+        history = agent.interact_with_env(
+            env = env,
+            max_nstep = max_nstep
+        )
+        assert is_list_of_data(history) == True
+
+
+@pytest.mark.L2
+class TestGoalConditionedAgent:
+
+    @pytest.mark.unit
+    @pytest.mark.integration
+    def test_can_interact_with_environment_for_one_step(self):
+        
+        env = GoalReachingTaskEnvironment()
+        env.setup(
+            observation_space = gym.spaces.Box(low = 0.0, high = 1.0, shape = (1,)),
+            action_space = gym.spaces.Discrete(2),
+            goal_space = gym.spaces.Box(low = 0.0, high = 1.0, shape = (1,))
+        )
+
+        agent = GoalConditionedAgent(
+            interface = default_agent_interface,
+            use_default = True
+        )
+
+        state = env.reset()
+        action = agent.choose_action(state)
+        assert env.can_accept_action(action) == True
+        state, goal, done, info = env.step(action)
+
+    @pytest.mark.unit
+    @pytest.mark.integration
+    @pytest.mark.parametrize(
+        "max_nstep",
+        [
+            1, 10, 100, 1000
+        ]
+    )
+    def test_can_interact_with_environment(self, max_nstep):
+
+        env = GoalReachingTaskEnvironment()
+        env.setup(
+            observation_space = gym.spaces.Box(low = 0.0, high = 1.0, shape = (1,)),
+            action_space = gym.spaces.Discrete(2),
+            goal_space = gym.spaces.Box(low = 0.0, high = 1.0, shape = (1,))
+        )
+
+        agent = GoalConditionedAgent(
             interface = default_agent_interface,
             use_default = True
         )

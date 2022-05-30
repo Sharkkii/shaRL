@@ -7,10 +7,12 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 
 from src.const import SpaceType
 from src.environment import Environment
+from src.environment import GoalReachingTaskEnvironment
 from src.environment import GymEnvironment
 
 
 default_gymenvironment_configuration = { "name": "CartPole-v1" }
+
 @pytest.mark.L2
 class TestEnvironment():
 
@@ -197,4 +199,97 @@ class TestGymEnvironment():
         assert observation.dtype is torch.float32
         assert type(reward) is torch.Tensor
         assert reward.dtype is torch.float32
+        assert type(done) is bool
+
+
+@pytest.mark.L2
+class TestGoalReachingTaskEnvironment():
+
+    @pytest.mark.unit
+    def test_should_be_unavailable_on_initialization(self):
+        env = GoalReachingTaskEnvironment()
+        assert env.is_available == False
+
+    @pytest.mark.unit
+    def test_should_be_available_after_setup(self):
+        env = GoalReachingTaskEnvironment()
+        env.setup()
+        assert env.is_available == True
+
+    @pytest.mark.unit
+    def test_should_have_observation_space(self):
+        env = GoalReachingTaskEnvironment()
+        env.setup()
+        assert isinstance(env.observation_space, gym.Space)
+
+    @pytest.mark.unit
+    def test_should_have_action_space(self):
+        env = GoalReachingTaskEnvironment()
+        env.setup()
+        assert isinstance(env.action_space, gym.Space)
+
+    @pytest.mark.unit
+    def test_should_have_goal_space(self):
+        env = GoalReachingTaskEnvironment()
+        env.setup()
+        assert isinstance(env.goal_space, gym.Space)
+
+    @pytest.mark.unit
+    def test_reset_method_should_return_single_observation_if_do_not_use_goal(self):
+        env = GoalReachingTaskEnvironment()
+        env.setup()
+        observation = env.reset(
+            use_goal = False
+        )
+        assert type(observation) is torch.Tensor
+        assert observation.dtype is torch.float32
+
+    @pytest.mark.unit
+    def test_reset_method_should_return_observation_and_goal_if_only_use_goal(self):
+        env = GoalReachingTaskEnvironment()
+        env.setup()
+        observation, goal = env.reset(
+            use_goal = True
+        )
+        assert type(observation) is torch.Tensor
+        assert observation.dtype is torch.float32
+        assert type(goal) is torch.Tensor
+        assert goal.dtype is torch.float32
+
+    @pytest.mark.unit
+    def test_sample_method_should_return_single_action(self):
+        env = GoalReachingTaskEnvironment()
+        env.setup()
+        _ = env.reset()
+        action = env.sample()
+        assert action is not None
+    
+    @pytest.mark.unit
+    def test_step_method_should_return_tuple_of_obs_done_info_if_dont_use_goal(self):
+        env = GoalReachingTaskEnvironment()
+        env.setup()
+        _ = env.reset()
+        action = env.sample()
+        observation, done, info = env.step(
+            action,
+            use_goal = False
+        )
+        assert type(observation) is torch.Tensor
+        assert observation.dtype is torch.float32
+        assert type(done) is bool
+
+    @pytest.mark.unit
+    def test_step_method_should_return_tuple_of_obs_goal_done_info_if_only_use_goal(self):
+        env = GoalReachingTaskEnvironment()
+        env.setup()
+        _ = env.reset()
+        action = env.sample()
+        observation, goal, done, info = env.step(
+            action,
+            use_goal = True
+        )
+        assert type(observation) is torch.Tensor
+        assert observation.dtype is torch.float32
+        assert type(goal) is torch.Tensor
+        assert goal.dtype is torch.float32
         assert type(done) is bool
