@@ -176,6 +176,85 @@ class TestDataset():
         for idx in [ 0, 1, 10, 100, 1000, 10000 ]:
             assert dataset[idx] is None
 
+    @pytest.mark.unit
+    @pytest.mark.parametrize(
+        "input_collection, expected_size",
+        [
+            ([], 0),
+            (list(range(100)), 100)
+        ]
+    )
+    def test_should_have_size(self, input_collection, expected_size):
+        dataset = Dataset(collection = input_collection)
+        assert dataset.size == expected_size
+
+    @pytest.mark.unit
+    def test_should_have_positive_max_size(self):
+        dataset = Dataset(collection = [])
+        assert dataset.max_size > 0
+
+    @pytest.mark.unit
+    def test_size_should_be_changed_on_addition(self):
+        batch1 = [ i + 100 for i in range(10) ]
+        batch2 = [ i + 200 for i in range(20) ]
+        batch3 = [ i + 300 for i in range(30) ]
+        dataset = Dataset(
+            collection = [],
+            max_size = 10000
+        )
+
+        dataset.add(batch1)
+        assert dataset.size == 10
+        dataset.add(batch2)
+        assert dataset.size == 30
+        dataset.add(batch3)
+        assert dataset.size == 60
+
+    @pytest.mark.unit
+    def test_size_should_be_changed_on_removal(self):
+        dataset = Dataset(
+            collection = list(range(100)),
+            max_size = 10000
+        )
+        dataset.remove(n = 10)
+        assert dataset.size == 90
+        dataset.remove(n = 20)
+        assert dataset.size == 70
+        dataset.remove(n = 30)
+        assert dataset.size == 40
+
+    @pytest.mark.unit
+    def test_should_store_at_most_max_size_data_on_initialization(self):
+        dataset = Dataset(
+            collection = list(range(1000)),
+            max_size = 100
+        )
+        assert dataset.size == 100
+
+    @pytest.mark.unit
+    def test_should_store_at_most_max_size_data_on_addition(self):
+        batch1 = [ i + 100 for i in range(20) ]
+        batch2 = [ i + 200 for i in range(30) ]
+        batch3 = [ i + 300 for i in range(40) ]
+        batch4 = [ i + 400 for i in range(50) ]
+        batch5 = [ i + 500 for i in range(60) ]
+        dataset = Dataset(
+            collection = [],
+            max_size = 100
+        )
+
+        assert dataset.size == 0
+        dataset.add(batch1)
+        assert dataset.size == 20
+        dataset.add(batch2)
+        assert dataset.size == 50
+        dataset.add(batch3)
+        assert dataset.size == 90
+        dataset.add(batch4)
+        assert dataset.size == 100
+        dataset.add(batch5)
+        assert dataset.size == 100
+
 
 class TestSarsDataset():
 
