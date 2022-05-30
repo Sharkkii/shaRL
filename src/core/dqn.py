@@ -5,41 +5,49 @@ import torch
 import torch.nn.functional as F
 
 from ..const import PhaseType
-from ..policy import QBasedPolicy
-from ..value import PseudoValue
+from ..policy import QValueBasedPolicy
+from ..value import Value
 from ..value import DiscreteQValue
 from ..actor import Actor
 from ..critic import Critic
 from ..agent import Agent
 
 
-class DQN(Agent):
+class DQNAgent(Agent):
 
     def __init__(
         self,
         actor = None,
         critic = None,
+        interface = None,
         model = None,
         memory = None,
         gamma = 0.99,
-        tau = 0.5,
-        eps = 0.0,
-        eps_decay = 1.0
+        tau = 0.01,
+        eps = 0.05,
+        eps_decay = 1.0,
+        use_default = False
     ):
         actor = DQNActor(
             eps = eps,
-            eps_decay = eps_decay
+            eps_decay = eps_decay,
+            interface = interface,
+            use_default = use_default
         )
         critic = DQNCritic(
             gamma = gamma,
-            tau = tau
+            tau = tau,
+            interface = interface,
+            use_default = use_default
         )
         super().__init__(
             actor = actor,
             critic = critic,
+            interface = interface,
             model = model,
             memory = memory,
-            gamma = gamma
+            gamma = gamma,
+            use_default = False
         )
     
     def setup_on_every_epoch(
@@ -58,12 +66,19 @@ class DQNActor(Actor):
         self,
         policy = None,
         eps = 0.0,
-        eps_decay = 1.0
+        eps_decay = 1.0,
+        interface = None,
+        use_default = False
     ):
         assert(0.0 <= eps_decay <= 1.0)
-        policy = QBasedPolicy()
+        policy = QValueBasedPolicy(
+            interface = interface,
+            use_default = use_default
+        )
         super().__init__(
-            policy = policy
+            policy = policy,
+            interface = interface,
+            use_default = False
         )
         self.eps = eps
         self.eps_decay = eps_decay
@@ -84,13 +99,12 @@ class DQNActor(Actor):
     def choose_action(
         self,
         state,
-        phase = PhaseType.NONE
+        information = None
     ):
-        action = self.policy.sample(
+        information["eps"] = self.eps
+        action = self.policy.choose_action(
             state = state,
-            action_space = self.env.action_space,
-            phase = phase,
-            eps = self.eps
+            information = information
         )
         return action
     
@@ -108,15 +122,25 @@ class DQNCritic(Critic):
         value = None,
         qvalue = None,
         gamma = 0.99,
-        tau = 0.5
+        tau = 0.5,
+        interface = None,
+        use_default = False
     ):
         assert(0.0 < gamma <= 1.0)
         assert(0.0 <= tau <= 1.0)
-        value = PseudoValue()
-        qvalue = DiscreteQValue()
+        value = Value(
+            interface = interface,
+            use_default = use_default
+        )
+        qvalue = DiscreteQValue(
+            interface = interface,
+            use_default = use_default
+        )
         super().__init__(
             value = value,
-            qvalue = qvalue
+            qvalue = qvalue,
+            interface = interface,
+            use_default = False
         )
         self.tau = tau
         self.gamma = gamma

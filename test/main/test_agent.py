@@ -214,7 +214,7 @@ class TestAgent():
             1, 10, 100, 1000
         ]
     )
-    def test_can_interact_with_env(self, max_nstep):
+    def test_can_interact_with_environment(self, max_nstep):
 
         env = Environment()
         env.setup(
