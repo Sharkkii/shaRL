@@ -14,20 +14,25 @@ from ..common.data import SARS
 # T_REWARD = float
 
 
+MAX_SIZE = 10000
+
 class BaseDataset(Component, TorchDataset, metaclass=ABCMeta):
 
     @abstractmethod
     def __init__(
         self,
         collection = None,
-        transform = None
+        transform = None,
+        max_size = MAX_SIZE,
     ):
         Component.__init__(self)
         self.collection = None      
         self.transform = None
+        self.max_size = None
         self.setup(
             collection = collection,
-            transform = transform
+            transform = transform,
+            max_size = max_size
         )
     
     @abstractmethod
@@ -40,7 +45,8 @@ class BaseDataset(Component, TorchDataset, metaclass=ABCMeta):
     def setup(
         self,
         collection = None,
-        transform = None
+        transform = None,
+        max_size = MAX_SIZE
     ):
         if (collection is None):
             return
@@ -49,8 +55,11 @@ class BaseDataset(Component, TorchDataset, metaclass=ABCMeta):
             raise ValueError("`collection` must be 'List' object.")
         
         self.collection = collection
+        self.max_size = max_size
         if (self.check_whether_valid_transform(transform)):
             self.transform = transform
+        self.trancate()
+
         self._become_available()
 
     @abstractmethod
@@ -66,6 +75,10 @@ class BaseDataset(Component, TorchDataset, metaclass=ABCMeta):
     ):
         raise NotImplementedError
 
+    @property
+    def size(self):
+        return len(self.collection)
+
     def add_collection(
         self,
         collection
@@ -73,6 +86,7 @@ class BaseDataset(Component, TorchDataset, metaclass=ABCMeta):
         if (not self.check_whether_valid_collection(collection)):
             raise ValueError("`collection` must be 'List' object.")
         self.collection.extend(collection)
+        self.trancate()
 
     def add_item(
         self,
@@ -104,6 +118,11 @@ class BaseDataset(Component, TorchDataset, metaclass=ABCMeta):
     ):
         self.remove_collection(n = n)
 
+    def trancate(
+        self
+    ):
+        del self.collection[:-self.max_size]
+
     def check_whether_valid_collection(self, collection):
         return (collection is not None) and (hasattr(collection, "__iter__")) and (hasattr(collection, "__getitem__"))
 
@@ -116,11 +135,13 @@ class Dataset(BaseDataset):
     def __init__(
         self,
         collection = None,
-        transform = None
+        transform = None,
+        max_size = MAX_SIZE
     ):
         super().__init__(
             collection = collection,
-            transform = transform
+            transform = transform,
+            max_size = max_size
         )
 
     def reset(
@@ -131,11 +152,13 @@ class Dataset(BaseDataset):
     def setup(
         self,
         collection = None,
-        transform = None
+        transform = None,
+        max_size = MAX_SIZE
     ):
         super().setup(
             collection = collection,
-            transform = transform
+            transform = transform,
+            max_size = max_size
         )
 
     @Component.check_whether_available
@@ -167,17 +190,20 @@ class SarsDataset(Dataset):
     def __init__(
         self,
         collection = None,
-        transform = None
+        transform = None,
+        max_size = MAX_SIZE
     ):
         super().__init__(
             collection = collection,
-            transform = transform
+            transform = transform,
+            max_size = max_size
         )
 
     def setup(
         self,
         collection = None,
-        transform = None
+        transform = None,
+        max_size = MAX_SIZE
     ):
         if (collection is None):
             return
@@ -190,7 +216,8 @@ class SarsDataset(Dataset):
 
         super().setup(
             collection = collection,
-            transform = transform
+            transform = transform,
+            max_size = max_size
         )
 
     def __getitem__(
