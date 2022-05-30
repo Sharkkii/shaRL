@@ -1,13 +1,12 @@
 #### Agent ####
 
 from abc import ABCMeta, abstractmethod
-import numpy as np
-import torch
 
 from ..const import PhaseType
 from ..common import AgentInterface
 from ..common import Component
 from ..common import SARS
+from ..common import SAGS
 from ..actor import Actor
 from ..critic import Critic
 from ..environment import Model
@@ -345,7 +344,6 @@ class Agent(BaseAgent):
         if (type(information) is not dict):
             raise ValueError("`information` must be a 'dictionary' object.")
 
-        # action_space
         information["action_space"] = env.action_space
 
         history = []
@@ -393,3 +391,58 @@ class Agent(BaseAgent):
         return self.memory.replay(
             n_sample = n_sample
         )
+
+
+class GoalConditionedAgent(Agent):
+
+    def interact_with_env(
+        self,
+        env,
+        n_episode = 1,
+        max_nstep = 1000,
+        information = None,
+        use_info = False,
+        use_goal = True, # will be implemented
+        use_reward = False, # will be implemented
+        verbose = False
+    ):
+        if (information is None):
+            information = {}
+
+        # assume `use_goal = True & use_reward = False`
+        if (not(use_goal)):
+            raise NotImplementedError("`use_goal` must be True.")
+        if (use_reward):
+            raise NotImplementedError("`use_reward` must be False.")
+        if (type(information) is not dict):
+            raise ValueError("`information` must be a 'dictionary' object.")
+
+        information["action_space"] = env.action_space
+        
+        history = []
+        info_history = []
+
+        for _ in range(n_episode):
+
+            t = 0
+            state = env.reset()
+            done = False
+            for _ in range(max_nstep):
+                if (done): break
+                action = self.actor.choose_action(
+                    state = state,
+                    information = information
+                )
+                # assume `use_goal = True & use_reward = False`
+                next_state, goal, done, info = env.step(action)
+                data = SAGS(state, action, goal, next_state)
+                history.append(data)
+                state = next_state
+                if (use_info):
+                    info_history.append(info)
+                t = t + 1
+        
+        if (use_info):
+            return history, info_history
+        else:
+            return history

@@ -1,12 +1,11 @@
 #### Dataset ####
 
 from abc import ABCMeta, abstractmethod
-import numpy as np
-import torch
 from torch.utils.data import Dataset as TorchDataset
 
 from ..common import Component
 from ..common.data import SARS
+from ..common.data import SAGS
 
 
 # T_STATE = torch.tensor
@@ -241,3 +240,61 @@ class SarsDataset(Dataset):
 
     def check_whether_valid_sars_collection(self, collection):
         return all([ (type(item) is SARS) for item in collection ])
+
+
+class SagsDataset(Dataset):
+
+    def __init__(
+        self,
+        collection = None,
+        transform = None,
+        max_size = MAX_SIZE
+    ):
+        super().__init__(
+            collection = collection,
+            transform = transform,
+            max_size = max_size
+        )
+
+    def setup(
+        self,
+        collection = None,
+        transform = None,
+        max_size = MAX_SIZE
+    ):
+        if (collection is None):
+            return
+
+        if (not self.check_whether_valid_collection(collection)):
+            raise ValueError("`collection` must be 'List' object.")
+
+        if (not self.check_whether_valid_sag_collection(collection)):
+            raise ValueError("`collection` must be 'List[SAGS]' object.")
+
+        super().setup(
+            collection = collection,
+            transform = transform,
+            max_size = max_size
+        )
+
+    def __getitem__(
+        self,
+        index
+    ):
+        sags = super().__getitem__(index = index)
+        return (sags.state, sags.action, sags.goal, sags.next_state)
+
+    def add_collection(
+        self,
+        collection
+    ):
+        if (not self.check_whether_valid_collection(collection)):
+            raise ValueError("`collection` must be 'List' object.")
+
+        if (not self.check_whether_valid_sag_collection(collection)):
+            raise ValueError("`collection` must be 'List[SAGS]' object.")
+
+        super().add_collection(collection)
+
+    def check_whether_valid_sag_collection(self, collection):
+        return all([ (type(item) is SAGS) for item in collection ])

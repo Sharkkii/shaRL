@@ -29,7 +29,7 @@ class BaseEnvironment(metaclass=ABCMeta):
     def reset(
         self
     ):
-        raise NotImplementedError
+        return None
 
     @abstractmethod
     def setup(
@@ -107,9 +107,9 @@ class Environment(BaseEnvironment):
         self,
         configuration = None
     ):
-       super().__init__(
-           configuration = configuration
-       )
+        super().__init__(
+            configuration = configuration
+        )
     
     def reset(
         self
@@ -167,6 +167,67 @@ class Environment(BaseEnvironment):
         warnings.warn("`score` is not implemented.")
         score_dictionary = {}
         return score_dictionary
+
+
+class GoalReachingTaskEnvironment(Environment):
+
+    def __init__(
+        self,
+        configuration = None
+    ):
+        super().__init__(
+            configuration = configuration
+        )
+        self.goal_space = None
+        self.goal = None
+
+    def reset(
+        self,
+        use_goal = False
+    ):
+        goal = self.goal_space.sample()
+        self.goal = torch.from_numpy(goal.astype(np.float32))
+        observation = super().reset()
+        if (use_goal):
+            return (observation, self.goal)
+        else:
+            return observation
+        
+    def setup(
+        self,
+        configuration = None,
+        observation_space = gym.spaces.Box(low = 0.0, high = 1.0, shape=(1,)), # will be in `configuration`
+        action_space = gym.spaces.Discrete(2), # will be in `configuration`
+        goal_space = gym.spaces.Box(low = 0.0, high = 1.0, shape=(1,)) # will be in `configuration`
+    ):
+        if (isinstance(observation_space, gym.spaces.Space) and isinstance(action_space, gym.spaces.Space) and isinstance(goal_space, gym.spaces.Space)):
+            self.goal_space = goal_space
+            self.observation_space = self.state_space = observation_space
+            self.action_space = action_space
+            self.goal = None
+            self.state = None
+            self.interface = get_environment_interface(
+                self.observation_space,
+                self.action_space
+            )
+            self._become_available()
+
+    def step(
+        self,
+        action,
+        use_goal = True,
+        use_reward = False
+    ):
+        observation, reward, done, info = super().step(action)
+        if (use_goal and use_reward):
+            return (observation, self.goal, reward, done, info)
+        elif (use_goal and (not use_reward)):
+            return (observation, self.goal, done, info)
+        elif ((not use_goal) and use_reward):
+            return (observation, reward, done, info)
+        else:
+            return (observation, done, info)
+
 
 class GymEnvironment(BaseEnvironment):
 

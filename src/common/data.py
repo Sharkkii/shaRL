@@ -149,3 +149,32 @@ class SAG(Data):
             SAG(state, action, goal) for state, action, goal in zip(state_set, action_set, goal_set)
         ]
         return dataset
+
+
+class SAGS(Data):
+
+    def __init__(
+        self,
+        state,
+        action,
+        goal,
+        next_state
+    ):
+        self.state = state
+        self.action = action
+        self.goal = goal
+        self.next_state = next_state
+
+    @classmethod
+    def random(
+        cls,
+        n = 1
+    ):
+        state_set = super().random_state(n = n)
+        action_set = super().random_action(n = n)
+        goal_set = super().random_goal(n = n)
+        next_state_set = super().random_state(n = n)
+        dataset = [
+            SAGS(state, action, goal, next_state) for state, action, goal, next_state in zip(state_set, action_set, goal_set, next_state_set)
+        ]
+        return dataset
