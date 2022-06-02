@@ -9,6 +9,7 @@ from ..const import PhaseType
 from ..const import SpaceType
 from ..policy import DiscretePolicy
 from ..policy import ContinuousPolicy
+from ..policy import GoalConditionedPolicy
 from ..policy import cast_to_policy
 
 
@@ -248,6 +249,109 @@ class Actor(BaseActor):
     ):
         return self.policy.choose_action(
             state = state,
+            information = information
+        )
+    
+    def update_policy(
+        self,
+        critic,
+        trajectory
+    ):
+        pass
+
+    def update_target_policy(
+        self,
+        critic,
+        trajectory
+    ):
+        pass
+
+    def update(
+        self,
+        critic,
+        trajectory,
+        n_times = 1
+    ):
+        for _ in range(n_times):
+            self.update_policy(critic, trajectory)
+            self.update_target_policy(critic, trajectory)
+
+
+class GoalConditionedActor(BaseActor):
+
+    def __init__(
+        self,
+        policy = None,
+        interface = None,
+        use_default = False
+    ):
+        policy = GoalConditionedPolicy(
+            interface = interface,
+            use_default = use_default
+        )
+        super().__init__(
+            policy = policy,
+            interface = interface,
+            use_default = False
+        )
+    
+    def reset(
+        self
+    ):
+        pass
+    
+    def setup(
+        self,
+        env = None, # will be deprecated
+        policy_network = None, # will be deprecated
+        policy_optimizer = None, # will be deprecated
+        policy = None
+    ):
+        super().setup(
+            policy = policy
+        )
+
+    def setup_with_critic(
+        self,
+        critic
+    ):
+        pass
+    
+    def setup_on_every_epoch(
+        self,
+        epoch,
+        n_epoch
+    ):
+        pass
+
+    def setup_on_every_step(
+        self,
+        step,
+        n_step
+    ):
+        pass
+
+    def __call__(
+        self,
+        state,
+        goal,
+        information = None
+    ):
+        return self.choose_action(
+            state = state,
+            goal = goal,
+            information = information
+        )
+
+    def choose_action(
+        self,
+        state,
+        goal,
+        information = None
+    ):
+        return self.policy.choose_action(
+            state = state,
+            goal = goal,
             information = information
         )
     

@@ -535,3 +535,85 @@ class QValueBasedPolicy(BasePolicy):
             state,
             information = information
         )
+
+
+class GoalConditionedDiscretePolicy(BasePolicy):
+
+    def __init__(
+        self,
+        policy_network = None,
+        policy_optimizer = None,
+        interface = None,
+        use_default = False
+    ):
+        super().__init__(
+            policy_network = policy_network,
+            policy_optimizer = policy_optimizer,
+            interface = interface,
+            use_default = use_default
+        )
+        
+    def reset(
+        self
+    ):
+        pass
+
+    def setup(
+        self,
+        policy_network = None,
+        policy_optimizer = None
+    ):
+        super().setup(
+            policy_network = policy_network,
+            policy_optimizer = policy_optimizer
+        )
+    
+    def __call__(
+        self,
+        state,
+        goal
+    ):
+        return self.choose_action(
+            state = state,
+            goal = goal
+        )
+
+    def choose_action(
+        self,
+        state,
+        goal,
+        information = None
+    ):
+        x = torch.cat([state, goal])
+        action = self.policy_network(x)
+        action = torch.argmax(action)
+        return action
+
+    def P(
+        self,
+        state,
+        goal,
+        action = None
+    ):
+        x = torch.cat([state, goal], dim=1)
+        return self.policy_network.P(x, action)
+
+    def logP(
+        self,
+        state,
+        goal,
+        action = None
+    ):
+        x = torch.cat([state, goal], dim=1)
+        return self.policy_network.logP(x, action)
+    
+    def sample(
+        self,
+        state,
+        goal,
+        action_space,
+        phase = PhaseType.NONE
+    ):
+        return action_space.sample()
+
+GoalConditionedPolicy = GoalConditionedDiscretePolicy
