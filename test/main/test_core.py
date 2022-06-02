@@ -6,11 +6,17 @@ from src.common import AgentInterface
 from src.const import SpaceType
 from src.environment import CartPoleEnvironment
 from src.core import DQNAgent
-from src.controller import Controller
+from src.controller import RLController
 
 cartpole_agent_interface = AgentInterface(
     sin = (4,),
     sout = (2,),
+    tin = SpaceType.CONTINUOUS,
+    tout = SpaceType.DISCRETE
+)
+discrete_mountaincar_agent_interface = AgentInterface(
+    sin = (2,),
+    sout = (3,),
     tin = SpaceType.CONTINUOUS,
     tout = SpaceType.DISCRETE
 )
@@ -51,7 +57,7 @@ class TestDQN():
         max_dataset_size = configuration_ctrl["max_dataset_size"]
         batch_size = configuration_ctrl["batch_size"]
 
-        controller = Controller(
+        controller = RLController(
             environment = env,
             agent = agent,
             config_e = None,
@@ -108,7 +114,7 @@ class TestDQN():
             "gamma": 0.90
         }
         configuration_ctrl = {
-            "n_epoch": 500,
+            "n_epoch": 200,
             "n_env_step": 5,
             "n_gradient_step": 5,
             "max_dataset_size": 10000,
@@ -129,7 +135,7 @@ class TestDQN():
         configuration_agent = {
             "eps": 0.20,
             "tau": 0.01,
-            "gamma": 0.99
+            "gamma": 0.90
         }
         configuration_ctrl = {
             "n_epoch": 1000,

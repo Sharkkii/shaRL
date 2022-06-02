@@ -14,8 +14,17 @@ from src.environment import Environment
 
 default_discrete_observation_space = gym.spaces.Discrete(2)
 default_continuous_observation_space = gym.spaces.Box(0, 1, shape=(1,))
-default_discrete_action_space = gym.spaces.Box(0, 1, shape=(1,))
-default_continuous_action_space = gym.spaces.Discrete(2)
+default_discrete_action_space = gym.spaces.Discrete(2)
+default_continuous_action_space = gym.spaces.Box(0, 1, shape=(1,))
+
+default_discrete_action_environment_configuration = {
+    "observation_space": default_continuous_observation_space,
+    "action_space": default_discrete_action_space
+}
+default_continuous_action_environment_configuration = {
+    "observation_space": default_continuous_observation_space,
+    "action_space": default_continuous_action_space
+}
 
 default_agent_interface_with_discrete_action = AgentInterface(
     sin = 1,
@@ -118,10 +127,8 @@ class TestActor():
             use_default = True
         )
 
-        env = Environment()
-        env.setup(
-            observation_space = default_continuous_observation_space,
-            action_space = default_discrete_action_space
+        env = Environment(
+            configuration = default_discrete_action_environment_configuration
         )
         state = env.reset()
         action = actor.choose_action(state)
@@ -137,10 +144,8 @@ class TestActor():
             use_default = True
         )
 
-        env = Environment()
-        env.setup(
-            observation_space = default_continuous_observation_space,
-            action_space = default_discrete_action_space
+        env = Environment(
+            configuration = default_discrete_action_environment_configuration
         )
         state = env.reset()
         action = actor(state)
@@ -156,10 +161,8 @@ class TestActor():
             use_default = True
         )
 
-        env = Environment()
-        env.setup(
-            observation_space = default_continuous_observation_space,
-            action_space = default_continuous_action_space
+        env = Environment(
+            configuration = default_continuous_action_environment_configuration
         )
         state = env.reset()
         action = actor.choose_action(state)
@@ -175,10 +178,8 @@ class TestActor():
             use_default = True
         )
 
-        env = Environment()
-        env.setup(
-            observation_space = default_continuous_observation_space,
-            action_space = default_continuous_action_space
+        env = Environment(
+            configuration = default_continuous_action_environment_configuration
         )
         state = env.reset()
         action = actor(state)

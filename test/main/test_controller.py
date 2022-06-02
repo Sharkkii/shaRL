@@ -1,5 +1,7 @@
 import pytest
+import gym
 import sys, os
+
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 
 from src.const import SpaceType
@@ -11,9 +13,21 @@ from src.agent import GoalConditionedAgent
 from src.controller import RLController
 from src.controller import GoalConditionedRLController
 
+default_environment_configuration = {
+    "observation_space": gym.spaces.Box(0, 1, shape=(1,)),
+    "action_space": gym.spaces.Discrete(2),
+    "goal_space": gym.spaces.Box(0, 1, shape=(1,))
+}
 
 default_agent_interface = AgentInterface(
     sin = 1,
+    sout = 1,
+    tin = SpaceType.CONTINUOUS,
+    tout = SpaceType.DISCRETE
+)
+
+default_goal_conditioned_agent_interface = AgentInterface(
+    sin = 1 * 2,
     sout = 1,
     tin = SpaceType.CONTINUOUS,
     tout = SpaceType.DISCRETE
@@ -51,7 +65,9 @@ class TestController():
     @pytest.mark.unit
     @pytest.mark.integration
     def test_train_method_should_work(self):
-        env = Environment()
+        env = Environment(
+            configuration = default_environment_configuration
+        )
         agent = Agent(
             interface = default_agent_interface,
             use_default = True
@@ -103,9 +119,11 @@ class TestGoalConditionedRLController():
     @pytest.mark.unit
     @pytest.mark.integration
     def test_train_method_should_work(self):
-        env = GoalReachingTaskEnvironment()
+        env = GoalReachingTaskEnvironment(
+            configuration = default_environment_configuration
+        )
         agent = GoalConditionedAgent(
-            interface = default_agent_interface,
+            interface = default_goal_conditioned_agent_interface,
             use_default = True
         )
         controller = GoalConditionedRLController()

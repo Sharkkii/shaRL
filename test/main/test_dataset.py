@@ -7,11 +7,11 @@ from src.common import UninitializedComponentException
 from src.common import SA
 from src.common import SARS
 from src.common import SARSA
-from src.common import SAG
-from src.common import SAGS
+from src.common import SGASG
+from src.common import SGARSG
 from src.dataset import Dataset
 from src.dataset import SarsDataset
-from src.dataset import SagsDataset
+from src.dataset import SgasgDataset
 from src.dataset import DataLoader
 
 
@@ -68,39 +68,43 @@ class TestSarsaData():
         assert hasattr(data, "next_action")
 
 
-class TestSagData():
+class TestSgasgData():
 
     @pytest.mark.unit
-    def test_random_method_should_return_sag_objects(self):
+    def test_random_method_should_return_sgasg_objects(self):
         N = 3
-        dataset = SAG.random(n = N)
+        dataset = SGASG.random(n = N)
         assert len(dataset) == N
-        assert all([ (type(data) is SAG) for data in dataset ])
+        assert all([ (type(data) is SGASG) for data in dataset ])
     
     @pytest.mark.unit
-    def test_should_have_state_and_action_and_goal(self):
-        data = SAG.random(n = 1)[0]
+    def test_should_have_state_and_goal_and_action_and_nextstate_and_nextgoal(self):
+        data = SGASG.random(n = 1)[0]
         assert hasattr(data, "state")
-        assert hasattr(data, "action")
         assert hasattr(data, "goal")
-
-
-class TestSagsData():
-
-    @pytest.mark.unit
-    def test_random_method_should_return_sags_objects(self):
-        N = 3
-        dataset = SAGS.random(n = N)
-        assert len(dataset) == N
-        assert all([ (type(data) is SAGS) for data in dataset ])
-    
-    @pytest.mark.unit
-    def test_should_have_state_and_action_and_goal_and_nextstate(self):
-        data = SAGS.random(n = 1)[0]
-        assert hasattr(data, "state")
         assert hasattr(data, "action")
-        assert hasattr(data, "goal")
         assert hasattr(data, "next_state")
+        assert hasattr(data, "next_goal")
+
+
+class TestSgarsgData():
+
+    @pytest.mark.unit
+    def test_random_method_should_return_sgarsg_objects(self):
+        N = 3
+        dataset = SGARSG.random(n = N)
+        assert len(dataset) == N
+        assert all([ (type(data) is SGARSG) for data in dataset ])
+    
+    @pytest.mark.unit
+    def test_should_have_state_and_goal_and_action_and_reward_and_nextstate_and_nextgoal(self):
+        data = SGARSG.random(n = 1)[0]
+        assert hasattr(data, "state")
+        assert hasattr(data, "goal")
+        assert hasattr(data, "action")
+        assert hasattr(data, "reward")
+        assert hasattr(data, "next_state")
+        assert hasattr(data, "next_goal")
 
 
 class TestDataset():
@@ -307,7 +311,7 @@ class TestSarsDataset():
 
     @pytest.mark.unit
     @pytest.mark.parametrize(
-        "TDataset", [ SA, SARSA, SAG, SAGS ]
+        "TDataset", [ SA, SARSA, SGASG, SGARSG ]
     )
     def test_should_raise_value_error_on_invalid_setup(self, TDataset):
         collection = TDataset.random(n = 3) # invalid
@@ -326,7 +330,7 @@ class TestSarsDataset():
 
     @pytest.mark.unit
     @pytest.mark.parametrize(
-        "TDataset", [ SA, SARSA, SAG, SAGS ]
+        "TDataset", [ SA, SARSA, SGASG, SGARSG ]
     )
     def test_invalid_collection_cannot_be_added_to_dataset(self, TDataset):
         dataset = SarsDataset(collection = SARS.random(n = 3))
@@ -335,30 +339,30 @@ class TestSarsDataset():
             dataset.add(TDataset.random(n = 2)) # invalid
 
 
-class TestSagsDataset():
+class TestSgasgDataset():
 
     @pytest.mark.unit
     def test_should_be_unavailable_on_empty_initialization(self):
-        dataset = SagsDataset()
+        dataset = SgasgDataset()
         assert dataset.is_available == False
 
     @pytest.mark.unit
     def test_should_be_available_on_nonempty_initialization_with_empty_collection(self):
-        dataset = SagsDataset(collection = [])
+        dataset = SgasgDataset(collection = [])
         assert dataset.is_available == True
 
     @pytest.mark.unit
     def test_should_be_unavailable_on_nonempty_initialization_with_nonempty_collection(self):
-        collection = SAGS.random(n = 3)
-        dataset = Dataset(
+        collection = SGASG.random(n = 3)
+        dataset = SgasgDataset(
             collection = collection
         )
         assert dataset.is_available == True
 
     @pytest.mark.unit
     def test_should_be_available_after_valid_setup(self):
-        collection = SAGS.random(n = 3)
-        dataset = SagsDataset()
+        collection = SGASG.random(n = 3)
+        dataset = SgasgDataset()
         dataset.setup(
             collection = collection
         )
@@ -366,11 +370,11 @@ class TestSagsDataset():
 
     @pytest.mark.unit
     @pytest.mark.parametrize(
-        "TDataset", [ SA, SARS, SARSA, SAG ]
+        "TDataset", [ SA, SARS, SARSA, SGARSG ]
     )
     def test_should_raise_value_error_on_invalid_setup(self, TDataset):
         collection = TDataset.random(n = 3) # invalid
-        dataset = SagsDataset()
+        dataset = SgasgDataset()
         with pytest.raises(ValueError) as message:
             dataset.setup(
                 collection = collection
@@ -378,17 +382,17 @@ class TestSagsDataset():
 
     @pytest.mark.unit
     def test_valid_collection_can_be_added_to_dataset(self):
-        dataset = SagsDataset(collection = SAGS.random(n = 3))
+        dataset = SgasgDataset(collection = SGASG.random(n = 3))
         assert len(dataset) == 3
-        dataset.add(SAGS.random(n = 2))
+        dataset.add(SGASG.random(n = 2))
         assert len(dataset) == 5
 
     @pytest.mark.unit
     @pytest.mark.parametrize(
-        "TDataset", [ SA, SARS, SARSA, SAG ]
+        "TDataset", [ SA, SARS, SARSA, SGARSG ]
     )
     def test_invalid_collection_cannot_be_added_to_dataset(self, TDataset):
-        dataset = SagsDataset(collection = SAGS.random(n = 3))
+        dataset = SgasgDataset(collection = SGASG.random(n = 3))
         assert len(dataset) == 3
         with pytest.raises(ValueError) as message:
             dataset.add(TDataset.random(n = 2)) # invalid

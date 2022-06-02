@@ -22,6 +22,13 @@ default_agent_interface = AgentInterface(
     tout = SpaceType.DISCRETE
 )
 
+default_goal_conditioned_agent_interface = AgentInterface(
+    sin = 1 * 2,
+    sout = 1,
+    tin = SpaceType.CONTINUOUS,
+    tout = SpaceType.DISCRETE
+)
+
 @pytest.mark.L2
 class TestAgent():
 
@@ -134,10 +141,11 @@ class TestAgent():
         agent_interface
     ):
         
-        env = Environment()
-        env.setup(
-            observation_space = env_observation_space,
-            action_space = env_action_space
+        env = Environment(
+            configuration = {
+                "observation_space": env_observation_space,
+                "action_space": env_action_space
+            }
         )
 
         agent = Agent(
@@ -174,10 +182,11 @@ class TestAgent():
         agent_interface
     ):
         
-        env = Environment()
-        env.setup(
-            observation_space = env_observation_space,
-            action_space = env_action_space
+        env = Environment(
+            configuration = {
+                "observation_space": env_observation_space,
+                "action_space": env_action_space
+            }
         )
 
         agent = Agent(
@@ -193,10 +202,11 @@ class TestAgent():
     @pytest.mark.integration
     def test_can_interact_with_environment_for_one_step(self):
         
-        env = Environment()
-        env.setup(
-            observation_space = gym.spaces.Box(low = 0.0, high = 1.0, shape = (1,)),
-            action_space = gym.spaces.Discrete(2)
+        env = Environment(
+            configuration = {
+                "observation_space": gym.spaces.Box(low = 0.0, high = 1.0, shape = (1,)),
+                "action_space": gym.spaces.Discrete(2)
+            }
         )
 
         agent = Agent(
@@ -219,10 +229,11 @@ class TestAgent():
     )
     def test_can_interact_with_environment(self, max_nstep):
 
-        env = Environment()
-        env.setup(
-            observation_space = gym.spaces.Box(low = 0.0, high = 1.0, shape = (1,)),
-            action_space = gym.spaces.Discrete(2)
+        env = Environment(
+            configuration = {
+                "observation_space": gym.spaces.Box(low = 0.0, high = 1.0, shape = (1,)),
+                "action_space": gym.spaces.Discrete(2)
+            }
         )
 
         agent = Agent(
@@ -243,20 +254,24 @@ class TestGoalConditionedAgent:
     @pytest.mark.integration
     def test_can_interact_with_environment_for_one_step(self):
         
-        env = GoalReachingTaskEnvironment()
-        env.setup(
-            observation_space = gym.spaces.Box(low = 0.0, high = 1.0, shape = (1,)),
-            action_space = gym.spaces.Discrete(2),
-            goal_space = gym.spaces.Box(low = 0.0, high = 1.0, shape = (1,))
+        env = GoalReachingTaskEnvironment(
+            configuration = {
+                "observation_space": gym.spaces.Box(low = 0.0, high = 1.0, shape = (1,)),
+                "action_space": gym.spaces.Discrete(2),
+                "goal_space": gym.spaces.Box(low = 0.0, high = 1.0, shape = (1,))
+            }
         )
 
         agent = GoalConditionedAgent(
-            interface = default_agent_interface,
+            interface = default_goal_conditioned_agent_interface,
             use_default = True
         )
 
-        state = env.reset()
-        action = agent.choose_action(state)
+        state, goal = env.reset(use_goal = True)
+        action = agent.choose_action(
+            state = state,
+            goal = goal
+        )
         assert env.can_accept_action(action) == True
         state, goal, done, info = env.step(action)
 
@@ -270,15 +285,16 @@ class TestGoalConditionedAgent:
     )
     def test_can_interact_with_environment(self, max_nstep):
 
-        env = GoalReachingTaskEnvironment()
-        env.setup(
-            observation_space = gym.spaces.Box(low = 0.0, high = 1.0, shape = (1,)),
-            action_space = gym.spaces.Discrete(2),
-            goal_space = gym.spaces.Box(low = 0.0, high = 1.0, shape = (1,))
+        env = GoalReachingTaskEnvironment(
+            configuration = {
+                "observation_space": gym.spaces.Box(low = 0.0, high = 1.0, shape = (1,)),
+                "action_space": gym.spaces.Discrete(2),
+                "goal_space": gym.spaces.Box(low = 0.0, high = 1.0, shape = (1,))
+            }
         )
 
         agent = GoalConditionedAgent(
-            interface = default_agent_interface,
+            interface = default_goal_conditioned_agent_interface,
             use_default = True
         )
         history = agent.interact_with_env(
