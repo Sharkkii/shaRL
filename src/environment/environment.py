@@ -426,6 +426,60 @@ class CartPoleEnvironment(GymEnvironmentMixin, EnvironmentBase):
         return score_dictionary
 
 
+class DiscreteMountainCarEnvironment(GymEnvironment):
+
+    def __init__(
+        self,
+        reward_spec = "sparse"
+    ):
+        if (reward_spec not in ("sparse", "dense")):
+            raise ValueError("`reward_spec`: ('sparse', 'dense')")
+        self.name = "MountainCar-v0"
+        self.reward_spec = reward_spec
+
+        super().__init__(
+            configuration = { "name": self.name }
+        )
+        self._t = 0
+        self._T = 200
+    
+    def reset(
+        self
+    ):
+        self._t = 0
+        state = super().reset()
+        return state
+
+    def step(
+        self,
+        action
+    ):
+        self._t += 1
+        observation, reward, done, info = self.env.step(action)
+        if (self.reward_spec == "dense"):
+            raise NotImplementedError("`reward_spec = dense` is not supported right now.")
+
+        observation = torch.from_numpy(observation.astype(np.float32))
+        reward = torch.tensor(reward, dtype=torch.float32)
+        return (observation, reward, done, info)
+
+    def score(
+        self,
+        history,
+        info_history = None
+    ):
+        score_dictionary = {
+            "total_reward": None
+        }
+        if (len(history) > 0):
+            total_reward = 0
+            for sars in history:
+                total_reward = total_reward + sars.reward
+            total_reward = int(total_reward)
+            score_dictionary["total_reward"] = total_reward
+        return score_dictionary
+
+
 class ContinuousMountainCarEnvironment(GymEnvironmentMixin, GoalReachingTaskEnvironmentMixin, GoalReachingTaskEnvironmentBase):
 
     def declare(self):

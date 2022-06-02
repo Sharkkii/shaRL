@@ -125,17 +125,21 @@ class SARSA(Data):
         return dataset
 
 
-class SAG(Data):
+class SGASG(Data):
 
     def __init__(
         self,
         state,
+        goal,
         action,
-        goal
+        next_state,
+        next_goal
     ):
         self.state = state
-        self.action = action
         self.goal = goal
+        self.action = action
+        self.next_state = next_state
+        self.next_goal = next_goal
 
     @classmethod
     def random(
@@ -143,27 +147,33 @@ class SAG(Data):
         n = 1
     ):
         state_set = super().random_state(n = n)
-        action_set = super().random_action(n = n)
         goal_set = super().random_goal(n = n)
+        action_set = super().random_action(n = n)
+        next_state_set = super().random_state(n = n)
+        next_goal_set = super().random_goal(n = n)
         dataset = [
-            SAG(state, action, goal) for state, action, goal in zip(state_set, action_set, goal_set)
+            SGASG(state, goal, action, next_state, next_goal) for state, goal, action, next_state, next_goal in zip(state_set, goal_set, action_set, next_state_set, next_goal_set)
         ]
         return dataset
 
 
-class SAGS(Data):
+class SGARSG(Data):
 
     def __init__(
         self,
         state,
-        action,
         goal,
-        next_state
+        action,
+        reward,
+        next_state,
+        next_goal
     ):
         self.state = state
-        self.action = action
         self.goal = goal
+        self.action = action
+        self.reward = reward
         self.next_state = next_state
+        self.next_goal = next_goal
 
     @classmethod
     def random(
@@ -171,10 +181,12 @@ class SAGS(Data):
         n = 1
     ):
         state_set = super().random_state(n = n)
-        action_set = super().random_action(n = n)
         goal_set = super().random_goal(n = n)
+        action_set = super().random_action(n = n)
+        reward_set = super().random_reward(n = n)
         next_state_set = super().random_state(n = n)
+        next_goal_set = super().random_goal(n = n)
         dataset = [
-            SAGS(state, action, goal, next_state) for state, action, goal, next_state in zip(state_set, action_set, goal_set, next_state_set)
+            SGARSG(state, goal, action, reward, next_state, next_goal) for state, goal, action, reward, next_state, next_goal in zip(state_set, goal_set, action_set, reward_set, next_state_set, next_goal_set)
         ]
         return dataset

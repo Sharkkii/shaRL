@@ -1,4 +1,4 @@
 from .dataset import Dataset
 from .dataset import SarsDataset
-from .dataset import SagsDataset
+from .dataset import SgasgDataset
 from .dataloader import DataLoader
