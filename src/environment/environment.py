@@ -1,145 +1,148 @@
 #### Environment ####
 
-from abc import ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 import warnings
 import random
 import numpy as np
 import torch
 import gym
 
+from ..common import Component
 from .helper import get_environment_interface
 from ..const import SpaceType
 
-class BaseEnvironment(metaclass=ABCMeta):
 
-    @abstractmethod
-    def __init__(
-        self,
-        configuration = None
-    ):
-        self.state_space = None
-        self.action_space = None
-        self.observation_space = None
-        self.state = None
-        self._is_available = False
-        self.interface = None
-        self.configuration = None
+# for compatilibity (will be removed)
+class BaseEnvironment(ABC):
+    pass
+
+
+class EnvironmentBase(ABC):
     
     @abstractmethod
-    def reset(
-        self
-    ):
-        return None
-
+    def __init__(self): raise NotImplementedError
     @abstractmethod
+    def setup(self): raise NotImplementedError
+    @abstractmethod
+    def reset(self): raise NotImplementedError
+    @abstractmethod
+    def step(self): raise NotImplementedError
+    @abstractmethod
+    def sample(self): raise NotImplementedError
+    @abstractmethod
+    def score(self): raise NotImplementedError
+    @abstractmethod
+    def can_accept_action(self): raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def interface(self): raise NotImplementedError
+    @property
+    @abstractmethod
+    def configuration(self): raise NotImplementedError
+    @property
+    @abstractmethod
+    def state_space(self): raise NotImplementedError
+    @property
+    @abstractmethod
+    def action_space(self): raise NotImplementedError
+    @property
+    @abstractmethod
+    def observation_space(self): raise NotImplementedError
+    @property
+    @abstractmethod
+    def state(self): raise NotImplementedError
+
+
+class GymEnvironmentBase(EnvironmentBase):
+    
+    @property
+    @abstractmethod
+    def env(self): raise NotImplementedError
+
+
+class GoalReachingTaskEnvironmentBase(EnvironmentBase):
+    
+    @property
+    @abstractmethod
+    def goal_space(self): raise NotImplementedError
+    @property
+    @abstractmethod
+    def goal_state(self): raise NotImplementedError
+
+
+class EnvironmentMixin(EnvironmentBase, Component):
+    
+    def declare(self):
+        self._interface = None
+        self._configuration = None
+        self._state_space = None
+        self._action_space = None
+        self._observation_space = None
+        self._state = None
+
+    @property
+    def interface(self): return self._interface
+    @property
+    def configuration(self): return self._configuration
+    @property
+    def state_space(self): return self._state_space
+    @property
+    def action_space(self): return self._action_space
+    @property
+    def observation_space(self): return self._observation_space
+    @property
+    def state(self): return self._state
+
+    def __init__(
+        self,
+        configuration = None,
+        allow_setup = True
+    ):
+        EnvironmentMixin.declare(self)
+        Component.__init__(self)
+        if (allow_setup):
+            EnvironmentMixin.setup(self, configuration = configuration)
+        
     def setup(
         self,
         configuration = None
     ):
-        self._become_available()
+        if (configuration is None):
+            return
+        if (type(configuration) is not dict):
+            raise ValueError("`configuration` must be 'Dictionary' object.")
+        if ("observation_space" not in configuration):
+            raise ValueError("`configuration` must have 'observation_space' key.")
+        if ("action_space" not in configuration):
+            raise ValueError("`configuration` must have 'action_space' key.")
+        observation_space = configuration["observation_space"]
+        action_space = configuration["action_space"]
 
-    @property
-    def is_available(
-        self
-    ):
-        return self._is_available
-
-    def _become_available(
-        self
-    ):
-        self._is_available = True
-
-    def _become_unavailable(
-        self
-    ):
-        self._is_available = False
-
-    def can_accept_action(
-        self,
-        action
-    ):
-        flag = False
-
-        if (not self.is_available):
-            return flag
-
-        if (type(action) is torch.Tensor):
-
-            if (self.interface.action_type is SpaceType.DISCRETE):
-                flag = (action.dtype is torch.long) and (tuple(action.shape) in ((), (1,)))
-        
-            elif (self.interface.action_type is SpaceType.CONTINUOUS):
-                flag = (action.dtype is torch.float32) and (tuple(action.shape) == self.interface.action_shape)
-        
-        return flag
-    
-    @abstractmethod
-    def step(
-        self,
-        action
-    ):
-        raise NotImplementedError
-    
-    # @abstractmethod
-    def sample(
-        self
-    ):
-        raise NotImplementedError
-
-    # @abstractmethod
-    def update(
-        self
-    ):
-        raise NotImplementedError
-
-    # @abstractmethod
-    def score(
-        self,
-        history,
-        info_history = None
-    ):
-        raise NotImplementedError
-
-
-class Environment(BaseEnvironment):
-
-    def __init__(
-        self,
-        configuration = None
-    ):
-        super().__init__(
-            configuration = configuration
-        )
+        if (isinstance(observation_space, gym.spaces.Space) and isinstance(action_space, gym.spaces.Space)):      
+            self._interface = get_environment_interface(
+                observation_space = observation_space,
+                action_space = action_space
+            )
+            self._configuration = configuration
+            self._state_space = observation_space
+            self._action_space = action_space
+            self._observation_space = observation_space
+            self._state = None
+            self._become_available()
     
     def reset(
         self
     ):
         observation = self.observation_space.sample()
         observation = torch.from_numpy(observation.astype(np.float32))
-        self.state = observation
+        self._state = observation
         return observation
 
-    def setup(
-        self,
-        configuration = None,
-        observation_space = gym.spaces.Box(low = 0.0, high = 1.0, shape=(1,)), # will be in `configuration`
-        action_space = gym.spaces.Discrete(2) # will be in `configuration`
-    ):
-        if (isinstance(observation_space, gym.spaces.Space) and isinstance(action_space, gym.spaces.Space)):      
-            self.observation_space = self.state_space = observation_space
-            self.action_space = action_space 
-            self.state = None
-            self.interface = get_environment_interface(
-                self.observation_space,
-                self.action_space
-            )
-            self._become_available()
-    
     def step(
         self,
         action
     ):
-        warnings.warn("`step` is not implemented.")
         observation = self.observation_space.sample()
         observation = torch.from_numpy(observation.astype(np.float32))
         reward = np.random.rand()
@@ -153,166 +156,223 @@ class Environment(BaseEnvironment):
     ):
         action = self.action_space.sample()
         return action
-    
-    def update(
-        self
-    ):
-        warnings.warn("`update` cannot be used for an Environment instance.")
 
     def score(
         self,
         history,
         info_history = None
     ):
-        warnings.warn("`score` is not implemented.")
         score_dictionary = {}
         return score_dictionary
 
+    def can_accept_action(
+        self,
+        action
+    ):
+        flag = False
+        if (not self.is_available):
+            return flag
 
-class GoalReachingTaskEnvironment(Environment):
+        if (type(action) is torch.Tensor):
+            if (self.interface.action_type is SpaceType.DISCRETE):
+                flag = (action.dtype is torch.long) and (tuple(action.shape) in ((), (1,)))
+            elif (self.interface.action_type is SpaceType.CONTINUOUS):
+                flag = (action.dtype is torch.float32) and (tuple(action.shape) == self.interface.action_shape)
+        
+        return flag
 
+
+class GymEnvironmentMixin(EnvironmentMixin):
+
+    def declare(self):
+        self._env = None
+
+    @property
+    def env(self): return self._env
+    
     def __init__(
         self,
         configuration = None
     ):
-        super().__init__(
+        EnvironmentMixin.__init__(
+            self,
+            configuration = configuration,
+            allow_setup = False
+        )
+        GymEnvironmentMixin.declare(self)
+        GymEnvironmentMixin.setup(
+            self,
             configuration = configuration
         )
-        self.goal_space = None
-        self.goal = None
-
-    def reset(
-        self,
-        use_goal = False
-    ):
-        goal = self.goal_space.sample()
-        self.goal = torch.from_numpy(goal.astype(np.float32))
-        observation = super().reset()
-        if (use_goal):
-            return (observation, self.goal)
-        else:
-            return observation
-        
-    def setup(
-        self,
-        configuration = None,
-        observation_space = gym.spaces.Box(low = 0.0, high = 1.0, shape=(1,)), # will be in `configuration`
-        action_space = gym.spaces.Discrete(2), # will be in `configuration`
-        goal_space = gym.spaces.Box(low = 0.0, high = 1.0, shape=(1,)) # will be in `configuration`
-    ):
-        if (isinstance(observation_space, gym.spaces.Space) and isinstance(action_space, gym.spaces.Space) and isinstance(goal_space, gym.spaces.Space)):
-            self.goal_space = goal_space
-            self.observation_space = self.state_space = observation_space
-            self.action_space = action_space
-            self.goal = None
-            self.state = None
-            self.interface = get_environment_interface(
-                self.observation_space,
-                self.action_space
-            )
-            self._become_available()
-
-    def step(
-        self,
-        action,
-        use_goal = True,
-        use_reward = False
-    ):
-        observation, reward, done, info = super().step(action)
-        if (use_goal and use_reward):
-            return (observation, self.goal, reward, done, info)
-        elif (use_goal and (not use_reward)):
-            return (observation, self.goal, done, info)
-        elif ((not use_goal) and use_reward):
-            return (observation, reward, done, info)
-        else:
-            return (observation, done, info)
-
-
-class GymEnvironment(BaseEnvironment):
-
-    def __init__(
-        self,
-        configuration = None
-    ):
-        self.env = None
-        self._is_available = False
-        self.setup(
-            configuration = configuration
-        )
-
-    @property
-    def observation_space(
-        self
-    ):
-        return self.env.observation_space
-
-    @property
-    def action_space(
-        self
-    ):
-        return self.env.action_space
-        
-    def reset(
-        self
-    ):
-        observation = self.env.reset()
-        observation = torch.from_numpy(observation.astype(np.float32))
-        self.state = observation
-        return observation
 
     def setup(
         self,
         configuration = None
     ):
-        if (configuration is None): return
+        if (configuration is None):
+            return
         if (type(configuration) is not dict):
             raise ValueError("`configuration` must be 'Dictionary' object.")
         if ("name" not in configuration):
             raise ValueError("`configuration` must have 'name' key.")
-        
         name = configuration["name"]
         if (type(name) is str):
             try:
-                self.env = gym.make(name)
-                self._become_available()
-            except gym.error.Error as e:
+                self._env = gym.make(name)
+                EnvironmentMixin.setup(
+                    self,
+                    configuration = {
+                        "observation_space": self.env.observation_space,
+                        "action_space": self.env.action_space
+                    }
+                )
+            except (gym.error.Error, gym.error.NameNotFound) as e:
                 raise ValueError(e)
-            except gym.error.NameNotFound as e:
-                raise ValueError(e)
-    
-    def step(
-        self,
-        action
-    ):
+
+    def reset_decorator(reset):
+        def wrapper(
+            self
+        ):
+            observation = reset(self)
+            observation = torch.from_numpy(observation.astype(np.float32))
+            # self._state = observation
+            return observation
+        return wrapper
+
+    @reset_decorator
+    def reset(self):
+        observation = self.env.reset()
+        return observation
+
+    def step_decorator(step):
+        def wrapper(
+            self,
+            action
+        ):
+            observation, reward, done, info = step(self, action)
+            observation = torch.from_numpy(observation.astype(np.float32))
+            reward = torch.tensor(reward, dtype=torch.float32)
+            return (observation, reward, done, info)
+        return wrapper
+
+    @step_decorator
+    def step(self, action):
         observation, reward, done, info = self.env.step(action)
-        observation = torch.from_numpy(observation.astype(np.float32))
-        reward = torch.tensor(reward, dtype=torch.float32)
         return (observation, reward, done, info)
+        
 
-    def sample(
-        self
-    ):
-        action = self.action_space.sample()
-        return action
+class GoalReachingTaskEnvironmentMixin(EnvironmentMixin):
+    
+    def declare(self):
+        self._goal_space = None
+        self._goal_state = None
+    
+    @property
+    def goal_space(self): return self._goal_space
+    @property
+    def goal_state(self): return self._goal_state
 
-    def score(
+    def __init__(
         self,
-        history,
-        info_history = None
+        configuration = None
     ):
-        score_dictionary = {
-            "total_reward": None
-        }
-        if (len(history) > 0):
-            total_reward = 0
-            for sars in history:
-                total_reward = total_reward + sars.reward
-            total_reward = int(total_reward)
-            score_dictionary["total_reward"] = total_reward
-        return score_dictionary
+        super().__init__(configuration = configuration)
+        GoalReachingTaskEnvironmentMixin.declare(self)
+        GoalReachingTaskEnvironmentMixin.setup(self, configuration = configuration)
 
-class CartPoleEnvironment(GymEnvironment):
+    def setup(
+        self,
+        configuration = None
+    ):
+        if (configuration is None):
+            return
+        if (type(configuration) is not dict):
+            raise ValueError("`configuration` must be 'Dictionary' object.")
+        if ("goal_space" not in configuration):
+            raise ValueError("`configuration` must have 'goal_space' key.")
+        goal_space = configuration["goal_space"]
+
+        if (isinstance(goal_space, gym.spaces.Space)):
+            self._goal_space = goal_space
+            # self._goal_state = None
+            self._become_available()
+
+    def reset_decorator(reset):
+        def wrapper(
+            self,
+            use_goal = True
+        ):
+            goal = self.goal_space.sample()
+            self._goal_state = torch.from_numpy(goal.astype(np.float32))
+            observation = reset(self)
+            if (use_goal):
+                return (observation, self.goal_state)
+            else:
+                return observation
+        return wrapper
+
+    def step_decorator(step):
+        def wrapper(
+            self,
+            action,
+            use_goal = True,
+            use_reward = False
+        ):
+            observation, reward, done, info = step(self, action)
+            if (use_goal and use_reward):
+                return (observation, self.goal_state, reward, done, info)
+            elif (use_goal and (not use_reward)):
+                return (observation, self.goal_state, done, info)
+            elif ((not use_goal) and use_reward):
+                return (observation, reward, done, info)
+            else:
+                return (observation, done, info)
+        return wrapper
+
+
+class Environment(EnvironmentMixin, EnvironmentBase):
+
+    def __init__(
+        self,
+        configuration = None
+    ):
+        super().__init__(configuration = configuration)
+
+
+class GymEnvironment(GymEnvironmentMixin, EnvironmentBase):
+
+    def __init__(self, configuration = None):
+        super().__init__(configuration = configuration)
+
+
+class GoalReachingTaskEnvironment(GoalReachingTaskEnvironmentMixin, EnvironmentBase):
+
+    def __init__(self, configuration = None):
+        super().__init__(configuration = configuration)
+
+    @GoalReachingTaskEnvironmentMixin.reset_decorator
+    def reset(self):
+        observation = self.observation_space.sample()
+        observation = torch.from_numpy(observation.astype(np.float32))
+        return observation
+
+    @GoalReachingTaskEnvironmentMixin.step_decorator
+    def step(self, action):
+        observation = self.observation_space.sample()
+        observation = torch.from_numpy(observation.astype(np.float32))
+        reward = np.random.rand()
+        reward = torch.tensor(reward, dtype=torch.float32)
+        done = random.choice([True, False])
+        info = None
+        return observation, reward, done, info
+
+
+class CartPoleEnvironment(GymEnvironmentMixin, EnvironmentBase):
+
+    def declare(self):
+        self.name = None
+        self._t = None
+        self._T = None
 
     def __init__(
         self,
@@ -325,31 +385,33 @@ class CartPoleEnvironment(GymEnvironment):
         super().__init__(
             configuration = { "name": self.name }
         )
-        self.t = 0
-        self.T = 500 if (version == "v1") else 200
+        CartPoleEnvironment.declare(self)
+        CartPoleEnvironment.setup(self, version)
 
-    def reset(
-        self
-    ):
-        self.t = 0
-        return super().reset()
+    def setup(self, version):
+        if (version not in ("v0", "v1")):
+            raise ValueError("`version`: ('v0', 'v1')")
+        self._t = 0
+        self._T = 500 if (version == "v1") else 200
+    
+    def reset(self):
+        self._t = 0
+        observation = super().reset()
+        return observation
     
     def step(
         self,
         action
     ):
-        observation, reward, done, info = self.env.step(action)
-        self.t += 1
+        self._t += 1
+        observation, reward, done, info = super().step(action)
 
         if (done):
-            reward = 1.0 if (self.t >= self.T) else -1.0
+            reward = torch.tensor(1.0, dtype=torch.float32) if (self._t >= self._T) else torch.tensor(-1.0, dtype=torch.float32)
         else:
-            reward = 1.0
-
-        observation = torch.from_numpy(observation.astype(np.float32))
-        reward = torch.tensor(reward, dtype=torch.float32)
+            reward = torch.tensor(1.0, dtype=torch.float32)
         return (observation, reward, done, info)
-    
+
     def score(
         self,
         history,
@@ -363,28 +425,40 @@ class CartPoleEnvironment(GymEnvironment):
             score_dictionary["duration"] = duration
         return score_dictionary
 
-class ContinuousMountainCarEnvironment(GymEnvironment):
+
+class ContinuousMountainCarEnvironment(GymEnvironmentMixin, GoalReachingTaskEnvironmentMixin, GoalReachingTaskEnvironmentBase):
+
+    def declare(self):
+        self.name = None
+        self._t = None
+        self._T = None
 
     def __init__(
         self
     ):
         super().__init__(
-            name = "MountainCarContinuous-v0"
+            configuration = { "name": "MountainCarContinuous-v0" }
         )
+        ContinuousMountainCarEnvironment.declare(self)
+        ContinuousMountainCarEnvironment.setup(self)
+
+    def setup(self):
         self._t = 0
         self._T = 200
 
-    def reset(
-        self
-    ):
+    @GoalReachingTaskEnvironmentMixin.reset_decorator
+    def reset(self):
         self._t = 0
-        return super().reset()
-    
+        observation = super().reset()
+        return observation
+
+    @GoalReachingTaskEnvironmentMixin.step_decorator
     def step(
         self,
         action
     ):
-        observation, reward, done, info = self.env.step(action)
+        self._t += 1
+        observation, reward, done, info = super().step(action)
         return observation, reward, done, info
     
     def score(
@@ -403,25 +477,38 @@ class ContinuousMountainCarEnvironment(GymEnvironment):
             score_dictionary["total_reward"] = total_reward
         return score_dictionary
 
-class PendulumEnvironment(GymEnvironment):
+
+class PendulumEnvironment(GymEnvironmentMixin, EnvironmentBase):
+
+    def declare(self):
+        self.name = None
+        self._t = None
+        self._T = None
 
     def __init__(
         self
     ):
         super().__init__(
-            name = "Pendulum-v1"
+            configuration = { "name": "Pendulum-v1" }
         )
+        PendulumEnvironment.declare(self)
+        PendulumEnvironment.setup(self)
 
-    def reset(
-        self
-    ):
-        return super().reset()
+    def setup(self):
+        self._t = 0
+        self._T = 200
+
+    def reset(self):
+        self._t = 0
+        observation = super().reset()
+        return observation
     
     def step(
         self,
         action
     ):
-        observation, reward, done, info = self.env.step(action)
+        self._t += 1
+        observation, reward, done, info = super().step(action)
         reward *= 0.01
         return observation, reward, done, info
 
