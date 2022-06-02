@@ -426,7 +426,13 @@ class CartPoleEnvironment(GymEnvironmentMixin, EnvironmentBase):
         return score_dictionary
 
 
-class DiscreteMountainCarEnvironment(GymEnvironment):
+class DiscreteMountainCarEnvironment(GymEnvironmentMixin, EnvironmentBase):
+
+    def declare(self):
+        self.name = None
+        self.reward_spec = None
+        self._t = None
+        self._T = None
 
     def __init__(
         self,
@@ -435,11 +441,19 @@ class DiscreteMountainCarEnvironment(GymEnvironment):
         if (reward_spec not in ("sparse", "dense")):
             raise ValueError("`reward_spec`: ('sparse', 'dense')")
         self.name = "MountainCar-v0"
-        self.reward_spec = reward_spec
 
         super().__init__(
             configuration = { "name": self.name }
         )
+        DiscreteMountainCarEnvironment.declare(self)
+        DiscreteMountainCarEnvironment.setup(self, reward_spec)
+
+    def setup(self, reward_spec):
+        if (reward_spec not in ("sparse", "dense")):
+            raise ValueError("`reward_spec`: ('sparse', 'dense')")
+        if (reward_spec == "dense"):
+            raise NotImplementedError("`reward_spec = dense` is not supported right now.")
+        self.reward_spec = reward_spec
         self._t = 0
         self._T = 200
     
@@ -447,20 +461,15 @@ class DiscreteMountainCarEnvironment(GymEnvironment):
         self
     ):
         self._t = 0
-        state = super().reset()
-        return state
+        observation = super().reset()
+        return observation
 
     def step(
         self,
         action
     ):
         self._t += 1
-        observation, reward, done, info = self.env.step(action)
-        if (self.reward_spec == "dense"):
-            raise NotImplementedError("`reward_spec = dense` is not supported right now.")
-
-        observation = torch.from_numpy(observation.astype(np.float32))
-        reward = torch.tensor(reward, dtype=torch.float32)
+        observation, reward, done, info = super().step(action)
         return (observation, reward, done, info)
 
     def score(

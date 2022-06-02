@@ -10,6 +10,7 @@ from src.environment import Environment
 from src.environment import GoalReachingTaskEnvironment
 from src.environment import GymEnvironment
 from src.environment import CartPoleEnvironment
+from src.environment import DiscreteMountainCarEnvironment
 from src.environment import ContinuousMountainCarEnvironment
 from src.environment import PendulumEnvironment
 
@@ -281,6 +282,14 @@ class TestCartPoleEnvironment:
         env = CartPoleEnvironment()
         assert env.is_available == True
 
+
+@pytest.mark.L2
+class TestDiscreteMountainCarEnvironment:
+    
+    @pytest.mark.unit
+    def test_should_be_available_on_initialization(self):
+        env = DiscreteMountainCarEnvironment()
+        assert env.is_available == True
 
 @pytest.mark.L2
 class TestContinuousMountainCarEnvironment:
