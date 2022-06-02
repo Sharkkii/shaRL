@@ -5,7 +5,7 @@ from torch.utils.data import Dataset as TorchDataset
 
 from ..common import Component
 from ..common.data import SARS
-from ..common.data import SAGS
+from ..common.data import SGASG
 
 
 # T_STATE = torch.tensor
@@ -242,7 +242,7 @@ class SarsDataset(Dataset):
         return all([ (type(item) is SARS) for item in collection ])
 
 
-class SagsDataset(Dataset):
+class SgasgDataset(Dataset):
 
     def __init__(
         self,
@@ -269,7 +269,7 @@ class SagsDataset(Dataset):
             raise ValueError("`collection` must be 'List' object.")
 
         if (not self.check_whether_valid_sag_collection(collection)):
-            raise ValueError("`collection` must be 'List[SAGS]' object.")
+            raise ValueError("`collection` must be 'List[SGASG]' object.")
 
         super().setup(
             collection = collection,
@@ -281,8 +281,8 @@ class SagsDataset(Dataset):
         self,
         index
     ):
-        sags = super().__getitem__(index = index)
-        return (sags.state, sags.action, sags.goal, sags.next_state)
+        sgasg = super().__getitem__(index = index)
+        return (sgasg.state, sgasg.goal, sgasg.action, sgasg.next_state, sgasg.next_goal)
 
     def add_collection(
         self,
@@ -292,9 +292,9 @@ class SagsDataset(Dataset):
             raise ValueError("`collection` must be 'List' object.")
 
         if (not self.check_whether_valid_sag_collection(collection)):
-            raise ValueError("`collection` must be 'List[SAGS]' object.")
+            raise ValueError("`collection` must be 'List[SGASG]' object.")
 
         super().add_collection(collection)
 
     def check_whether_valid_sag_collection(self, collection):
-        return all([ (type(item) is SAGS) for item in collection ])
+        return all([ (type(item) is SGASG) for item in collection ])

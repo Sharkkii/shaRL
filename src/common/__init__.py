@@ -5,8 +5,8 @@ from .data import Data
 from .data import SA
 from .data import SARS
 from .data import SARSA
-from .data import SAG
-from .data import SAGS
+from .data import SGASG
+from .data import SGARSG
 
 from .helper import cast_space_to_type
 
