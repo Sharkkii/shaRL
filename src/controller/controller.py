@@ -6,7 +6,7 @@ from abc import ABCMeta, abstractmethod
 from ..const import PhaseType
 from ..const import EnvironmentModelType, AgentStrategyType, AgentBehaviorType, AgentLearningType
 from ..dataset import SarsDataset
-from ..dataset import SagsDataset
+from ..dataset import SgasgDataset
 from ..dataset import DataLoader
 
 
@@ -43,15 +43,15 @@ class BaseController(metaclass=ABCMeta):
             self.env = environment
             self.agent = agent
             
-            if (config_e is None):
-                self.env.setup()
-            else:
-                self.env.setup(config_e)
+            # if (config_e is None):
+            #     self.env.setup()
+            # else:
+            #     self.env.setup(config_e)
 
-            if (config_a is None):
-                self.agent.setup()
-            else:
-                self.agent.setup(config_a)
+            # if (config_a is None):
+            #     self.agent.setup()
+            # else:
+            #     self.agent.setup(config_a)
 
             self._become_available()
     
@@ -421,7 +421,7 @@ class GoalConditionedRLController(BaseController):
         behavior_type = AgentBehaviorType.OFF_POLICY
         learning_type = AgentLearningType.OFFLINE
 
-        dataset = SagsDataset(
+        dataset = SgasgDataset(
             collection = [],
             transform = None
         )

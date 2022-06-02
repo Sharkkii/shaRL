@@ -6,10 +6,12 @@ from ..const import PhaseType
 from ..common import AgentInterface
 from ..common import Component
 from ..common import SARS
-from ..common import SAGS
+from ..common import SGASG
 from ..actor import Actor
+from ..actor import GoalConditionedActor
 from ..critic import Critic
 from ..environment import Model
+from ..environment import GoalReachingTaskEnvironment
 from ..memory import RLMemory
 
 
@@ -395,6 +397,42 @@ class Agent(BaseAgent):
 
 class GoalConditionedAgent(Agent):
 
+    def __init__(
+        self,
+        actor = None,
+        critic = None,
+        interface = None,
+        use_default = False
+    ):
+        if ((actor is None)):
+            actor = GoalConditionedActor(
+                interface = interface,
+                use_default = use_default
+            )
+        if ((critic is None)):
+            critic = Critic(
+                interface = interface,
+                use_default = use_default
+            )
+        super().__init__(
+            actor = actor,
+            critic = critic,
+            interface = interface,
+            use_default = False
+        )
+
+    def choose_action(
+        self,
+        state,
+        goal,
+        information = None
+    ):
+        return self.actor.choose_action(
+            state = state,
+            goal = goal,
+            information = information
+        )
+
     def interact_with_env(
         self,
         env,
@@ -406,6 +444,9 @@ class GoalConditionedAgent(Agent):
         use_reward = False, # will be implemented
         verbose = False
     ):
+        if (not isinstance(env, GoalReachingTaskEnvironment)):
+            raise ValueError("`env` must be 'GoalReachingTaskEnvironment' object.")
+
         if (information is None):
             information = {}
 
@@ -417,6 +458,8 @@ class GoalConditionedAgent(Agent):
         if (type(information) is not dict):
             raise ValueError("`information` must be a 'dictionary' object.")
 
+        if (information is None):
+            information = {}
         information["action_space"] = env.action_space
         
         history = []
@@ -425,17 +468,19 @@ class GoalConditionedAgent(Agent):
         for _ in range(n_episode):
 
             t = 0
-            state = env.reset()
+            state, goal = env.reset(use_goal = True)
             done = False
             for _ in range(max_nstep):
                 if (done): break
                 action = self.actor.choose_action(
                     state = state,
+                    goal = goal,
                     information = information
                 )
                 # assume `use_goal = True & use_reward = False`
                 next_state, goal, done, info = env.step(action)
-                data = SAGS(state, action, goal, next_state)
+                next_goal = goal
+                data = SGASG(state, goal, action, next_state, next_goal)
                 history.append(data)
                 state = next_state
                 if (use_info):
