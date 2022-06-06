@@ -141,6 +141,7 @@ class AgentMixin(AgentBase, Component):
                 raise ValueError("`default_actor` & `default_critic` must not be None if `use_default = True`")
             actor = TACTOR(
                 interface = interface,
+                configuration = configuration,
                 use_default = True
             )
             critic = TCRITIC(
@@ -296,7 +297,9 @@ class GoalConditionedAgentMixin(AgentMixin, GoalConditionedAgentBase):
                 configuration = configuration,
                 actor = actor,
                 critic = critic,
-                use_default = use_default
+                use_default = use_default,
+                default_actor = default_actor,
+                default_critic = default_critic
             )
     
     def setup(
@@ -305,7 +308,9 @@ class GoalConditionedAgentMixin(AgentMixin, GoalConditionedAgentBase):
         configuration = None,
         actor = None,
         critic = None,
-        use_default = False
+        use_default = False,
+        default_actor = None,
+        default_critic = None
     ):
         pass
 
@@ -315,7 +320,7 @@ class GoalConditionedAgentMixin(AgentMixin, GoalConditionedAgentBase):
         goal,
         information = None
     ):
-        return self._actor.choose_action(
+        return self.actor.choose_action(
             state = state,
             goal = goal,
             information = information
