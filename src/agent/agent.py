@@ -8,8 +8,12 @@ from ..common import Component
 from ..common import SARS
 from ..common import SGASG
 from ..actor import Actor
+from ..actor import DiscreteControlActor
+from ..actor import ContinuousControlActor
 from ..actor import GoalConditionedActor
 from ..critic import Critic
+from ..critic import DiscreteControlCritic
+from ..critic import ContinuousControlCritic
 from ..environment import Model
 from ..environment import GoalReachingTaskEnvironment
 from ..memory import RLMemory
@@ -60,6 +64,14 @@ class AgentBase(ABC):
     # @property
     # @abstractmethod
     # def memory(self): raise NotImplementedError
+
+
+class DiscreteControlAgentBase(AgentBase):
+    pass
+
+
+class ContinuousControlAgentBase(AgentBase):
+    pass
 
 
 class GoalConditionedAgentBase(AgentBase):
@@ -261,6 +273,112 @@ class AgentMixin(AgentBase, Component):
         self.critic.eval()
 
 
+class DiscreteControlAgentMixin(AgentMixin, DiscreteControlAgentBase):
+    
+    def __init__(
+        self,
+        interface = None,
+        configuration = None,
+        actor = None,
+        critic = None,
+        allow_setup = True,
+        use_default = False,
+        default_actor = None,
+        default_critic = None
+    ):
+        if (default_actor is None):
+            default_actor = DiscreteControlActor
+        if (default_critic is None):
+            default_critic = DiscreteControlCritic
+
+        AgentMixin.__init__(
+            self,
+            interface = interface,
+            configuration = configuration,
+            actor = actor,
+            critic = critic,
+            use_default = use_default,
+            default_actor = default_actor,
+            default_critic = default_critic
+        )
+        if (allow_setup):
+            DiscreteControlAgentMixin.setup(
+                self,
+                interface = interface,
+                configuration = configuration,
+                actor = actor,
+                critic = critic,
+                use_default = use_default,
+                default_actor = default_actor,
+                default_critic = default_critic
+            )
+
+    def setup(
+        self,
+        interface = None,
+        configuration = None,
+        actor = None,
+        critic = None,
+        use_default = False,
+        default_actor = None,
+        default_critic = None
+    ):
+        pass
+
+
+class ContinuousControlAgentMixin(AgentMixin, ContinuousControlAgentBase):
+    
+    def __init__(
+        self,
+        interface = None,
+        configuration = None,
+        actor = None,
+        critic = None,
+        allow_setup = True,
+        use_default = False,
+        default_actor = None,
+        default_critic = None
+    ):
+        if (default_actor is None):
+            default_actor = ContinuousControlActor
+        if (default_critic is None):
+            default_critic = ContinuousControlCritic
+
+        AgentMixin.__init__(
+            self,
+            interface = interface,
+            configuration = configuration,
+            actor = actor,
+            critic = critic,
+            use_default = use_default,
+            default_actor = default_actor,
+            default_critic = default_critic
+        )
+        if (allow_setup):
+            ContinuousControlAgentMixin.setup(
+                self,
+                interface = interface,
+                configuration = configuration,
+                actor = actor,
+                critic = critic,
+                use_default = use_default,
+                default_actor = default_actor,
+                default_critic = default_critic
+            )
+
+    def setup(
+        self,
+        interface = None,
+        configuration = None,
+        actor = None,
+        critic = None,
+        use_default = False,
+        default_actor = None,
+        default_critic = None
+    ):
+        pass
+
+
 class GoalConditionedAgentMixin(AgentMixin, GoalConditionedAgentBase):
 
     def __init__(
@@ -403,7 +521,47 @@ class Agent(AgentMixin, AgentBase):
         )
 
 
-class GoalConditionedAgent(GoalConditionedAgentMixin, GoalConditionedAgentBase):
+class DiscreteControlAgent(DiscreteControlAgentMixin, AgentBase):
+
+    def __init__(
+        self,
+        interface = None,
+        configuration = None,
+        actor = None,
+        critic = None,
+        use_default = False
+    ):
+        DiscreteControlAgentMixin.__init__(
+            self,
+            interface = interface,
+            configuration = configuration,
+            actor = actor,
+            critic = critic,
+            use_default = use_default
+        )
+
+
+class ContinuousControlAgent(ContinuousControlAgentMixin, AgentBase):
+
+    def __init__(
+        self,
+        interface = None,
+        configuration = None,
+        actor = None,
+        critic = None,
+        use_default = False
+    ):
+        ContinuousControlAgentMixin.__init__(
+            self,
+            interface = interface,
+            configuration = configuration,
+            actor = actor,
+            critic = critic,
+            use_default = use_default
+        )
+
+
+class GoalConditionedAgent(GoalConditionedAgentMixin, AgentBase):
     
     def __init__(
         self,

@@ -267,7 +267,7 @@ class DiscreteControlActorMixin(ActorMixin, DiscreteControlActorBase):
         pass
 
 
-class ContinuousControlActorMixin(ActorMixin, DiscreteControlActorBase):
+class ContinuousControlActorMixin(ActorMixin, ContinuousControlActorBase):
 
     def __init__(
         self,
@@ -291,7 +291,7 @@ class ContinuousControlActorMixin(ActorMixin, DiscreteControlActorBase):
             default_policy = default_policy
         )
         if (allow_setup):
-            DiscreteControlActorMixin.setup(
+            ContinuousControlActorMixin.setup(
                 self,
                 interface = interface,
                 configuration = configuration,
@@ -328,7 +328,8 @@ class SoftUpdateActorMixin(ActorBase):
     ):
         SoftUpdateActorMixin.declare()
         SoftUpdateActorMixin.setup(
-            self
+            self,
+            tau = tau
         )
 
     def setup(
