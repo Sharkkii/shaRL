@@ -1,6 +1,6 @@
 #### Agent ####
 
-from abc import ABCMeta, abstractmethod
+from abc import ABC, ABCMeta, abstractmethod
 
 from ..const import PhaseType
 from ..common import AgentInterface
@@ -15,112 +15,163 @@ from ..environment import GoalReachingTaskEnvironment
 from ..memory import RLMemory
 
 
-class BaseAgent(Component, metaclass=ABCMeta):
+class AgentBase(ABC):
 
     @abstractmethod
+    def __init__(self): raise NotImplementedError
+    @abstractmethod
+    def setup(self): raise NotImplementedError
+    # TODO) TO BE RENAMED: setup_on_every_epoch #
+    @abstractmethod
+    def setup_on_every_epoch(self): raise NotImplementedError
+    # TODO) TO BE RENAMED: setup_on_every_step #
+    @abstractmethod
+    def setup_on_every_step(self): raise NotImplementedError
+    # @abstractmethod
+    # def reset(self): raise NotImplementedError
+    @abstractmethod
+    def choose_action(self): raise NotImplementedError
+    @abstractmethod
+    def interact_with_env(self): raise NotImplementedError
+    @abstractmethod
+    def update_actor(self): raise NotImplementedError
+    @abstractmethod
+    def update_critic(self): raise NotImplementedError
+    @abstractmethod
+    def train(self): raise NotImplementedError
+    @abstractmethod
+    def eval(self): raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def interface(self): raise NotImplementedError
+    @property
+    @abstractmethod
+    def configuration(self): raise NotImplementedError
+    @property
+    @abstractmethod
+    def actor(self): raise NotImplementedError
+    @property
+    @abstractmethod
+    def critic(self): raise NotImplementedError
+    # @property
+    # @abstractmethod
+    # def env(self): raise NotImplementedError
+    # @property
+    # @abstractmethod
+    # def memory(self): raise NotImplementedError
+
+
+class GoalConditionedAgentBase(AgentBase):
+    pass
+
+
+class AgentMixin(AgentBase, Component):
+
+    def declare(self):
+        self._interface = None
+        self._configuration = None
+        self._actor = None
+        self._critic = None
+
+    @property
+    def interface(self): return self._interface
+    @property
+    def configuration(self): return self._configuration
+    @property
+    def actor(self): return self._actor
+    @property
+    def critic(self): return self._critic
+
     def __init__(
         self,
-        actor = None,
-        critic = None,
         interface = None,
         configuration = None,
-        model = None, # will be in `component`
-        memory = None, # will be in `component`
-        gamma = 1.0, # will be in `configuration`
-        use_default = False
+        actor = None,
+        critic = None,
+        allow_setup = True,
+        use_default = False,
+        default_actor = None,
+        default_critic = None
     ):
+        if (default_actor is None):
+            default_actor = Actor
+        if (default_critic is None):
+            default_critic = Critic
+
+        AgentMixin.declare(self)
         Component.__init__(self)
-        if (use_default):
-            if (not ((actor is None) and (critic is None))):
-                raise ValueError("`actor` & `critic` must be None if `use_default = True`")
-            if (type(interface) is not AgentInterface):
-                raise ValueError("`interface` must be 'AgentInterface' object if `use_default = True`")
-            actor = Actor(
+        if (allow_setup):
+            AgentMixin.setup(
+                self,
                 interface = interface,
-                use_default = True
+                configuration = configuration,
+                actor = actor,
+                critic = critic,
+                use_default = use_default,
+                default_actor = default_actor,
+                default_critic = default_critic
             )
-            critic = Critic(
-                interface = interface,
-                use_default = True
-            )
-
-        if ((configuration is not None) and (type(configuration) is not dict)):
-            raise ValueError("`configuration` must be 'Dictionary' object or None")
-
-        self.actor = Actor() if (actor is None) else actor
-        self.critic = Critic() if (critic is None) else critic
-        self.env = None
-        self.model = Model() if (model is None) else model
-        self.memory = RLMemory() if (memory is None) else memory
-        self.gamma = gamma
-        self.setup(
-            actor = actor,
-            critic = critic
-        )
     
-    @abstractmethod
-    def reset(
-        self
-    ):
-        self.actor.reset()
-        self.critic.reset()
-        self.model.reset()
-        self.memory.reset()
-
-    @abstractmethod
     def setup(
         self,
-        env = None, # will be deprecated
-        policy_network = None, # will be deprecated
-        value_network = None, # will be deprecated
-        qvalue_network = None, # will be deprecated
-        policy_optimizer = None, # will be deprecated
-        value_optimizer = None, # will be deprecated
-        qvalue_optimizer = None, # will be deprecated
+        interface = None,
+        configuration = None,
         actor = None,
-        critic = None
+        critic = None,
+        use_default = False,
+        default_actor = None,
+        default_critic = None
     ):
-        if ((actor is not None) and (critic is not None)):
-            self.actor = actor
-            self.critic = critic
-            self.critic.setup_with_actor(
-                actor = self.actor
-            )
-            self.actor.setup_with_critic(
-                critic = self.critic
-            )
-            self._become_available()
+        TACTOR = default_actor
+        TCRITIC = default_critic
 
-        # self.actor.setup(
-        #     env = env,
-        #     policy_network = policy_network,
-        #     policy_optimizer = policy_optimizer
-        # )
-        # self.critic.setup(
-        #     env = env,
-        #     value_network = value_network,
-        #     qvalue_network = qvalue_network,
-        #     value_optimizer = value_optimizer,
-        #     qvalue_optimizer = qvalue_optimizer,
-        # )
-        # self.model.setup(env)
-        # self.memory.setup()
-    
-    @abstractmethod
+        if (use_default and (interface is None)):
+            raise ValueError("`interface` must be 'AgentInterface' object if `use_default = True`.")
+        if (configuration is None):
+            # return
+            configuration = {}
+        if ((type(configuration) is not dict)):
+            raise ValueError("`configuration` must be 'Dictionary' object or None.")
+
+        if (use_default):
+            if ((actor is not None) or (critic is not None)):
+                raise ValueError("`actor` & `critic` must be None if `use_default = True`")
+            if ((default_actor is None) or (default_critic is None)):
+                raise ValueError("`default_actor` & `default_critic` must not be None if `use_default = True`")
+            actor = TACTOR(
+                interface = interface,
+                use_default = True
+            )
+            critic = TCRITIC(
+                interface = interface,
+                use_default = True
+            )
+        
+        else:
+            if ((actor is None) or (critic is None)):
+                return
+        #         raise ValueError("`actor` & `critic` must not be None if `use_default = False`.")
+        
+        self._interface = interface
+        self._configuration = configuration
+        self._actor = actor
+        self._critic = critic
+        self._become_available()
+
     def setup_on_every_epoch(
         self,
         epoch,
         n_epoch
     ):
-        raise NotImplementedError
+        pass
 
-    @abstractmethod
     def setup_on_every_step(
         self,
         step,
         n_step
     ):
-        raise NotImplementedError
+        pass
 
     def choose_action(
         self,
@@ -132,220 +183,19 @@ class BaseAgent(Component, metaclass=ABCMeta):
             information = information
         )
 
-    def train(
-        self
-    ):
-        self.actor.train()
-        self.critic.train()
-    
-    def eval(
-        self
-    ):
-        self.actor.eval()
-        self.critic.eval()
-
-    def save(
-        self,
-        path_to_policy,
-        path_to_value,
-        path_to_qvalue
-    ):
-        self.actor.save(
-            path_to_policy = path_to_policy
-        )
-        self.critic.save(
-            path_to_value = path_to_value,
-            path_to_qvalue = path_to_qvalue
-        )
-
-    def load(
-        self,
-        path_to_policy,
-        path_to_value,
-        path_to_qvalue
-    ):
-        self.actor.load(
-            path_to_policy = path_to_policy
-        )
-        self.critic.load(
-            path_to_value = path_to_value,
-            path_to_qvalue = path_to_qvalue
-        )
-
-    @abstractmethod
-    def update_model(
-        self,
-        trajectory,
-        n_times = 1
-    ):
-        raise NotImplementedError
-
-    @abstractmethod
-    def update_actor(
-        self,
-        trajectory,
-        n_times = 1
-    ):
-        raise NotImplementedError
-    
-    @abstractmethod
-    def update_critic(
-        self,
-        trajectory,
-        n_times = 1
-    ):
-        raise NotImplementedError
-
-    # @abstractmethod
-    # def update_every_epoch(
-    #     epoch,
-    #     n_epoch
-    # ):
-    #     raise NotImplementedError
-
-    @abstractmethod
     def interact_with_env(
         self,
         env,
-        information = None,
-        use_info = False
-    ):
-        raise NotImplementedError
-    
-    @abstractmethod
-    def save_history(
-        self,
-        history
-    ):
-        raise NotImplementedError
-
-    @abstractmethod
-    def load_history(
-        self,
-        n_sample = 0
-    ):
-        raise NotImplementedError
-
-class Agent(BaseAgent):
-
-    def __init__(
-        self,
-        actor = None,
-        critic = None,
-        interface = None,
-        configuration = None,
-        model = None, # will be in `component`
-        memory = None, # will be in `component`
-        gamma = 1.0, # will be in `configuration`
-        use_default = False
-    ):
-        super().__init__(
-            actor = actor,
-            critic = critic,
-            interface = interface,
-            configuration = configuration,
-            model = model,
-            memory = memory,
-            gamma = gamma,
-            use_default = use_default
-        )
-    
-    def reset(
-        self
-    ):
-        super().reset()
-
-    def setup(
-        self,
-        env = None, # will be deprecated
-        policy_network = None, # will be deprecated
-        value_network = None, # will be deprecated
-        qvalue_network = None, # will be deprecated
-        policy_optimizer = None, # will be deprecated
-        value_optimizer = None, # will be deprecated
-        qvalue_optimizer = None, # will be deprecated
-        actor = None,
-        critic = None
-    ):
-        super().setup(
-            actor = actor,
-            critic = critic
-        )
-
-        # super().setup(
-        #     env = env,
-        #     policy_network = policy_network,
-        #     value_network = value_network,
-        #     qvalue_network = qvalue_network,
-        #     policy_optimizer = policy_optimizer,
-        #     value_optimizer = value_optimizer,
-        #     qvalue_optimizer = qvalue_optimizer
-        # )
-    
-    def setup_on_every_epoch(
-        self,
-        epoch,
-        n_epoch
-    ):
-        pass
-
-    def setup_on_every_step(
-        self,
-        step,
-        n_step
-    ):
-        pass
-
-    def update_model(
-        self,
-        trajectory,
-        n_times = 1
-    ):
-        return self.model.update(
-            trajectory,
-            n_times = n_times
-        )
-
-    def update_actor(
-        self,
-        trajectory,
-        n_times = 1
-    ):
-        return self.actor.update(
-            self.critic,
-            trajectory,
-            n_times = n_times
-        )
-    
-    def update_critic(
-        self,
-        trajectory,
-        n_times = 1
-    ):
-        return self.critic.update(
-            self.actor,
-            trajectory, 
-            n_times = n_times
-        )
-
-    def interact_with_env(
-        self,
-        env,
-        # n_times = 1, # deprecated -> use `n_episode`
-        # n_limit = 1000, # deprecated -> use `max_nstep`
         n_episode = 1,
         max_nstep = 1000,
         information = None,
         use_info = False,
         verbose = False,
     ):
-
         if (information is None):
             information = {}
-
         if (type(information) is not dict):
             raise ValueError("`information` must be a 'dictionary' object.")
-
         information["action_space"] = env.action_space
 
         history = []
@@ -374,52 +224,90 @@ class Agent(BaseAgent):
             return history, info_history
         else:
             return history
-    
-    def save_history(
-        self,
-        history
-    ):
-        self.memory.save(history)
 
-    def load_history(
-        self
-    ):
-        return self.memory.load()
-    
-    def replay_history(
+    def update_actor(
         self,
-        n_sample = 0
+        history,
+        n_step = 1
     ):
-        return self.memory.replay(
-            n_sample = n_sample
+        return self.actor.update(
+            critic = self.critic,
+            trajectory = history,
+            n_times = n_step
         )
 
+    def update_critic(
+        self,
+        history,
+        n_step = 1
+    ):
+        return self.critic.update(
+            actor = self.actor,
+            trajectory = history, 
+            n_times = n_step
+        )
 
-class GoalConditionedAgent(Agent):
+    def train(
+        self
+    ):
+        self.actor.train()
+        self.critic.train()
+
+    def eval(
+        self
+    ):
+        self.actor.eval()
+        self.critic.eval()
+
+
+class GoalConditionedAgentMixin(AgentMixin, GoalConditionedAgentBase):
 
     def __init__(
         self,
+        interface = None,
+        configuration = None,
         actor = None,
         critic = None,
-        interface = None,
-        use_default = False
+        allow_setup = True,
+        use_default = False,
+        default_actor = None,
+        default_critic = None
     ):
-        if ((actor is None)):
-            actor = GoalConditionedActor(
-                interface = interface,
-                use_default = use_default
-            )
-        if ((critic is None)):
-            critic = Critic(
-                interface = interface,
-                use_default = use_default
-            )
-        super().__init__(
+        if (default_actor is None):
+            default_actor = GoalConditionedActor
+        if (default_critic is None):
+            default_critic = Critic
+
+        AgentMixin.__init__(
+            self,
+            interface = interface,
+            configuration = configuration,
             actor = actor,
             critic = critic,
-            interface = interface,
-            use_default = False
+            allow_setup = allow_setup,
+            use_default = use_default,
+            default_actor = default_actor,
+            default_critic = default_critic
         )
+        if (allow_setup):
+            GoalConditionedAgentMixin.setup(
+                self,
+                interface = interface,
+                configuration = configuration,
+                actor = actor,
+                critic = critic,
+                use_default = use_default
+            )
+    
+    def setup(
+        self,
+        interface = None,
+        configuration = None,
+        actor = None,
+        critic = None,
+        use_default = False
+    ):
+        pass
 
     def choose_action(
         self,
@@ -427,7 +315,7 @@ class GoalConditionedAgent(Agent):
         goal,
         information = None
     ):
-        return self.actor.choose_action(
+        return self._actor.choose_action(
             state = state,
             goal = goal,
             information = information
@@ -449,18 +337,15 @@ class GoalConditionedAgent(Agent):
 
         if (information is None):
             information = {}
+        if (type(information) is not dict):
+            raise ValueError("`information` must be a 'dictionary' object.")
+        information["action_space"] = env.action_space
 
         # assume `use_goal = True & use_reward = False`
         if (not(use_goal)):
             raise NotImplementedError("`use_goal` must be True.")
         if (use_reward):
             raise NotImplementedError("`use_reward` must be False.")
-        if (type(information) is not dict):
-            raise ValueError("`information` must be a 'dictionary' object.")
-
-        if (information is None):
-            information = {}
-        information["action_space"] = env.action_space
         
         history = []
         info_history = []
@@ -491,3 +376,43 @@ class GoalConditionedAgent(Agent):
             return history, info_history
         else:
             return history
+
+
+class Agent(AgentMixin, AgentBase):
+
+    def __init__(
+        self,
+        interface = None,
+        configuration = None,
+        actor = None,
+        critic = None,
+        use_default = False
+    ):
+        AgentMixin.__init__(
+            self,
+            interface = interface,
+            configuration = configuration,
+            actor = actor,
+            critic = critic,
+            use_default = use_default
+        )
+
+
+class GoalConditionedAgent(GoalConditionedAgentMixin, GoalConditionedAgentBase):
+    
+    def __init__(
+        self,
+        interface = None,
+        configuration = None,
+        actor = None,
+        critic = None,
+        use_default = False
+    ):
+        GoalConditionedAgentMixin.__init__(
+            self,
+            interface = interface,
+            configuration = configuration,
+            actor = actor,
+            critic = critic,
+            use_default = use_default
+        )

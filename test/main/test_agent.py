@@ -41,7 +41,10 @@ class TestAgent():
     def test_should_be_available_on_nonempty_initialization(self):
         actor = Actor()
         critic = Critic()
-        agent = Agent(actor, critic)
+        agent = Agent(
+            actor = actor,
+            critic = critic
+        )
         assert agent.is_available == True
 
     @pytest.mark.unit
