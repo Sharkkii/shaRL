@@ -46,50 +46,86 @@ default_agent_interface = default_agent_interface_with_discrete_action
 class TestActor():
 
     @pytest.mark.unit
-    def test_should_be_unavailable_on_empty_initialization(self):
-        actor = Actor()
+    @pytest.mark.parametrize(
+        "TActor",
+        [ Actor, DiscreteControlActor, ContinuousControlActor ]
+    )
+    def test_should_be_unavailable_on_empty_initialization(self, TActor):
+        actor = TActor()
         assert actor.is_available == False
 
     @pytest.mark.unit
-    def test_should_be_available_on_nonempty_initialization(self):
-        policy = Policy()
-        actor = Actor(
+    @pytest.mark.parametrize(
+        "TActor, TPolicy",
+        [
+            (Actor, Policy),
+            (DiscreteControlActor, DiscretePolicy),
+            (ContinuousControlActor, ContinuousPolicy)
+        ]
+    )
+    def test_should_be_available_on_nonempty_initialization(self, TActor, TPolicy):
+        policy = TPolicy()
+        actor = TActor(
             policy = policy
         )
         assert actor.is_available == True
 
-    @pytest.mark.unit
-    def test_should_be_available_after_setup(self):
-        policy = Policy()
-        actor = Actor()
-        actor.setup(
-            policy = policy
-        )
-        assert actor.is_available == True
+    # @pytest.mark.unit
+    # @pytest.mark.parametrize(
+    #     "TActor, TPolicy",
+    #     [
+    #         (Actor, Policy),
+    #         (DiscreteControlActor, DiscretePolicy),
+    #         (ContinuousControlActor, ContinuousPolicy)
+    #     ]
+    # )
+    # def test_should_be_available_after_setup(self, TActor, TPolicy):
+    #     policy = TPolicy()
+    #     actor = TActor()
+    #     actor.setup(
+    #         policy = policy
+    #     )
+    #     assert actor.is_available == True
 
     @pytest.mark.unit
-    def test_should_be_available_on_empty_initialization_with_use_default_true(self):
+    @pytest.mark.parametrize(
+        "TActor",
+        [ Actor, DiscreteControlActor, ContinuousControlActor ]
+    )
+    def test_should_be_available_on_empty_initialization_with_use_default_true(self, TActor):
         interface = default_agent_interface
-        actor = Actor(
+        actor = TActor(
             interface = interface,
             use_default = True
         )
         assert actor.is_available == True
 
     @pytest.mark.unit
-    def test_should_raise_value_error_with_use_default_true_but_no_interface_specified(self):
+    @pytest.mark.parametrize(
+        "TActor",
+        [ Actor, DiscreteControlActor, ContinuousControlActor ]
+    )
+    def test_should_raise_value_error_with_use_default_true_but_no_interface_specified(self, TActor):
         with pytest.raises(ValueError) as message:
-            actor = Actor(
+            actor = TActor(
                 interface = None,
                 use_default = True
             )
 
     @pytest.mark.unit
-    def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self):
-        policy = Policy()
+    @pytest.mark.parametrize(
+        "TActor, TPolicy",
+        [
+            (Actor, Policy),
+            (DiscreteControlActor, DiscretePolicy),
+            (ContinuousControlActor, ContinuousPolicy)
+        ]
+    )
+    def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self, TActor, TPolicy):
+        policy = TPolicy()
         interface = default_agent_interface
         with pytest.raises(ValueError) as message:
-            actor = Actor(
+            actor = TActor(
                 policy = policy,
                 interface = interface,
                 use_default = True
@@ -97,14 +133,15 @@ class TestActor():
     
     @pytest.mark.unit
     @pytest.mark.parametrize(
-        "interface",
+        "TActor, interface",
         [
-            default_agent_interface_with_discrete_action,
-            default_agent_interface_with_continuous_action
+            (Actor, default_agent_interface_with_discrete_action),
+            (DiscreteControlActor, default_agent_interface_with_discrete_action),
+            (ContinuousControlActor, default_agent_interface_with_continuous_action)
         ]
     )
-    def test_we_can_check_whether_pointwise_estimation_is_available(self, interface):
-        actor = Actor(
+    def test_we_can_check_whether_pointwise_estimation_is_available(self, TActor, interface):
+        actor = TActor(
             interface = interface,
             use_default = True
         )
@@ -113,14 +150,15 @@ class TestActor():
 
     @pytest.mark.unit
     @pytest.mark.parametrize(
-        "interface",
+        "TActor, interface",
         [
-            default_agent_interface_with_discrete_action,
-            default_agent_interface_with_continuous_action
+            (Actor, default_agent_interface_with_discrete_action),
+            (DiscreteControlActor, default_agent_interface_with_discrete_action),
+            (ContinuousControlActor, default_agent_interface_with_continuous_action)
         ]
     )
-    def test_we_can_check_whether_density_estimation_is_available(self, interface):
-        actor = Actor(
+    def test_we_can_check_whether_density_estimation_is_available(self, TActor, interface):
+        actor = TActor(
             interface = interface,
             use_default = True
         )

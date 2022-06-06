@@ -8,6 +8,8 @@ from src.value import Value, QValue
 from src.value import DiscreteQValue
 from src.value import ContinuousQValue
 from src.critic import Critic
+from src.critic import DiscreteControlCritic
+from src.critic import ContinuousControlCritic
 
 
 default_agent_interface = AgentInterface(
@@ -21,55 +23,91 @@ default_agent_interface = AgentInterface(
 class TestCritic():
 
     @pytest.mark.unit
-    def test_should_be_unavailable_on_empty_initialization(self):
-        critic = Critic()
+    @pytest.mark.parametrize(
+        "TCritic",
+        [ Critic, DiscreteControlCritic, ContinuousControlCritic ]
+    )
+    def test_should_be_unavailable_on_empty_initialization(self, TCritic):
+        critic = TCritic()
         assert critic.is_available == False
 
     @pytest.mark.unit
-    def test_should_be_available_on_nonempty_initialization(self):
-        value = Value()
-        qvalue = QValue()
-        critic = Critic(
+    @pytest.mark.parametrize(
+        "TCritic, TValue, TQValue",
+        [
+            (Critic, Value, QValue),
+            (DiscreteControlCritic, Value, DiscreteQValue),
+            (ContinuousControlCritic, Value, ContinuousQValue)
+        ]
+    )
+    def test_should_be_available_on_nonempty_initialization(self, TCritic, TValue, TQValue):
+        value = TValue()
+        qvalue = TQValue()
+        critic = TCritic(
             value = value,
             qvalue = qvalue
         )
         assert critic.is_available == True
 
-    @pytest.mark.unit
-    def test_should_be_available_after_setup(self):
-        value = Value()
-        qvalue = QValue()
-        critic = Critic()
-        critic.setup(
-            value = value,
-            qvalue = qvalue
-        )
-        assert critic.is_available == True
+    # @pytest.mark.unit
+    # @pytest.mark.parametrize(
+    #     "TCritic, TValue, TQValue",
+    #     [
+    #         (Critic, Value, QValue),
+    #         (DiscreteControlCritic, Value, DiscreteQValue),
+    #         (ContinuousControlCritic, Value, ContinuousQValue)
+    #     ]
+    # )
+    # def test_should_be_available_after_setup(self, TCritic, TValue, TQValue):
+    #     value = TValue()
+    #     qvalue = TQValue()
+    #     critic = TCritic()
+    #     critic.setup(
+    #         value = value,
+    #         qvalue = qvalue
+    #     )
+    #     assert critic.is_available == True
 
     @pytest.mark.unit
-    def test_should_be_available_on_empty_initialization_with_use_default_true(self):
+    @pytest.mark.parametrize(
+        "TCritic",
+        [ Critic, DiscreteControlCritic, ContinuousControlCritic ]
+    )
+    def test_should_be_available_on_empty_initialization_with_use_default_true(self, TCritic):
         interface = default_agent_interface
-        critic = Critic(
+        critic = TCritic(
             interface = interface,
             use_default = True
         )
         assert critic.is_available == True
 
     @pytest.mark.unit
-    def test_should_raise_value_error_with_use_default_true_but_no_interface_specified(self):
+    @pytest.mark.parametrize(
+        "TCritic",
+        [ Critic, DiscreteControlCritic, ContinuousControlCritic ]
+    )
+    def test_should_raise_value_error_with_use_default_true_but_no_interface_specified(self, TCritic):
         with pytest.raises(ValueError) as message:
-            critic = Critic(
+            critic = TCritic(
                 interface = None,
                 use_default = True
             )
 
     @pytest.mark.unit
-    def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self):
-        value = Value()
-        qvalue = QValue()
+    @pytest.mark.parametrize(
+        "TCritic, TValue, TQValue",
+        [
+            (Critic, Value, QValue),
+            (DiscreteControlCritic, Value, DiscreteQValue),
+            (ContinuousControlCritic, Value, ContinuousQValue)
+        ]
+    )
+    def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self, TCritic, TValue, TQValue):
+        value = TValue()
+        qvalue = TQValue()
         interface = default_agent_interface
         with pytest.raises(ValueError) as message:
-            critic = Critic(
+            critic = TCritic(
                 value = value,
                 qvalue = qvalue,
                 interface = interface,

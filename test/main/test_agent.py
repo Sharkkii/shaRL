@@ -1,4 +1,3 @@
-from email.policy import default
 import pytest
 import sys, os
 import gym
@@ -8,8 +7,14 @@ from src.const import SpaceType
 from src.common import AgentInterface
 from src.common.helper import is_list_of_data
 from src.actor import Actor
+from src.actor import DiscreteControlActor
+from src.actor import ContinuousControlActor
 from src.critic import Critic
+from src.critic import DiscreteControlCritic
+from src.critic import ContinuousControlCritic
 from src.agent import Agent
+from src.agent import DiscreteControlAgent
+from src.agent import ContinuousControlAgent
 from src.agent import GoalConditionedAgent
 from src.environment import Environment
 from src.environment import GoalReachingTaskEnvironment
@@ -33,55 +38,88 @@ default_goal_conditioned_agent_interface = AgentInterface(
 class TestAgent():
 
     @pytest.mark.unit
-    def test_should_be_unavailable_on_empty_initialization(self):
-        agent = Agent()
+    @pytest.mark.parametrize(
+        "TAgent",
+        [ Agent, DiscreteControlAgent, ContinuousControlAgent ]
+    )
+    def test_should_be_unavailable_on_empty_initialization(self, TAgent):
+        agent = TAgent()
         assert agent.is_available == False
 
     @pytest.mark.unit
-    def test_should_be_available_on_nonempty_initialization(self):
-        actor = Actor()
-        critic = Critic()
-        agent = Agent(
+    @pytest.mark.parametrize(
+        "TAgent, TActor, TCritic",
+        [
+            (Agent, Actor, Critic),
+            (DiscreteControlAgent, DiscreteControlActor, DiscreteControlCritic),(ContinuousControlAgent, ContinuousControlActor, ContinuousControlCritic)
+        ]
+    )
+    def test_should_be_available_on_nonempty_initialization(self, TAgent, TActor, TCritic):
+        actor = TActor()
+        critic = TCritic()
+        agent = TAgent(
             actor = actor,
             critic = critic
         )
         assert agent.is_available == True
 
-    @pytest.mark.unit
-    def test_should_be_available_after_setup(self):
-        actor = Actor()
-        critic = Critic()
-        agent = Agent()
-        agent.setup(
-            actor = actor,
-            critic = critic
-        )
-        assert agent.is_available == True
+    # @pytest.mark.unit
+    # @pytest.mark.parametrize(
+    #     "TAgent, TActor, TCritic",
+    #     [
+    #         (Agent, Actor, Critic),
+    #         (DiscreteControlAgent, DiscreteControlActor, DiscreteControlCritic),(ContinuousControlAgent, ContinuousControlActor, ContinuousControlCritic)
+    #     ]
+    # )
+    # def test_should_be_available_after_setup(self, TAgent, TActor, TCritic):
+    #     actor = TActor()
+    #     critic = TCritic()
+    #     agent = TAgent()
+    #     agent.setup(
+    #         actor = actor,
+    #         critic = critic
+    #     )
+    #     assert agent.is_available == True
 
     @pytest.mark.unit
-    def test_should_be_available_on_empty_initialization_with_use_default_true(self):
+    @pytest.mark.parametrize(
+        "TAgent",
+        [ Agent, DiscreteControlAgent, ContinuousControlAgent ]
+    )
+    def test_should_be_available_on_empty_initialization_with_use_default_true(self, TAgent):
         interface = default_agent_interface
-        agent = Agent(
+        agent = TAgent(
             interface = interface,
             use_default = True
         )
         assert agent.is_available == True
     
     @pytest.mark.unit
-    def test_should_raise_value_error_with_use_default_true_but_no_interface_specified(self):
+    @pytest.mark.parametrize(
+        "TAgent",
+        [ Agent, DiscreteControlAgent, ContinuousControlAgent ]
+    )
+    def test_should_raise_value_error_with_use_default_true_but_no_interface_specified(self, TAgent):
         with pytest.raises(ValueError) as message:
-            agent = Agent(
+            agent = TAgent(
                 interface = None,
                 use_default = True
             )
 
     @pytest.mark.unit
-    def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self):
-        actor = Actor()
-        critic = Critic()
+    @pytest.mark.parametrize(
+        "TAgent, TActor, TCritic",
+        [
+            (Agent, Actor, Critic),
+            (DiscreteControlAgent, DiscreteControlActor, DiscreteControlCritic),(ContinuousControlAgent, ContinuousControlActor, ContinuousControlCritic)
+        ]
+    )
+    def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self, TAgent, TActor, TCritic):
+        actor = TActor()
+        critic = TCritic()
         interface = default_agent_interface
         with pytest.raises(ValueError) as message:
-            agent = Agent(
+            agent = TAgent(
                 actor = actor,
                 critic = critic,
                 interface = interface,
@@ -89,12 +127,19 @@ class TestAgent():
             )
 
     @pytest.mark.unit
-    def test_should_accept_dictionary_type_configuration(self):
-        actor = Actor()
-        critic = Critic()
+    @pytest.mark.parametrize(
+        "TAgent, TActor, TCritic",
+        [
+            (Agent, Actor, Critic),
+            (DiscreteControlAgent, DiscreteControlActor, DiscreteControlCritic),(ContinuousControlAgent, ContinuousControlActor, ContinuousControlCritic)
+        ]
+    )
+    def test_should_accept_dictionary_type_configuration(self, TAgent, TActor, TCritic):
+        actor = TActor()
+        critic = TCritic()
         interface = default_agent_interface
         configuration = { "key": "value" }
-        agent = Agent(
+        agent = TAgent(
             actor = actor,
             critic = critic,
             interface = interface,
@@ -103,13 +148,20 @@ class TestAgent():
         assert agent.is_available == True
 
     @pytest.mark.unit
-    def test_should_reject_non_dictionary_type_configuration(self):
-        actor = Actor()
-        critic = Critic()
+    @pytest.mark.parametrize(
+        "TAgent, TActor, TCritic",
+        [
+            (Agent, Actor, Critic),
+            (DiscreteControlAgent, DiscreteControlActor, DiscreteControlCritic),(ContinuousControlAgent, ContinuousControlActor, ContinuousControlCritic)
+        ]
+    )
+    def test_should_reject_non_dictionary_type_configuration(self, TAgent, TActor, TCritic):
+        actor = TActor()
+        critic = TCritic()
         interface = default_agent_interface
         configuration = ( "value1", "value2", "value3" )
         with pytest.raises(ValueError) as message:
-            agent = Agent(
+            agent = TAgent(
                 actor = actor,
                 critic = critic,
                 interface = interface,
