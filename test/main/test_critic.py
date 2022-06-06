@@ -29,7 +29,10 @@ class TestCritic():
     def test_should_be_available_on_nonempty_initialization(self):
         value = Value()
         qvalue = QValue()
-        critic = Critic(value, qvalue)
+        critic = Critic(
+            value = value,
+            qvalue = qvalue
+        )
         assert critic.is_available == True
 
     @pytest.mark.unit
@@ -73,32 +76,32 @@ class TestCritic():
                 use_default = True
             )
 
-    @pytest.mark.unit
-    def test_should_have_discrete_qvalue_if_interface_specifies_so(self):
-        interface = AgentInterface(
-            sin = 1,
-            sout = 1,
-            tin = SpaceType.CONTINUOUS,
-            tout = SpaceType.DISCRETE
-        )
-        critic = Critic(
-            interface = interface,
-            use_default = True
-        )
-        assert type(critic.value) is Value
-        assert type(critic.qvalue) is DiscreteQValue 
+    # @pytest.mark.unit
+    # def test_should_have_discrete_qvalue_if_interface_specifies_so(self):
+    #     interface = AgentInterface(
+    #         sin = 1,
+    #         sout = 1,
+    #         tin = SpaceType.CONTINUOUS,
+    #         tout = SpaceType.DISCRETE
+    #     )
+    #     critic = Critic(
+    #         interface = interface,
+    #         use_default = True
+    #     )
+    #     assert type(critic.value) is Value
+    #     assert type(critic.qvalue) is DiscreteQValue 
     
-    @pytest.mark.unit
-    def test_should_have_continuous_qvalue_if_interface_specifies_so(self):
-        interface = AgentInterface(
-            sin = 1,
-            sout = 1,
-            tin = SpaceType.CONTINUOUS,
-            tout = SpaceType.CONTINUOUS
-        )
-        critic = Critic(
-            interface = interface,
-            use_default = True
-        )
-        assert type(critic.value) is Value
-        assert type(critic.qvalue) is ContinuousQValue
+    # @pytest.mark.unit
+    # def test_should_have_continuous_qvalue_if_interface_specifies_so(self):
+    #     interface = AgentInterface(
+    #         sin = 1,
+    #         sout = 1,
+    #         tin = SpaceType.CONTINUOUS,
+    #         tout = SpaceType.CONTINUOUS
+    #     )
+    #     critic = Critic(
+    #         interface = interface,
+    #         use_default = True
+    #     )
+    #     assert type(critic.value) is Value
+    #     assert type(critic.qvalue) is ContinuousQValue

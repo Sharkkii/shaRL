@@ -1,126 +1,203 @@
 #### Critic ####
 
-from abc import ABCMeta, abstractmethod
-import numpy as np
-import torch
-import torch.nn.functional as F
+from abc import ABC, ABCMeta, abstractmethod
 
 from ..const import SpaceType
+from ..common import Component
 from ..common import AgentInterface
 from ..value import Value
 from ..value import QValue
 from ..value import DiscreteQValue
 from ..value import ContinuousQValue
-from ..value import cast_to_value
-from ..value import cast_to_qvalue
 
 
-class BaseCritic(metaclass=ABCMeta):
+class CriticBase(ABC):
 
     @abstractmethod
+    def __init__(self): raise NotImplementedError
+    @abstractmethod
+    def setup(self): raise NotImplementedError
+    @abstractmethod
+    def setup_with_actor(self): raise NotImplementedError
+    # @abstractmethod
+    # def reset(self): raise NotImplementedError
+    # @abstractmethod
+    # def __call__(self): raise NotImplementedError
+    @abstractmethod
+    def update(self): raise NotImplementedError
+    @abstractmethod
+    def update_value(self): raise NotImplementedError
+    @abstractmethod
+    def update_qvalue(self): raise NotImplementedError
+    @abstractmethod
+    def train(self): raise NotImplementedError
+    @abstractmethod
+    def eval(self): raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def interface(self): raise NotImplementedError
+    @property
+    @abstractmethod
+    def configuration(self): raise NotImplementedError
+    @property
+    @abstractmethod
+    def value(self): raise NotImplementedError
+    @property
+    @abstractmethod
+    def qvalue(self): raise NotImplementedError
+
+
+class DiscreteControlCriticBase(CriticBase):
+    pass
+
+
+class ContinuousControlCriticBase(CriticBase):
+    pass
+
+
+class CriticMixin(CriticBase, Component):
+
+    def declare(self):
+        self._interface = None
+        self._configuration = None
+        self._policy = None
+
+    @property
+    def interface(self): return self._interface
+    @property
+    def configuration(self): return self._configuration
+    @property
+    def value(self): return self._value
+    @property
+    def qvalue(self): return self._qvalue
+
     def __init__(
         self,
+        interface = None,
+        configuration = None,
         value = None,
         qvalue = None,
-        interface = None,
-        use_default = False
-        # smooth_v = 0.99,
-        # smooth_q = 0.99,
+        allow_setup = True,
+        use_default = False,
+        default_value = None,
+        default_qvalue = None
     ):
-        if (use_default):
-            if (not ((value is None) and (qvalue is None))):
-                raise ValueError("`value` & `qvalue` must be None if `use_default = True`")
-            if (type(interface) is not AgentInterface):
-                raise ValueError("`interface` must be 'AgentInterface' object if `use_default = True`")
-            value = Value(
+        if (default_value is None):
+            default_value = Value
+        if (default_qvalue is None):
+            default_qvalue = DiscreteQValue
+
+        CriticMixin.declare(self)
+        Component.__init__(self)
+        if (allow_setup):
+            CriticMixin.setup(
+                self,
                 interface = interface,
-                use_default = True
+                configuration = configuration,
+                value = value,
+                qvalue = qvalue,
+                use_default = use_default,
+                default_value = default_value,
+                default_qvalue = default_qvalue
             )
-            if (interface.tout is SpaceType.DISCRETE):
-                qvalue = DiscreteQValue(
-                    interface = interface,
-                    use_default = True
-                )
-            elif (interface.tout is SpaceType.CONTINUOUS):
-                qvalue = ContinuousQValue(
-                    interface = interface,
-                    use_default = True
-                )
-            else:
-                raise ValueError("invalid interface")
 
-        self.value = None # cast_to_value(value)
-        self.qvalue = None # cast_to_qvalue(qvalue)
-        self.target_value = None # self.value.copy()
-        self.target_qvalue = None # self.qvalue.copy()
-        self._is_available = False
-        self.setup(
-            value = value,
-            qvalue = qvalue
-        )
-    
-    @abstractmethod
-    def reset(
-        self
-    ):
-        raise NotImplementedError
-
-    @abstractmethod
     def setup(
         self,
-        env = None, # will be deprecated
-        value_network = None, # will be deprecated
-        qvalue_network = None, # will be deprecated
-        value_optimizer = None, # will be deprecated
-        qvalue_optimizer = None, # will be deprecated
+        interface = None,
+        configuration = None,
         value = None,
-        qvalue = None
+        qvalue = None,
+        use_default = False,
+        default_value = None,
+        default_qvalue = None
     ):
-        if ((value is not None) and (qvalue is not None)):
-            self.value = value
-            self.qvalue = qvalue
-            self.target_value = self.value.copy()
-            self.target_qvalue = self.qvalue.copy()
-            self._become_available()
+        TVALUE = default_value
+        TQVALUE = default_qvalue
 
-    @abstractmethod
+        if (use_default and (interface is None)):
+            raise ValueError("`interface` must be 'AgentInterface' object if `use_default = True`.")
+        if (configuration is None):
+            # return
+            configuration = {}
+        if ((type(configuration) is not dict)):
+            raise ValueError("`configuration` must be 'Dictionary' object or None.")
+
+        if (use_default):
+            if ((value is not None) or (qvalue is not None)):
+                raise ValueError("`value` & `qvalue` must be None if `use_default = True`")
+            if ((default_value is None) or (default_qvalue is None)):
+                raise ValueError("`default_value` & `default_qvalue` must not be None if `use_default = True`")
+            
+            value = TVALUE(
+                interface = interface,
+                # configuration = configuration,
+                use_default = True
+            )
+            qvalue = TQVALUE(
+                interface = interface,
+                # configuration = configuration,
+                use_default = True
+            )
+
+            # if (interface.tout is SpaceType.DISCRETE):
+            #     qvalue = DiscreteQValue(
+            #         interface = interface,
+            #         use_default = True
+            #     )
+            # elif (interface.tout is SpaceType.CONTINUOUS):
+            #     qvalue = ContinuousQValue(
+            #         interface = interface,
+            #         use_default = True
+            #     )
+            # else:
+            #     raise ValueError("invalid interface")
+        
+        else:
+            if ((value is None) or (qvalue is None)):
+                return
+
+        self._interface = interface
+        self._configuration = configuration
+        self._value = value
+        self._qvalue = qvalue
+        self._become_available()
+
     def setup_with_actor(
         self,
         actor
     ):
-        raise NotImplementedError
+        pass
+
+    def update(
+        self,
+        actor,
+        history,
+        n_step = 1
+    ):
+        for _ in range(n_step):
+            self.update_value(
+                actor = actor,
+                history = history
+            )
+            self.update_qvalue(
+                actor = actor,
+                history = history
+            )
     
-    @abstractmethod
-    def setup_on_every_epoch(
+    def update_value(
         self,
-        epoch,
-        n_epoch
+        actor,
+        history
     ):
-        raise NotImplementedError
+        pass
 
-    @abstractmethod
-    def setup_on_every_step(
+    def update_qvalue(
         self,
-        step,
-        n_step
+        actor,
+        history
     ):
-        raise NotImplementedError
-
-    @property
-    def is_available(
-        self
-    ):
-        return self._is_available
-
-    def _become_available(
-        self
-    ):
-        self._is_available = True
-
-    def _become_unavailable(
-        self
-    ):
-        self._is_available = False
+        pass
 
     def train(
         self
@@ -134,166 +211,245 @@ class BaseCritic(metaclass=ABCMeta):
         self.value.eval()
         self.qvalue.eval()
 
-    def save(
-        self,
-        path_to_value,
-        path_to_qvalue,
-    ):
-        self.value.save(path_to_value)
-        self.qvalue.save(path_to_qvalue)
-    
-    def load(
-        self,
-        path_to_value,
-        path_to_qvalue,
-    ):
-        self.value.load(path_to_value)
-        self.qvalue.load(path_to_qvalue)
 
-    @abstractmethod
-    def update_value(
-        self,
-        actor,
-        trajectory
-    ):
-        raise NotImplementedError
-
-    @abstractmethod
-    def update_qvalue(
-        self,
-        actor,
-        trajectory
-    ):
-        raise NotImplementedError
-
-    @abstractmethod
-    def update_target_value(
-        self,
-        actor,
-        trajectory
-    ):
-        raise NotImplementedError
-
-    @abstractmethod
-    def update_target_qvalue(
-        self,
-        actor,
-        trajectory
-    ):
-        raise NotImplementedError
-
-    @abstractmethod
-    def update(
-        self,
-        actor,
-        trajectory,
-        n_times = 1
-    ):
-        raise NotImplementedError
-
-class Critic(BaseCritic):
+class DiscreteControlCriticMixin(CriticMixin, DiscreteControlCriticBase):
 
     def __init__(
         self,
+        interface = None,
+        configuration = None,
         value = None,
         qvalue = None,
-        interface = None,
-        use_default = False
+        allow_setup = True,
+        use_default = False,
+        default_value = None,
+        default_qvalue = None
     ):
-        super().__init__(
+        if (default_value is None):
+            default_value = Value
+        if (default_qvalue is None):
+            default_qvalue = DiscreteQValue
+
+        CriticMixin.__init__(
+            self,
+            interface = interface,
+            configuration = configuration,
             value = value,
             qvalue = qvalue,
-            interface = interface,
-            use_default = use_default
+            allow_setup = allow_setup,
+            use_default = use_default,
+            default_value = default_value,
+            default_qvalue = default_qvalue
         )
-    
-    def reset(
-        self
-    ):
-        pass
+        if (allow_setup):
+            DiscreteControlCriticMixin.setup(
+                self,
+                interface = interface,
+                configuration = configuration,
+                value = value,
+                qvalue = qvalue,
+                use_default = use_default,
+                default_value = default_value,
+                default_qvalue = default_qvalue
+            )
 
     def setup(
         self,
-        env = None, # will be deprecated
-        value_network = None, # will be deprecated
-        qvalue_network = None, # will be deprecated
-        value_optimizer = None, # will be deprecated
-        qvalue_optimizer = None, # will be deprecated
+        interface = None,
+        configuration = None,
         value = None,
-        qvalue = None
+        qvalue = None,
+        use_default = False,
+        default_value = None,
+        default_qvalue = None
     ):
-        super().setup(
+        pass
+
+
+class ContinuousControlCriticMixin(CriticMixin, ContinuousControlCriticBase):
+
+    def __init__(
+        self,
+        interface = None,
+        configuration = None,
+        value = None,
+        qvalue = None,
+        allow_setup = True,
+        use_default = False,
+        default_value = None,
+        default_qvalue = None
+    ):
+        if (default_value is None):
+            default_value = Value
+        if (default_qvalue is None):
+            default_qvalue = ContinuousQValue
+
+        CriticMixin.__init__(
+            self,
+            interface = interface,
+            configuration = configuration,
             value = value,
-            qvalue = qvalue
+            qvalue = qvalue,
+            allow_setup = allow_setup,
+            use_default = use_default,
+            default_value = default_value,
+            default_qvalue = default_qvalue
         )
-        # self.env = env
-        # self.value.setup(
-        #     value_network = value_network,
-        #     value_optimizer = value_optimizer
-        # )
-        # self.qvalue.setup(
-        #     qvalue_network = qvalue_network,
-        #     qvalue_optimizer = qvalue_optimizer
-        # )
-        # self.target_value = self.value.copy()
-        # self.target_qvalue = self.qvalue.copy()
+        if (allow_setup):
+            CriticMixin.setup(
+                self,
+                interface = interface,
+                configuration = configuration,
+                value = value,
+                qvalue = qvalue,
+                use_default = use_default,
+                default_value = default_value,
+                default_qvalue = default_qvalue
+            )
 
-    def setup_with_actor(
+    def setup(
         self,
-        actor
+        interface = None,
+        configuration = None,
+        value = None,
+        qvalue = None,
+        use_default = False,
+        default_value = None,
+        default_qvalue = None
     ):
         pass
+
+
+class SoftUpdateCriticMixin(CriticBase):
+
+    def declare(self):
+        self._target_value = None
+        self._target_qvalue = None
+        self._tau = None
     
-    def setup_on_every_epoch(
-        self,
-        epoch,
-        n_epoch
-    ):
-        pass
+    @property
+    def target_value(self): return self._target_value
+    @property
+    def target_qvalue(self): return self._target_qvalue
+    @property
+    def tau(self): return self._tau
 
-    def setup_on_every_step(
+    def __init__(
         self,
-        step,
-        n_step
+        tau = 0.01
     ):
-        pass
+        SoftUpdateCriticMixin.declare()
+        SoftUpdateCriticMixin.setup(
+            self,
+            tau = tau
+        )
 
-    def update_value(
+    def setup(
         self,
-        actor,
-        trajectory
+        tau = 0.01
     ):
-        pass
-
-    def update_qvalue(
-        self,
-        actor,
-        trajectory
-    ):
-        pass
-
-    def update_target_value(
-        self,
-        actor,
-        trajectory
-    ):
-        pass
-
-    def update_target_qvalue(
-        self,
-        actor,
-        trajectory
-    ):
-        pass
+        self._target_value = self.value.copy()
+        self._target_qvalue = self.qvalue.copy()
+        self._tau = tau
 
     def update(
         self,
         actor,
-        trajectory,
-        n_times = 1
+        history,
+        n_step = 1
     ):
-        for _ in range(n_times):
-            self.update_value(actor, trajectory)
-            self.update_qvalue(actor, trajectory)
-            self.update_target_value(actor, trajectory)
-            self.update_target_qvalue(actor, trajectory)
+        for _ in range(n_step):
+            self.update_value(
+                actor = actor,
+                history = history
+            )
+            self.update_qvalue(
+                actor = actor,
+                history = history
+            )
+            self.update_target_value(
+                actor = actor,
+                history = history
+            )
+            self.update_target_qvalue(
+                actor = actor,
+                history = history
+            )
+
+    def update_target_value(
+        self,
+        critic,
+        history
+    ):
+        pass
+        # for theta, target_theta in zip(self.value.value_network.parameters(), self.target_value.value_network.parameters()):
+        #     target_theta.data = (1 - self.tau) * target_theta.data + self.tau * theta.data
+
+    def update_target_qvalue(
+        self,
+        critic,
+        history
+    ):
+        pass
+        # for theta, target_theta in zip(self.qvalue.qvalue_network.parameters(), self.target_qvalue.qvalue_network.parameters()):
+        #     target_theta.data = (1 - self.tau) * target_theta.data + self.tau * theta.data
+
+
+class Critic(CriticMixin, CriticBase):
+
+    def __init__(
+        self,
+        interface = None,
+        configuration = None,
+        value = None,
+        qvalue = None,
+        use_default = False
+    ):
+        CriticMixin.__init__(
+            self,
+            interface = interface,
+            configuration = configuration,
+            value = value,
+            qvalue = qvalue,
+            use_default = use_default
+        )
+
+
+class DiscreteControlCritic(DiscreteControlCriticMixin, CriticBase):
+
+    def __init__(
+        self,
+        interface = None,
+        configuration = None,
+        value = None,
+        qvalue = None,
+        use_default = False
+    ):
+        DiscreteControlCriticMixin.__init__(
+            self,
+            interface = interface,
+            configuration = configuration,
+            value = value,
+            qvalue = qvalue,
+            use_default = use_default
+        )
+
+
+class ContinuousControlCritic(ContinuousControlCriticMixin, CriticBase):
+
+    def __init__(
+        self,
+        interface = None,
+        configuration = None,
+        value = None,
+        qvalue = None,
+        use_default = False
+    ):
+        ContinuousControlCriticMixin.__init__(
+            self,
+            interface = interface,
+            configuration = configuration,
+            value = value,
+            qvalue = qvalue,
+            use_default = use_default
+        )
