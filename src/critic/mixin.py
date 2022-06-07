@@ -294,7 +294,7 @@ class SoftUpdateCriticMixin(CriticBase):
         self,
         tau = 0.01
     ):
-        SoftUpdateCriticMixin.declare()
+        SoftUpdateCriticMixin.declare(self)
         SoftUpdateCriticMixin.setup(
             self,
             tau = tau
@@ -334,18 +334,16 @@ class SoftUpdateCriticMixin(CriticBase):
 
     def update_target_value(
         self,
-        critic,
-        history
+        actor,
+        history = None
     ):
-        pass
-        # for theta, target_theta in zip(self.value.value_network.parameters(), self.target_value.value_network.parameters()):
-        #     target_theta.data = (1 - self.tau) * target_theta.data + self.tau * theta.data
+        for theta, target_theta in zip(self.value.value_network.parameters(), self.target_value.value_network.parameters()):
+            target_theta.data = (1 - self.tau) * target_theta.data + self.tau * theta.data
 
     def update_target_qvalue(
         self,
-        critic,
-        history
+        actor,
+        history = None
     ):
-        pass
-        # for theta, target_theta in zip(self.qvalue.qvalue_network.parameters(), self.target_qvalue.qvalue_network.parameters()):
-        #     target_theta.data = (1 - self.tau) * target_theta.data + self.tau * theta.data
+        for theta, target_theta in zip(self.qvalue.qvalue_network.parameters(), self.target_qvalue.qvalue_network.parameters()):
+            target_theta.data = (1 - self.tau) * target_theta.data + self.tau * theta.data

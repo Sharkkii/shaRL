@@ -185,8 +185,8 @@ class AgentMixin(AgentBase, Component):
     ):
         return self.actor.update(
             critic = self.critic,
-            trajectory = history,
-            n_times = n_step
+            history = history,
+            n_step = n_step
         )
 
     def update_critic(
@@ -196,8 +196,8 @@ class AgentMixin(AgentBase, Component):
     ):
         return self.critic.update(
             actor = self.actor,
-            trajectory = history, 
-            n_times = n_step
+            history = history,
+            n_step = n_step
         )
 
     def train(

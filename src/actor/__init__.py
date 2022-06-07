@@ -1,3 +1,9 @@
+from .mixin import ActorMixin
+from .mixin import DiscreteControlActorMixin
+from .mixin import ContinuousControlActorMixin
+from .mixin import GoalConditionedActorMixin
+from .mixin import SoftUpdateActorMixin
+
 from .actor import Actor
 from .actor import DiscreteControlActor
 from .actor import ContinuousControlActor

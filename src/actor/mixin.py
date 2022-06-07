@@ -272,7 +272,7 @@ class SoftUpdateActorMixin(ActorBase):
         self,
         tau = 0.01
     ):
-        SoftUpdateActorMixin.declare()
+        SoftUpdateActorMixin.declare(self)
         SoftUpdateActorMixin.setup(
             self,
             tau = tau
