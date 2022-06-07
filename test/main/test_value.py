@@ -99,141 +99,85 @@ class TestValue():
                 use_default = True
             )
 
+
 @pytest.mark.L4
-class TestDiscreteQValue():
+class TestQValue():
 
     @pytest.mark.unit
-    def test_should_be_unavailable_on_empty_initialization(self):
-        qvalue = DiscreteQValue()
+    @pytest.mark.parametrize(
+        "TQValue",
+        [ QValue, DiscreteQValue, ContinuousQValue ]
+    )
+    def test_should_be_unavailable_on_empty_initialization(self, TQValue):
+        qvalue = TQValue()
         assert qvalue.is_available == False
 
     @pytest.mark.unit
-    def test_should_be_available_on_nonempty_initialization(self):
-        interface = default_agent_interface_with_discrete_action
-        qvalue_network = DiscreteQValueNetwork(
+    @pytest.mark.parametrize(
+        "TQValue, TQValueNetwork, interface",
+        [
+            (QValue, QValueNetwork, default_agent_interface_with_discrete_action),
+            (DiscreteQValue, DiscreteQValueNetwork, default_agent_interface_with_discrete_action),
+            (ContinuousQValue, ContinuousQValueNetwork, default_agent_interface_with_continuous_action)
+        ]
+    )
+    def test_should_be_available_on_nonempty_initialization(self, TQValue, TQValueNetwork, interface):
+        qvalue_network = TQValueNetwork(
             interface = interface,
             use_default = True
         )
         qvalue_optimizer = MeasureOptimizer(optimizer_factory)
-        qvalue = DiscreteQValue(
+        qvalue = TQValue(
             qvalue_network = qvalue_network,
             qvalue_optimizer = qvalue_optimizer
         )
         assert qvalue.is_available == True
 
     @pytest.mark.unit
-    def test_should_be_available_after_setup(self):
-        interface = default_agent_interface_with_discrete_action
-        qvalue_network = DiscreteQValueNetwork(
-            interface = interface,
-            use_default = True
-        )
-        qvalue_optimizer = MeasureOptimizer(optimizer_factory)
-        qvalue = DiscreteQValue()
-        qvalue.setup(
-            qvalue_network = qvalue_network,
-            qvalue_optimizer = qvalue_optimizer
-        )
-        assert qvalue.is_available == True
-
-    @pytest.mark.unit
-    def test_should_be_available_on_empty_initialization_with_use_default_true(self):
-        interface = default_agent_interface_with_discrete_action
-        qvalue = DiscreteQValue(
+    @pytest.mark.parametrize(
+        "TQValue, interface",
+        [
+            (QValue, default_agent_interface_with_discrete_action),
+            (DiscreteQValue, default_agent_interface_with_discrete_action),
+            (ContinuousQValue, default_agent_interface_with_continuous_action)
+        ]
+    )
+    def test_should_be_available_on_empty_initialization_with_use_default_true(self, TQValue, interface):
+        qvalue = TQValue(
             interface = interface,
             use_default = True
         )
         assert qvalue.is_available == True
 
     @pytest.mark.unit
-    def test_should_raise_value_error_with_use_default_true_but_no_interface_specified(self):
+    @pytest.mark.parametrize(
+        "TQValue",
+        [ QValue, DiscreteQValue, ContinuousQValue ]
+    )
+    def test_should_raise_value_error_with_use_default_true_but_no_interface_specified(self, TQValue):
         with pytest.raises(ValueError) as message:
-            qvalue = DiscreteQValue(
+            qvalue = TQValue(
                 interface = None,
                 use_default = True
             )
 
     @pytest.mark.unit
-    def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self):
-        interface = default_agent_interface_with_discrete_action
-        qvalue_network = DiscreteQValueNetwork(
+    @pytest.mark.parametrize(
+        "TQValue, TQValueNetwork, interface",
+        [
+            (QValue, QValueNetwork, default_agent_interface_with_discrete_action),
+            (DiscreteQValue, DiscreteQValueNetwork, default_agent_interface_with_discrete_action),
+            (ContinuousQValue, ContinuousQValueNetwork, default_agent_interface_with_continuous_action)
+        ]
+    )
+    def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self, TQValue, TQValueNetwork, interface):
+        qvalue_network = TQValueNetwork(
             interface = interface,
             use_default = True
         )
         qvalue_optimizer = MeasureOptimizer(optimizer_factory)
         with pytest.raises(ValueError) as message:
-            qvalue = DiscreteQValue(
-                qvalue_network = qvalue_network,
-                qvalue_optimizer = qvalue_optimizer,
-                interface = interface,
-                use_default = True
-            )
-
-
-@pytest.mark.L4
-class TestContinuousQValue():
-
-    @pytest.mark.unit
-    def test_should_be_unavailable_on_empty_initialization(self):
-        qvalue = ContinuousQValue()
-        assert qvalue.is_available == False
-
-    @pytest.mark.unit
-    def test_should_be_available_on_nonempty_initialization(self):
-        interface = default_agent_interface_with_continuous_action
-        qvalue_network = ContinuousQValueNetwork(
-            interface = interface,
-            use_default = True
-        )
-        qvalue_optimizer = MeasureOptimizer(optimizer_factory)
-        qvalue = ContinuousQValue(
-            qvalue_network = qvalue_network,
-            qvalue_optimizer = qvalue_optimizer
-        )
-        assert qvalue.is_available == True
-
-    @pytest.mark.unit
-    def test_should_be_available_after_setup(self):
-        interface = default_agent_interface_with_continuous_action
-        qvalue_network = ContinuousQValueNetwork(
-            interface = interface,
-            use_default = True
-        )
-        qvalue_optimizer = MeasureOptimizer(optimizer_factory)
-        qvalue = ContinuousQValue()
-        qvalue.setup(
-            qvalue_network = qvalue_network,
-            qvalue_optimizer = qvalue_optimizer
-        )
-        assert qvalue.is_available == True
-
-    @pytest.mark.unit
-    def test_should_be_available_on_empty_initialization_with_use_default_true(self):
-        interface = default_agent_interface_with_continuous_action
-        qvalue = ContinuousQValue(
-            interface = interface,
-            use_default = True
-        )
-        assert qvalue.is_available == True
-
-    @pytest.mark.unit
-    def test_should_raise_value_error_with_use_default_true_but_no_interface_specified(self):
-        with pytest.raises(ValueError) as message:
-            qvalue = ContinuousQValue(
-                interface = None,
-                use_default = True
-            )
-
-    @pytest.mark.unit
-    def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self):
-        interface = default_agent_interface_with_continuous_action
-        qvalue_network = ContinuousQValueNetwork(
-            interface = interface,
-            use_default = True
-        )
-        qvalue_optimizer = MeasureOptimizer(optimizer_factory)
-        with pytest.raises(ValueError) as message:
-            qvalue = ContinuousQValue(
+            qvalue = TQValue(
                 qvalue_network = qvalue_network,
                 qvalue_optimizer = qvalue_optimizer,
                 interface = interface,

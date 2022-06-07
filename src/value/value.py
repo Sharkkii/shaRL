@@ -1,8 +1,7 @@
 #### Value function ####
 
-from abc import ABCMeta, abstractmethod
+from abc import ABC, ABCMeta, abstractmethod
 import copy
-import numpy as np
 import torch
 import torch.nn as nn
 
@@ -15,60 +14,177 @@ from ..network import DiscreteQValueNetwork
 from ..network import ContinuousQValueNetwork
 from ..optimizer import MeasureOptimizer
 
-class BaseValue(Component, metaclass=ABCMeta):
+
+class ValueBase(ABC):
 
     @abstractmethod
+    def __init__(self): raise NotImplementedError
+    @abstractmethod
+    def setup(self): raise NotImplementedError
+    # @abstractmethod
+    # def setup_with_policy(self): raise NotImplementedError
+    # @abstractmethod
+    # def reset(self): raise NotImplementedError
+    @abstractmethod
+    def __call__(self): raise NotImplementedError
+    # @abstractmethod
+    # def update(self): raise NotImplementedError
+    @abstractmethod
+    def train(self): raise NotImplementedError
+    @abstractmethod
+    def eval(self): raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def interface(self): raise NotImplementedError
+    @property
+    @abstractmethod
+    def configuration(self): raise NotImplementedError
+    @property
+    @abstractmethod
+    def value_network(self): raise NotImplementedError
+    @property
+    @abstractmethod
+    def value_optimizer(self): raise NotImplementedError
+
+
+class QValueBase(ABC):
+
+    @abstractmethod
+    def __init__(self): raise NotImplementedError
+    @abstractmethod
+    def setup(self): raise NotImplementedError
+    # @abstractmethod
+    # def setup_with_policy(self): raise NotImplementedError
+    # @abstractmethod
+    # def reset(self): raise NotImplementedError
+    @abstractmethod
+    def __call__(self): raise NotImplementedError
+    # @abstractmethod
+    # def update(self): raise NotImplementedError
+    @abstractmethod
+    def train(self): raise NotImplementedError
+    @abstractmethod
+    def eval(self): raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def interface(self): raise NotImplementedError
+    @property
+    @abstractmethod
+    def configuration(self): raise NotImplementedError
+    @property
+    @abstractmethod
+    def qvalue_network(self): raise NotImplementedError
+    @property
+    @abstractmethod
+    def qvalue_optimizer(self): raise NotImplementedError
+
+
+class DiscreteQValueBase(QValueBase):
+    pass
+
+
+class ContinuousQValueBase(QValueBase):
+    pass
+
+
+class ValueMixin(ValueBase, Component):
+
+    def declare(self):
+        self._interface = None
+        self._configuration = None
+        self._value_network = None
+        self._value_optimizer = None
+
+    @property
+    def interface(self): return self._interface
+    @property
+    def configuration(self): return self._configuration
+    @property
+    def value_network(self): return self._value_network
+    @property
+    def value_optimizer(self): return self._value_optimizer
+
     def __init__(
         self,
+        interface = None,
+        configuration = None,
         value_network = None,
         value_optimizer = None,
-        interface = None,
-        use_default = False
+        allow_setup = True,
+        use_default = False,
+        default_value_network = None,
+        default_value_optimizer = None
     ):
+        if (default_value_network is None):
+            default_value_network = ValueNetwork
+        if (default_value_optimizer is None):
+            default_value_optimizer = MeasureOptimizer
+        
+        ValueMixin.declare(self)
         Component.__init__(self)
-        if (use_default):
-            if (not ((value_network is None) and (value_optimizer is None))):
-                raise ValueError("`value_network` & `value_optimizer` must be None if `use_default = True`")
-            value_network = ValueNetwork(
+        if (allow_setup):
+            ValueMixin.setup(
+                self,
                 interface = interface,
+                configuration = configuration,
+                value_network = value_network,
+                value_optimizer = value_optimizer,
+                use_default = use_default,
+                default_value_network = default_value_network,
+                default_value_optimizer = default_value_optimizer,
+            )
+
+    def setup(
+        self,
+        interface = None,
+        configuration = None,
+        value_network = None,
+        value_optimizer = None,
+        use_default = False,
+        default_value_network = None,
+        default_value_optimizer = None
+    ):
+        TValueNetwork = default_value_network
+        TValueOptimizer = default_value_optimizer
+
+        if (use_default and (interface is None)):
+            raise ValueError("`interface` must be 'AgentInterface' object if `use_default = True`.")
+        if (configuration is None):
+            # return
+            configuration = {}
+        if ((type(configuration) is not dict)):
+            raise ValueError("`configuration` must be 'Dictionary' object or None.")
+
+        if (use_default):
+            if ((value_network is not None) or (value_optimizer is not None)):
+                raise ValueError("`value_network` & `value_optimizer` must be None if `use_default = True`")
+            if ((default_value_network is None) or (default_value_optimizer is None)):
+                raise ValueError("`default_value` & `default_value_optimizer` must not be None if `use_default = True`")
+            
+            value_network = TValueNetwork(
+                interface = interface,
+                # configuration = configuration,
                 use_default = True
             )
-            value_optimizer = MeasureOptimizer(torch.optim.Adam, lr=1e-3)
+            value_optimizer = TValueOptimizer(torch.optim.Adam, lr=1e-3)
 
-        self.value_network = None
-        self.value_optimizer = None
-        self.setup(
-            value_network = value_network,
-            value_optimizer = value_optimizer
-        )
+        else:
+            if ((value_network is None) or (value_optimizer is None)):
+                return
 
-    @abstractmethod
+        self._interface = interface
+        self._configuration = configuration
+        self._value_network = value_network
+        self._value_optimizer = value_optimizer
+        self._become_available()
+
     def __call__(
         self,
         state
     ):
-        raise NotImplementedError
-    
-    @abstractmethod
-    def reset(
-        self
-    ):
-        raise NotImplementedError
-
-    @abstractmethod
-    def setup(
-        self,
-        value_network = None,
-        value_optimizer = None
-    ):
-        if ((value_network is not None) and (value_optimizer is not None)):
-            self.value_network = value_network
-            self.value_optimizer = value_optimizer
-            self.value_optimizer.setup(
-                network = self.value_network
-            )
-            self._become_available()
-        print(f"Value.setup: { self.value_network } & { self.value_optimizer }")
+        return self.value_network(state)
 
     def train(
         self
@@ -80,180 +196,124 @@ class BaseValue(Component, metaclass=ABCMeta):
     ):
         self.value_network.eval()
 
-    def save(
-        self,
-        path_to_value_network
-    ):
-        self.value_network.save(path_to_value_network)
-    
-    def load(
-        self,
-        path_to_value_network
-    ):
-        self.value_network.load(path_to_value_network)
-
-    # @abstractmethod
     def copy(
         self
     ):
         return copy.deepcopy(self)
 
-class Value(BaseValue):
+
+class QValueMixin(QValueBase, Component):
+
+    def declare(self):
+        self._interface = None
+        self._configuration = None
+        self._qvalue_network = None
+        self._qvalue_optimizer = None
+
+    @property
+    def interface(self): return self._interface
+    @property
+    def configuration(self): return self._configuration
+    @property
+    def qvalue_network(self): return self._qvalue_network
+    @property
+    def qvalue_optimizer(self): return self._qvalue_optimizer
 
     def __init__(
         self,
-        value_network = None,
-        value_optimizer = None,
         interface = None,
-        use_default = False
-    ):
-        super().__init__(
-            value_network = value_network,
-            value_optimizer = value_optimizer,
-            interface = interface,
-            use_default = use_default
-        )
-
-    def __call__(
-        self,
-        state
-    ):
-        return self.value_network(state)
-    
-    def reset(
-        self
-    ):
-        pass
-    
-    def setup(
-        self,
-        value_network = None,
-        value_optimizer = None
-    ):
-        super().setup(
-            value_network = value_network,
-            value_optimizer = value_optimizer
-        )
-
-class PseudoValue(BaseValue):
-
-    @classmethod
-    def __raise_exception(cls):
-        raise Exception("`PseudoValue` cannot be used as a value function.")
-
-    def __init__(
-        self,
-        value_network = None,
-        value_optimizer = None
-    ):
-        pass
-
-    def reset(
-        self
-    ):
-        pass
-
-    def setup(
-        self,
-        value_network = None,
-        value_optimizer = None
-    ):
-        pass
-
-    def train(
-        self
-    ):
-        pass
-
-    def eval(
-        self
-    ):
-        pass
-
-    def __call__(
-        self,
-        state
-    ):
-        PseudoValue.__raise_exception()
-    
-    def save(
-        self,
-        path_to_value_network
-    ):
-        PseudoValue.__raise_exception()
-
-    def load(
-        self,
-        path_to_value_network
-    ):
-        PseudoValue.__raise_exception()
-
-class BaseQValue(Component, metaclass=ABCMeta):
-
-    @abstractmethod
-    def __init__(
-        self,
+        configuration = None,
         qvalue_network = None,
         qvalue_optimizer = None,
-        interface = None,
-        use_default = False
+        allow_setup = True,
+        use_default = False,
+        default_qvalue_network = None,
+        default_qvalue_optimizer = None
     ):
+        if (default_qvalue_network is None):
+            default_qvalue_network = QValueNetwork
+        if (default_qvalue_optimizer is None):
+            default_qvalue_optimizer = MeasureOptimizer
+        
+        QValueMixin.declare(self)
         Component.__init__(self)
+        if (allow_setup):
+            QValueMixin.setup(
+                self,
+                interface = interface,
+                configuration = configuration,
+                qvalue_network = qvalue_network,
+                qvalue_optimizer = qvalue_optimizer,
+                use_default = use_default,
+                default_qvalue_network = default_qvalue_network,
+                default_qvalue_optimizer = default_qvalue_optimizer,
+            )
+
+    def setup(
+        self,
+        interface = None,
+        configuration = None,
+        qvalue_network = None,
+        qvalue_optimizer = None,
+        use_default = False,
+        default_qvalue_network = None,
+        default_qvalue_optimizer = None
+    ):
+        TQValueNetwork = default_qvalue_network
+        TQValueOptimizer = default_qvalue_optimizer
+
+        if (use_default and (interface is None)):
+            raise ValueError("`interface` must be 'AgentInterface' object if `use_default = True`.")
+        if (configuration is None):
+            # return
+            configuration = {}
+        if ((type(configuration) is not dict)):
+            raise ValueError("`configuration` must be 'Dictionary' object or None.")
+
         if (use_default):
-            if (not ((qvalue_network is None) and (qvalue_optimizer is None))):
+            if ((qvalue_network is not None) or (qvalue_optimizer is not None)):
                 raise ValueError("`qvalue_network` & `qvalue_optimizer` must be None if `use_default = True`")
-            if (type(interface) is not AgentInterface):
-                raise ValueError("`interface` must be 'AgentInterface' object if `use_default = True`")
-            if (interface.tout is SpaceType.DISCRETE):
-                qvalue_network = DiscreteQValueNetwork(
-                    interface = interface,
-                    use_default = True
-                )
-            elif (interface.tout is SpaceType.CONTINUOUS):
-                qvalue_network = ContinuousQValueNetwork(
-                    interface = interface,
-                    use_default = True
-                )
-            else:
-                raise ValueError("invalid interface")
-            qvalue_optimizer = MeasureOptimizer(torch.optim.Adam, lr=1e-3)
+            if ((default_qvalue_network is None) or (default_qvalue_optimizer is None)):
+                raise ValueError("`default_qvalue` & `default_qvalue_optimizer` must not be None if `use_default = True`")
 
-        self.qvalue_network = None
-        self.qvalue_optimizer = None
-        self.setup(
-            qvalue_network = qvalue_network,
-            qvalue_optimizer = qvalue_optimizer
-        )
+            # if (interface.tout is SpaceType.DISCRETE):
+            #     qvalue_network = DiscreteQValueNetwork(
+            #         interface = interface,
+            #         use_default = True
+            #     )
+            # elif (interface.tout is SpaceType.CONTINUOUS):
+            #     qvalue_network = ContinuousQValueNetwork(
+            #         interface = interface,
+            #         use_default = True
+            #     )
+            # else:
+            #     raise ValueError("invalid interface")
+            
+            qvalue_network = TQValueNetwork(
+                interface = interface,
+                # configuration = configuration,
+                use_default = True
+            )
+            qvalue_optimizer = TQValueOptimizer(torch.optim.Adam, lr=1e-3)
 
-    @abstractmethod
+        else:
+            if ((qvalue_network is None) or (qvalue_optimizer is None)):
+                return
+
+        self._interface = interface
+        self._configuration = configuration
+        self._qvalue_network = qvalue_network
+        self._qvalue_optimizer = qvalue_optimizer
+        self._become_available()
+
     def __call__(
         self,
         state,
-        action = None
+        # action = None
     ):
-        raise NotImplementedError
+        # assert(action is None)
+        return self.qvalue_network(state)
 
-    @abstractmethod
-    def reset(
-        self
-    ):
-        raise NotImplementedError
-
-    @abstractmethod
-    def setup(
-        self,
-        qvalue_network = None,
-        qvalue_optimizer = None
-    ):
-        if ((qvalue_network is not None) and (qvalue_optimizer is not None)):
-            self.qvalue_network = qvalue_network
-            self.qvalue_optimizer = qvalue_optimizer
-            self.qvalue_optimizer.setup(
-                network = self.qvalue_network
-            )
-            self._become_available()
-            print(f"QValue.setup: { self.qvalue_network } & { self.qvalue_optimizer }")
-    
     def train(
         self
     ):
@@ -263,154 +323,205 @@ class BaseQValue(Component, metaclass=ABCMeta):
         self
     ):
         self.qvalue_network.eval()
-    
-    def save(
-        self,
-        path_to_qvalue_network
-    ):
-        self.qvalue_network.save(path_to_qvalue_network)
-    
-    def load(
-        self,
-        path_to_qvalue_network
-    ):
-        self.qvalue_network.load(path_to_qvalue_network)
-    
-    # @abstractmethod
+
     def copy(
         self
     ):
         return copy.deepcopy(self)
 
-class DiscreteQValue(BaseQValue):
+
+class DiscreteQValueMixin(QValueMixin, DiscreteQValueBase):
 
     def __init__(
         self,
+        interface = None,
+        configuration = None,
         qvalue_network = None,
         qvalue_optimizer = None,
+        allow_setup = True,
+        use_default = False,
+        default_qvalue_network = None,
+        default_qvalue_optimizer = None
+    ):
+        if (default_qvalue_network is None):
+            default_qvalue_network = DiscreteQValueNetwork
+        if (default_qvalue_optimizer is None):
+            default_qvalue_optimizer = MeasureOptimizer
+
+        QValueMixin.__init__(
+            self,
+            interface = interface,
+            configuration = configuration,
+            qvalue_network = qvalue_network,
+            qvalue_optimizer = qvalue_optimizer,
+            allow_setup = allow_setup,
+            use_default = use_default,
+            default_qvalue_network = default_qvalue_network,
+            default_qvalue_optimizer = default_qvalue_optimizer
+        )
+        if (allow_setup):
+            DiscreteQValueMixin.setup(
+                self,
+                interface = interface,
+                configuration = configuration,
+                qvalue_network = qvalue_network,
+                qvalue_optimizer = qvalue_optimizer,
+                use_default = use_default,
+                default_qvalue_network = default_qvalue_network,
+                default_qvalue_optimizer = default_qvalue_optimizer
+            )
+
+    def setup(
+        self,
         interface = None,
+        configuration = None,
+        qvalue_network = None,
+        qvalue_optimizer = None,
+        use_default = False,
+        default_qvalue_network = None,
+        default_qvalue_optimizer = None
+    ):
+        pass
+
+
+class ContinuousQValueMixin(QValueMixin, ContinuousQValueBase):
+
+    def __init__(
+        self,
+        interface = None,
+        configuration = None,
+        qvalue_network = None,
+        qvalue_optimizer = None,
+        allow_setup = True,
+        use_default = False,
+        default_qvalue_network = None,
+        default_qvalue_optimizer = None
+    ):
+        if (default_qvalue_network is None):
+            default_qvalue_network = ContinuousQValueNetwork
+        if (default_qvalue_optimizer is None):
+            default_qvalue_optimizer = MeasureOptimizer
+
+        QValueMixin.__init__(
+            self,
+            interface = interface,
+            configuration = configuration,
+            qvalue_network = qvalue_network,
+            qvalue_optimizer = qvalue_optimizer,
+            allow_setup = allow_setup,
+            use_default = use_default,
+            default_qvalue_network = default_qvalue_network,
+            default_qvalue_optimizer = default_qvalue_optimizer
+        )
+        if (allow_setup):
+            ContinuousQValueMixin.setup(
+                self,
+                interface = interface,
+                configuration = configuration,
+                qvalue_network = qvalue_network,
+                qvalue_optimizer = qvalue_optimizer,
+                use_default = use_default,
+                default_qvalue_network = default_qvalue_network,
+                default_qvalue_optimizer = default_qvalue_optimizer
+            )
+
+    def setup(
+        self,
+        interface = None,
+        configuration = None,
+        qvalue_network = None,
+        qvalue_optimizer = None,
+        use_default = False,
+        default_qvalue_network = None,
+        default_qvalue_optimizer = None
+    ):
+        pass
+
+
+class Value(ValueMixin, ValueBase):
+
+    def __init__(
+        self,
+        interface = None,
+        configuration = None,
+        value_network = None,
+        value_optimizer = None,
         use_default = False
     ):
-        super().__init__(
-            qvalue_network,
-            qvalue_optimizer,
+        ValueMixin.__init__(
+            self,
             interface = interface,
+            configuration = configuration,
+            value_network = value_network,
+            value_optimizer = value_optimizer,
             use_default = use_default
         )
 
-    def __call__(
-        self,
-        state,
-        action = None
-    ):
-        assert(action is None)
-        return self.qvalue_network(state)
 
-    def reset(
-        self
-    ):
-        pass
-    
-    def setup(
-        self,
-        qvalue_network = None,
-        qvalue_optimizer = None
-    ):
-        super().setup(
-            qvalue_network = qvalue_network,
-            qvalue_optimizer = qvalue_optimizer
-        )
-
-class ContinuousQValue(BaseQValue):
+class QValue(QValueMixin, QValueBase):
 
     def __init__(
         self,
+        interface = None,
+        configuration = None,
         qvalue_network = None,
         qvalue_optimizer = None,
-        interface = None,
         use_default = False
     ):
-        super().__init__(
-            qvalue_network,
-            qvalue_optimizer,
+        QValueMixin.__init__(
+            self,
             interface = interface,
+            configuration = configuration,
+            qvalue_network = qvalue_network,
+            qvalue_optimizer = qvalue_optimizer,
             use_default = use_default
         )
 
-    def __call__(
-        self,
-        state,
-        action = None
-    ):
-        return self.qvalue_network(state, action)
 
-    def reset(
-        self
-    ):
-        pass
-    
-    def setup(
-        self,
-        qvalue_network = None,
-        qvalue_optimizer = None
-    ):
-        super().setup(
-            qvalue_network = qvalue_network,
-            qvalue_optimizer = qvalue_optimizer
-        )
-
-QValue = DiscreteQValue
-
-class PseudoQValue(BaseQValue):
-
-    @classmethod
-    def __raise_exception(cls):
-        raise Exception("`PseudoQValue` cannot be used as a qvalue function.")
+class DiscreteQValue(DiscreteQValueMixin, QValueBase):
 
     def __init__(
         self,
+        interface = None,
+        configuration = None,
         qvalue_network = None,
-        qvalue_optimizer = None
+        qvalue_optimizer = None,
+        use_default = False
     ):
-        pass
+        DiscreteQValueMixin.__init__(
+            self,
+            interface = interface,
+            configuration = configuration,
+            qvalue_network = qvalue_network,
+            qvalue_optimizer = qvalue_optimizer,
+            use_default = use_default
+        )
 
-    def reset(
-        self
-    ):
-        pass
 
-    def setup(
+class ContinuousQValue(ContinuousQValueMixin, QValueBase):
+
+    def __init__(
         self,
+        interface = None,
+        configuration = None,
         qvalue_network = None,
-        qvalue_optimizer = None
+        qvalue_optimizer = None,
+        use_default = False
     ):
-        pass
+        ContinuousQValueMixin.__init__(
+            self,
+            interface = interface,
+            configuration = configuration,
+            qvalue_network = qvalue_network,
+            qvalue_optimizer = qvalue_optimizer,
+            use_default = use_default
+        )
 
-    def train(
-        self
-    ):
-        pass
 
-    def eval(
-        self
-    ):
-        pass
+class BaseValue(ABC): pass
 
-    def __call__(
-        self,
-        state,
-        action = None
-    ):
-        PseudoQValue.__raise_exception()
-    
-    def save(
-        self,
-        path_to_qvalue_network
-    ):
-        PseudoQValue.__raise_exception()
+class PseudoValue(BaseValue): pass
 
-    def load(
-        self,
-        path_to_qvalue_network
-    ):
-        PseudoQValue.__raise_exception()
+class BaseQValue(ABC): pass
+
+class PseudoQValue(BaseQValue): pass
