@@ -266,10 +266,16 @@ class RLController(BaseController):
                         continue
 
                     # update value function (critic)
-                    self.agent.update_critic(history, n_times=1)
+                    self.agent.update_critic(
+                        history = history,
+                        n_step = 1
+                    )
 
                     # update policy (actor)
-                    self.agent.update_actor(history, n_times=1)
+                    self.agent.update_actor(
+                        history = history,
+                        n_step = 1
+                    )
 
                     # learn dynamics
                     # if (model_type == EnvironmentModelType.MODEL_BASED):
@@ -498,8 +504,14 @@ class GoalConditionedRLController(BaseController):
                     # guard
                     if (len(history[0]) < batch_size):
                         continue
-                    self.agent.update_critic(history, n_times=1)
-                    self.agent.update_actor(history, n_times=1)
+                    self.agent.update_critic(
+                        history = history,
+                        n_step = 1
+                    )
+                    self.agent.update_actor(
+                        history = history,
+                        n_step = 1
+                    )
 
                     # learn dynamics
                     # if (model_type == EnvironmentModelType.MODEL_BASED):
