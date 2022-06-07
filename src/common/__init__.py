@@ -13,3 +13,5 @@ from .helper import cast_space_to_type
 from .error import UninitializedComponentException
 
 from .component import Component
+
+from .reference import QValueReference
