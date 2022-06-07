@@ -116,6 +116,9 @@ class PolicyMixin(PolicyBase, Component):
         self._configuration = configuration
         self._policy_network = policy_network
         self._policy_optimizer = policy_optimizer
+        self.policy_optimizer.setup(
+            network = self.policy_network
+        )
         self._become_available()
 
     def __call__(

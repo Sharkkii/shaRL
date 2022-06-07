@@ -72,10 +72,10 @@ class TemplateMeasureOptimizer(BaseMeasureOptimizer):
     ):
         BaseMeasureOptimizer.__init__(self)
         self.optimizer = None
+        self.kwargs = kwargs
 
         self.setup(
-            network = network,
-            **kwargs
+            network = network
         )
 
     def reset(
@@ -85,13 +85,12 @@ class TemplateMeasureOptimizer(BaseMeasureOptimizer):
     
     def setup(
         self,
-        network,
-        **kwargs
+        network
     ):
         if (isinstance(network, BaseMeasureNetwork)):
             self.optimizer = self.factory(
                 network.parameters(),
-                **kwargs
+                **self.kwargs
             )
             self.network = network
             self._become_available()

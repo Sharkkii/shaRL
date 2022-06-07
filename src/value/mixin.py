@@ -104,6 +104,9 @@ class ValueMixin(ValueBase, Component):
         self._configuration = configuration
         self._value_network = value_network
         self._value_optimizer = value_optimizer
+        self.value_optimizer.setup(
+            network = self.value_network
+        )
         self._become_available()
 
     def __call__(
@@ -230,6 +233,9 @@ class QValueMixin(QValueBase, Component):
         self._configuration = configuration
         self._qvalue_network = qvalue_network
         self._qvalue_optimizer = qvalue_optimizer
+        self.qvalue_optimizer.setup(
+            network = self.qvalue_network
+        )
         self._become_available()
 
     def __call__(
