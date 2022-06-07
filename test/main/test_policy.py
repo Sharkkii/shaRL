@@ -10,8 +10,12 @@ from src.network import PolicyNetwork
 from src.network import DiscretePolicyNetwork
 from src.network import ContinuousPolicyNetwork
 from src.optimizer import MeasureOptimizer
+from src.policy import Policy
 from src.policy import DiscretePolicy
 from src.policy import ContinuousPolicy
+from src.policy import GoalConditionedPolicy
+from src.policy import GoalConditionedDiscretePolicy
+from src.policy import GoalConditionedContinuousPolicy
 from src.environment import Environment
 
 
@@ -44,74 +48,141 @@ default_agent_interface_with_continuous_action = AgentInterface(
     tout = SpaceType.CONTINUOUS
 )
 
+
 @pytest.mark.L4
-class TestDiscretePolicy():
+class TestPolicy():
 
     @pytest.mark.unit
-    def test_should_be_unavailable_on_empty_initialization(self):
-        policy = DiscretePolicy()
+    @pytest.mark.parametrize(
+        "TPolicy",
+        [ Policy, DiscretePolicy, ContinuousPolicy, GoalConditionedPolicy, GoalConditionedDiscretePolicy, GoalConditionedContinuousPolicy ]
+    )
+    def test_should_be_unavailable_on_empty_initialization(self, TPolicy):
+        policy = TPolicy()
         assert policy.is_available == False
 
     @pytest.mark.unit
-    def test_should_be_available_on_nonempty_initialization(self):
-        interface = default_agent_interface_with_discrete_action
-        policy_network = PolicyNetwork(
+    @pytest.mark.parametrize(
+        "TPolicy, TPolicyNetwork, interface",
+        [
+            (Policy, PolicyNetwork, default_agent_interface_with_discrete_action),
+            (DiscretePolicy, DiscretePolicyNetwork, default_agent_interface_with_discrete_action),
+            (ContinuousPolicy, ContinuousPolicyNetwork, default_agent_interface_with_continuous_action),
+            (GoalConditionedPolicy, PolicyNetwork, default_agent_interface_with_discrete_action),
+            (GoalConditionedDiscretePolicy, DiscretePolicyNetwork, default_agent_interface_with_discrete_action),
+            (GoalConditionedContinuousPolicy, ContinuousPolicyNetwork, default_agent_interface_with_continuous_action)
+        ]
+    )
+    def test_should_be_available_on_nonempty_initialization(self, TPolicy, TPolicyNetwork, interface):
+        policy_network = TPolicyNetwork(
             interface = interface,
             use_default = True
         )
         policy_optimizer = MeasureOptimizer(optimizer_factory)
-        policy = DiscretePolicy(
+        policy = TPolicy(
             policy_network = policy_network,
             policy_optimizer = policy_optimizer
         )
         assert policy.is_available == True
 
     @pytest.mark.unit
-    def test_should_be_available_after_setup(self):
-        interface = default_agent_interface_with_discrete_action
-        policy_network = PolicyNetwork(
-            interface = interface,
-            use_default = True
-        )
-        policy_optimizer = MeasureOptimizer(optimizer_factory)
-        policy = DiscretePolicy()
-        policy.setup(
-            policy_network = policy_network,
-            policy_optimizer = policy_optimizer
-        )
-        assert policy.is_available == True
-
-    @pytest.mark.unit
-    def test_should_be_available_on_empty_initialization_with_use_default_true(self):
-        interface = default_agent_interface_with_discrete_action
-        policy = DiscretePolicy(
+    @pytest.mark.parametrize(
+        "TPolicy, interface",
+        [
+            (Policy, default_agent_interface_with_discrete_action),
+            (DiscretePolicy, default_agent_interface_with_discrete_action),
+            (ContinuousPolicy, default_agent_interface_with_continuous_action),
+            (GoalConditionedPolicy, default_agent_interface_with_discrete_action),
+            (GoalConditionedDiscretePolicy, default_agent_interface_with_discrete_action),
+            (GoalConditionedContinuousPolicy, default_agent_interface_with_continuous_action)
+        ]
+    )
+    def test_should_be_available_on_empty_initialization_with_use_default_true(self, TPolicy, interface):
+        policy = TPolicy(
             interface = interface,
             use_default = True
         )
         assert policy.is_available == True
     
     @pytest.mark.unit
-    def test_should_raise_value_error_with_use_default_true_but_no_interface_specified(self):
+    @pytest.mark.parametrize(
+        "TPolicy",
+        [ Policy, DiscretePolicy, ContinuousPolicy, GoalConditionedPolicy, GoalConditionedDiscretePolicy, GoalConditionedContinuousPolicy ]
+    )
+    def test_should_raise_value_error_with_use_default_true_but_no_interface_specified(self, TPolicy):
         with pytest.raises(ValueError) as message:
-            policy = DiscretePolicy(
+            policy = TPolicy(
                 interface = None,
                 use_default = True
             )
 
     @pytest.mark.unit
-    def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self):
-        interface = default_agent_interface_with_discrete_action
-        policy_network = PolicyNetwork(
+    @pytest.mark.parametrize(
+        "TPolicy, TPolicyNetwork, interface",
+        [
+            (Policy, PolicyNetwork, default_agent_interface_with_discrete_action),
+            (DiscretePolicy, DiscretePolicyNetwork, default_agent_interface_with_discrete_action),
+            (ContinuousPolicy, ContinuousPolicyNetwork, default_agent_interface_with_continuous_action),
+            (GoalConditionedPolicy, PolicyNetwork, default_agent_interface_with_discrete_action),
+            (GoalConditionedDiscretePolicy, DiscretePolicyNetwork, default_agent_interface_with_discrete_action),
+            (GoalConditionedContinuousPolicy, ContinuousPolicyNetwork, default_agent_interface_with_continuous_action)
+        ]
+    )
+    def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self, TPolicy, TPolicyNetwork, interface):
+        policy_network = TPolicyNetwork(
             interface = interface,
             use_default = True
         )
         policy_optimizer = MeasureOptimizer(optimizer_factory)
         with pytest.raises(ValueError) as message:
-            policy = DiscretePolicy(
+            policy = TPolicy(
                 policy_network = policy_network,
                 policy_optimizer = policy_optimizer,
                 use_default = True
             )
+
+    @pytest.mark.unit
+    @pytest.mark.parametrize(
+        "TPolicy, interface",
+        [
+            (Policy, default_agent_interface_with_discrete_action),
+            (DiscretePolicy, default_agent_interface_with_discrete_action),
+            (ContinuousPolicy, default_agent_interface_with_continuous_action),
+            (GoalConditionedPolicy, default_agent_interface_with_discrete_action),
+            (GoalConditionedDiscretePolicy, default_agent_interface_with_discrete_action),
+            (GoalConditionedContinuousPolicy, default_agent_interface_with_continuous_action)
+        ]
+    )
+    def test_we_can_check_whether_pointwise_estimation_is_available(self, TPolicy, interface):
+        policy = TPolicy(
+            interface = interface,
+            use_default = True
+        )
+        flag = policy.can_pointwise_estimate
+        assert type(flag) is bool
+
+    @pytest.mark.unit
+    @pytest.mark.parametrize(
+        "TPolicy, interface",
+        [
+            (Policy, default_agent_interface_with_discrete_action),
+            (DiscretePolicy, default_agent_interface_with_discrete_action),
+            (ContinuousPolicy, default_agent_interface_with_continuous_action),
+            (GoalConditionedPolicy, default_agent_interface_with_discrete_action),
+            (GoalConditionedDiscretePolicy, default_agent_interface_with_discrete_action),
+            (GoalConditionedContinuousPolicy, default_agent_interface_with_continuous_action)
+        ]
+    )
+    def test_we_can_check_whether_density_estimation_is_available(self, TPolicy, interface):
+        policy = TPolicy(
+            interface = interface,
+            use_default = True
+        )
+        flag = policy.can_density_estimate
+        assert type(flag) is bool
+
+@pytest.mark.L4
+class TestDiscretePolicy():
 
     @pytest.mark.unit
     def test_should_have_discrete_policy_network(self):
@@ -153,96 +224,10 @@ class TestDiscretePolicy():
         action = policy(state)
         assert type(action) is torch.Tensor
         assert action.dtype is torch.long
-    
-    @pytest.mark.unit
-    def test_we_can_check_whether_pointwise_estimation_is_available(self):
-        interface = default_agent_interface_with_discrete_action
-        policy = DiscretePolicy(
-            interface = interface,
-            use_default = True
-        )
-        flag = policy.can_pointwise_estimate
-        assert type(flag) is bool
-
-    @pytest.mark.unit
-    def test_we_can_check_whether_density_estimation_is_available(self):
-        interface = default_agent_interface_with_discrete_action
-        policy = DiscretePolicy(
-            interface = interface,
-            use_default = True
-        )
-        flag = policy.can_density_estimate
-        assert type(flag) is bool
 
 
 @pytest.mark.L4
 class TestContinuousPolicy():
-
-    @pytest.mark.unit
-    def test_should_be_unavailable_on_empty_initialization(self):
-        policy = ContinuousPolicy()
-        assert policy.is_available == False
-
-    @pytest.mark.unit
-    def test_should_be_available_on_nonempty_initialization(self):
-        interface = default_agent_interface_with_continuous_action
-        policy_network = PolicyNetwork(
-            interface = interface,
-            use_default = True
-        )
-        policy_optimizer = MeasureOptimizer(optimizer_factory)
-        policy = ContinuousPolicy(
-            policy_network = policy_network,
-            policy_optimizer = policy_optimizer
-        )
-        assert policy.is_available == True
-
-    @pytest.mark.unit
-    def test_should_be_available_after_setup(self):
-        interface = default_agent_interface_with_continuous_action
-        policy_network = PolicyNetwork(
-            interface = interface,
-            use_default = True
-        )
-        policy_optimizer = MeasureOptimizer(optimizer_factory)
-        policy = ContinuousPolicy()
-        policy.setup(
-            policy_network = policy_network,
-            policy_optimizer = policy_optimizer
-        )
-        assert policy.is_available == True
-
-    @pytest.mark.unit
-    def test_should_be_available_on_empty_initialization_with_use_default_true(self):
-        interface = default_agent_interface_with_continuous_action
-        policy = ContinuousPolicy(
-            interface = interface,
-            use_default = True
-        )
-        assert policy.is_available == True
-    
-    @pytest.mark.unit
-    def test_should_raise_value_error_with_use_default_true_but_no_interface_specified(self):
-        with pytest.raises(ValueError) as message:
-            policy = ContinuousPolicy(
-                interface = None,
-                use_default = True
-            )
-
-    @pytest.mark.unit
-    def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self):
-        interface = default_agent_interface_with_continuous_action
-        policy_network = PolicyNetwork(
-            interface = interface,
-            use_default = True
-        )
-        policy_optimizer = MeasureOptimizer(optimizer_factory)
-        with pytest.raises(ValueError) as message:
-            policy = ContinuousPolicy(
-                policy_network = policy_network,
-                policy_optimizer = policy_optimizer,
-                use_default = True
-            )
 
     @pytest.mark.unit
     def test_should_have_continuous_policy_network(self):
@@ -284,23 +269,3 @@ class TestContinuousPolicy():
         action = policy(state)
         assert type(action) is torch.Tensor
         assert action.dtype is torch.float32
-
-    @pytest.mark.unit
-    def test_we_can_check_whether_pointwise_estimation_is_available(self):
-        interface = default_agent_interface_with_continuous_action
-        policy = ContinuousPolicy(
-            interface = interface,
-            use_default = True
-        )
-        flag = policy.can_pointwise_estimate
-        assert type(flag) is bool
-
-    @pytest.mark.unit
-    def test_we_can_check_whether_density_estimation_is_available(self):
-        interface = default_agent_interface_with_continuous_action
-        policy = ContinuousPolicy(
-            interface = interface,
-            use_default = True
-        )
-        flag = policy.can_density_estimate
-        assert type(flag) is bool
