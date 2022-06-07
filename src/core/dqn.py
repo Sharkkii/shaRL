@@ -4,24 +4,23 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from ..const import PhaseType
 from ..policy import QValueBasedPolicy
 from ..value import Value
 from ..value import DiscreteQValue
-from ..actor import Actor
-from ..critic import Critic
-from ..agent import Agent
+from ..actor import DiscreteControlActorMixin
+from ..critic import DiscreteControlCriticMixin
+from ..critic import SoftUpdateCriticMixin
+from ..agent import DiscreteControlAgentMixin
 
 
-class DQNAgent(Agent):
+class DQNAgent(DiscreteControlAgentMixin):
 
     def __init__(
         self,
+        interface = None,
+        configuration = None,
         actor = None,
         critic = None,
-        interface = None,
-        model = None,
-        memory = None,
         gamma = 0.99,
         tau = 0.01,
         eps = 0.05,
@@ -40,15 +39,31 @@ class DQNAgent(Agent):
             interface = interface,
             use_default = use_default
         )
-        super().__init__(
+        DiscreteControlAgentMixin.__init__(
+            self,
+            interface = interface,
+            configuration = configuration,
             actor = actor,
             critic = critic,
-            interface = interface,
-            model = model,
-            memory = memory,
-            gamma = gamma,
             use_default = False
         )
+        DQNAgent.setup(
+            self,
+            interface = None,
+            configuration = None,
+            actor = None,
+            critic = None
+        )
+
+    def setup(
+        self,
+        interface = None,
+        configuration = None,
+        actor = None,
+        critic = None
+    ):
+        self.actor.setup_with_critic(critic = self.critic)
+        self.critic.setup_with_actor(actor = self.actor)
     
     def setup_on_every_epoch(
         self,
@@ -60,24 +75,27 @@ class DQNAgent(Agent):
             n_epoch = n_epoch
         )
 
-class DQNActor(Actor):
+class DQNActor(DiscreteControlActorMixin):
 
     def __init__(
         self,
+        interface = None,
+        configuration = None,
         policy = None,
         eps = 0.0,
         eps_decay = 1.0,
-        interface = None,
         use_default = False
     ):
-        assert(0.0 <= eps_decay <= 1.0)
         policy = QValueBasedPolicy(
             interface = interface,
+            configuration = configuration,
             use_default = use_default
         )
-        super().__init__(
-            policy = policy,
+        DiscreteControlActorMixin.__init__(
+            self,
             interface = interface,
+            configuration = configuration,
+            policy = policy,
             use_default = False
         )
         self.eps = eps
@@ -85,9 +103,12 @@ class DQNActor(Actor):
 
     def setup_with_critic(
         self,
-        critic
+        critic = None
     ):
-        self.policy.setup_reference_qvalue(critic.qvalue)
+        self.policy.setup_with_value(
+            value = critic.value,
+            qvalue = critic.qvalue
+        )
 
     def setup_on_every_epoch(
         self,
@@ -111,46 +132,71 @@ class DQNActor(Actor):
     def update_policy(
         self,
         critic,
-        trajectory = None
+        history = None
     ):
-        self.policy.setup_reference_qvalue(critic.qvalue)
+        pass
 
-class DQNCritic(Critic):
+class DQNCritic(DiscreteControlCriticMixin, SoftUpdateCriticMixin):
 
     def __init__(
         self,
+        interface = None,
+        configuration = None,
         value = None,
         qvalue = None,
         gamma = 0.99,
         tau = 0.5,
-        interface = None,
         use_default = False
     ):
-        assert(0.0 < gamma <= 1.0)
-        assert(0.0 <= tau <= 1.0)
         value = Value(
             interface = interface,
+            configuration = configuration,
             use_default = use_default
         )
         qvalue = DiscreteQValue(
             interface = interface,
+            configuration = configuration,
             use_default = use_default
         )
-        super().__init__(
+        DiscreteControlCriticMixin.__init__(
+            self,
+            interface = interface,
+            configuration = configuration,
             value = value,
             qvalue = qvalue,
-            interface = interface,
             use_default = False
         )
-        self.tau = tau
+        SoftUpdateCriticMixin.__init__(
+            self,
+            tau = tau
+        )
         self.gamma = gamma
+
+    def setup_with_actor(
+        self,
+        actor = None
+    ):
+        pass
+
+    def update(
+        self,
+        actor,
+        history,
+        n_step = 1
+    ):
+        SoftUpdateCriticMixin.update(
+            self,
+            actor = actor,
+            history = history,
+            n_step = n_step
+        )
     
     def update_qvalue(
         self,
         actor,
-        trajectory
+        history
     ):
-        (state_trajectory, action_trajectory, reward_trajectory, next_state_trajectory) = trajectory
+        (state_trajectory, action_trajectory, reward_trajectory, next_state_trajectory) = history
         action_trajectory = action_trajectory.long()
         batch_size = len(state_trajectory)
 
@@ -171,7 +217,10 @@ class DQNCritic(Critic):
     def update_target_qvalue(
         self,
         actor,
-        trajectory
+        history = None
     ):
-        for theta, target_theta in zip(self.qvalue.qvalue_network.parameters(), self.target_qvalue.qvalue_network.parameters()):
-            target_theta.data = (1 - self.tau) * target_theta.data + self.tau * theta.data
+        SoftUpdateCriticMixin.update_target_qvalue(
+            self,
+            actor = actor,
+            history = history
+        )
