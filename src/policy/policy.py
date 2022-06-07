@@ -8,6 +8,7 @@ import gym
 
 from ..const import SpaceType
 from ..const import PhaseType
+from ..common import QValueReference
 
 from .base import PolicyBase
 from .mixin import PolicyMixin
@@ -139,10 +140,10 @@ class GoalConditionedContinuousPolicy(GoalConditionedPolicyMixin, ContinuousPoli
 class QValueBasedPolicy(DiscretePolicyMixin, PolicyBase):
 
     def declare(self):
-        self._reference_qvalue = None
+        self._qvalue_reference = None
 
     @property
-    def reference_qvalue(self): return self.reference_qvalue
+    def qvalue_reference(self): return self._qvalue_reference
 
     def __init__(
         self,
@@ -150,7 +151,7 @@ class QValueBasedPolicy(DiscretePolicyMixin, PolicyBase):
         configuration = None,
         policy_network = None,
         policy_optimizer = None,
-        reference_qvalue = None, # read-only
+        qvalue_reference = None, # read-only
         allow_setup = True,
         use_default = False,
         default_policy_network = None,
@@ -176,7 +177,7 @@ class QValueBasedPolicy(DiscretePolicyMixin, PolicyBase):
                 configuration = configuration,
                 policy_network = policy_network,
                 policy_optimizer = policy_optimizer,
-                reference_qvalue = reference_qvalue,
+                qvalue_reference = qvalue_reference,
                 use_default = use_default,
                 default_policy_network = default_policy_network,
                 default_policy_optimizer = default_policy_optimizer
@@ -188,14 +189,23 @@ class QValueBasedPolicy(DiscretePolicyMixin, PolicyBase):
         configuration = None,
         policy_network = None,
         policy_optimizer = None,
-        reference_qvalue = None,
+        qvalue_reference = None,
         use_default = False,
         default_policy_network = None,
         default_policy_optimizer = None
     ):
-        if (reference_qvalue is None):
-            raise ValueError("`reference_qvalue` must be 'QValue'.")
-        self._reference_qvalue = reference_qvalue.copy()
+        self.setup_with_value(
+            qvalue = qvalue_reference
+        )
+
+    def setup_with_value(
+        self,
+        value = None,
+        qvalue = None
+    ):
+        self._qvalue_reference = QValueReference(
+            target = qvalue
+        )
 
     def __call__(
         self,
@@ -238,7 +248,7 @@ class QValueBasedPolicy(DiscretePolicyMixin, PolicyBase):
         # epsilon-greedy
         with torch.no_grad():
 
-            q = self.reference_qvalue(state).numpy()
+            q = self.qvalue_reference(state).numpy()
 
             if (phase in [PhaseType.TEST]):
                 action = np.argmax(q)
