@@ -10,7 +10,7 @@ from ..actor import GoalConditionedActor
 from ..critic import Critic
 from ..critic import DiscreteControlCritic
 from ..critic import ContinuousControlCritic
-from ..environment import GoalReachingTaskEnvironment
+from ..environment import GoalReachingTaskEnvironmentBase
 
 from .base import AgentBase
 from .base import DiscreteControlAgentBase
@@ -395,7 +395,7 @@ class GoalConditionedAgentMixin(AgentMixin, GoalConditionedAgentBase):
         use_reward = False, # will be implemented
         verbose = False
     ):
-        if (not isinstance(env, GoalReachingTaskEnvironment)):
+        if (not isinstance(env, GoalReachingTaskEnvironmentBase)):
             raise ValueError("`env` must be 'GoalReachingTaskEnvironment' object.")
 
         if (information is None):

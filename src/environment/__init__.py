@@ -1,3 +1,8 @@
+from .base import EnvironmentBase
+from .base import GymEnvironmentBase
+from .base import GoalReachingTaskEnvironmentBase
+
+
 from .environment import Environment
 from .environment import GoalReachingTaskEnvironment
 from .environment import GymEnvironment
