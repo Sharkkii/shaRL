@@ -60,3 +60,11 @@ class ContinuousPolicyBase(PolicyBase):
 
 class GoalConditionedPolicyBase(PolicyBase):
     pass
+
+
+class EpsilonGreedyPolicyBase(PolicyBase):
+    pass
+
+
+class GoalConditionedEpsilonGreedyPolicyBase(EpsilonGreedyPolicyBase, GoalConditionedPolicyBase):
+    pass

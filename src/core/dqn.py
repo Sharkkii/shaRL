@@ -1,10 +1,9 @@
 # Deep Q Network (DQN)
 
-import numpy as np
 import torch
 import torch.nn.functional as F
 
-from ..policy import QValueBasedPolicy
+from ..policy import QValueBasedEpsilonGreedyPolicy
 from ..value import Value
 from ..value import DiscreteQValue
 from ..actor import DiscreteControlActorMixin
@@ -28,15 +27,15 @@ class DQNAgent(DiscreteControlAgentMixin):
         use_default = False
     ):
         actor = DQNActor(
-            eps = eps,
-            eps_decay = eps_decay,
             interface = interface,
+            configuration = { "epsilon": eps },
             use_default = use_default
         )
         critic = DQNCritic(
             gamma = gamma,
             tau = tau,
             interface = interface,
+            configuration = None,
             use_default = use_default
         )
         DiscreteControlAgentMixin.__init__(
@@ -73,11 +72,9 @@ class DQNActor(DiscreteControlActorMixin):
         interface = None,
         configuration = None,
         policy = None,
-        eps = 0.0,
-        eps_decay = 1.0,
         use_default = False
     ):
-        policy = QValueBasedPolicy(
+        policy = QValueBasedEpsilonGreedyPolicy(
             interface = interface,
             configuration = configuration,
             use_default = use_default
@@ -89,8 +86,6 @@ class DQNActor(DiscreteControlActorMixin):
             policy = policy,
             use_default = False
         )
-        self.eps = eps
-        self.eps_decay = eps_decay
 
     def setup_with_critic(
         self,
@@ -101,19 +96,11 @@ class DQNActor(DiscreteControlActorMixin):
             qvalue = critic.qvalue
         )
 
-    def epochwise_preprocess(
-        self,
-        epoch,
-        n_epoch
-    ):
-        self.eps = self.eps * self.eps_decay
-
     def choose_action(
         self,
         state,
         information = None
     ):
-        information["eps"] = self.eps
         action = self.policy.choose_action(
             state = state,
             information = information

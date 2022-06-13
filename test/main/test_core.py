@@ -118,7 +118,7 @@ class TestDQN():
             "version": "v0"
         }
         configuration_agent = {
-            "eps": 0.20,
+            "eps": 0.50,
             "tau": 0.01,
             "gamma": 0.90
         }
@@ -126,7 +126,7 @@ class TestDQN():
             "n_epoch": 200,
             "n_env_step": 5,
             "n_gradient_step": 5,
-            "max_dataset_size": 10000,
+            "max_dataset_size": 20000,
             "batch_size": 100,
         }
         self.rl_with_dqn_agent_on_cartpole_env(
@@ -142,15 +142,15 @@ class TestDQN():
             "version": "v1"
         }
         configuration_agent = {
-            "eps": 0.20,
+            "eps": 0.50,
             "tau": 0.01,
             "gamma": 0.90
         }
         configuration_ctrl = {
-            "n_epoch": 1000,
+            "n_epoch": 500,
             "n_env_step": 10,
             "n_gradient_step": 10,
-            "max_dataset_size": 10000,
+            "max_dataset_size": 50000,
             "batch_size": 100,
         }
         self.rl_with_dqn_agent_on_cartpole_env(
