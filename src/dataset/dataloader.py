@@ -22,17 +22,20 @@ class BaseDataLoader(Component, metaclass=ABCMeta):
         self,
         dataset = None,
         batch_size = 1,
-        shuffle = True
+        shuffle = True,
+        num_workers = 0
     ):
         Component.__init__(self)
         self.dataset = None
         self.dataloader = None
         self.batch_size = None
         self.shuffle = None
+        self.num_workers = None
         self.setup(
             dataset = dataset,
             batch_size = batch_size,
-            shuffle = shuffle
+            shuffle = shuffle,
+            num_workers = num_workers
         )
         
     def reset(
@@ -44,7 +47,8 @@ class BaseDataLoader(Component, metaclass=ABCMeta):
         self,
         dataset = None,
         batch_size = 1,
-        shuffle = True
+        shuffle = True,
+        num_workers = 0
     ):
         if (self.check_whether_valid_size(batch_size)):
             self.batch_size = batch_size
@@ -61,6 +65,7 @@ class BaseDataLoader(Component, metaclass=ABCMeta):
                 dataset = dataset,
                 batch_size = self.batch_size,
                 shuffle = self.shuffle,
+                num_workers = num_workers,
                 collate_fn = custom_collate_fn
             )
             self._become_available()
@@ -105,27 +110,12 @@ class DataLoader(BaseDataLoader):
         self,
         dataset = None,
         batch_size = 1,
-        shuffle = True
+        shuffle = True,
+        num_workers = 0
     ):
         super().__init__(
             dataset = dataset,
             batch_size = batch_size,
-            shuffle = shuffle
-        )
-
-    def reset(
-        self
-    ):
-        super().reset()
-
-    def setup(
-        self,
-        dataset = None,
-        batch_size = 1,
-        shuffle = True
-    ):
-        super().setup(
-            dataset = dataset,
-            batch_size = batch_size,
-            shuffle = shuffle
+            shuffle = shuffle,
+            num_workers = num_workers
         )
