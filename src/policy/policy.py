@@ -14,7 +14,9 @@ from .base import PolicyBase
 from .mixin import PolicyMixin
 from .mixin import DiscretePolicyMixin
 from .mixin import ContinuousPolicyMixin
+from .mixin import EpsilonGreedyPolicyMixin
 from .mixin import GoalConditionedPolicyMixin
+from .mixin import GoalConditionedEpsilonGreedyPolicyMixin
 
 
 class Policy(PolicyMixin, PolicyBase):
@@ -77,6 +79,37 @@ class ContinuousPolicy(ContinuousPolicyMixin, PolicyBase):
         )
 
 
+class EpsilonGreedyPolicy(EpsilonGreedyPolicyMixin, PolicyBase):
+
+    def __init__(
+        self,
+        interface = None,
+        configuration = None,
+        policy_network = None,
+        policy_optimizer = None,
+        use_default = False
+    ):
+        EpsilonGreedyPolicyMixin.__init__(
+            self,
+            interface = interface,
+            configuration = configuration,
+            policy_network = policy_network,
+            policy_optimizer = policy_optimizer,
+            use_default = use_default
+        )
+
+    def choose_action(
+        self,
+        state,
+        information = None
+    ):
+        return EpsilonGreedyPolicy.choose_action(
+            self,
+            state = state,
+            information = information
+        )
+
+
 class GoalConditionedPolicy(GoalConditionedPolicyMixin, PolicyBase):
 
     def __init__(
@@ -128,6 +161,26 @@ class GoalConditionedContinuousPolicy(GoalConditionedPolicyMixin, ContinuousPoli
         use_default = False
     ):
         ContinuousPolicyMixin.__init__(
+            self,
+            interface = interface,
+            configuration = configuration,
+            policy_network = policy_network,
+            policy_optimizer = policy_optimizer,
+            use_default = use_default
+        )
+
+
+class GoalConditionedEpsilonGreedyPolicy(GoalConditionedEpsilonGreedyPolicyMixin, PolicyBase):
+
+    def __init__(
+        self,
+        interface = None,
+        configuration = None,
+        policy_network = None,
+        policy_optimizer = None,
+        use_default = False
+    ):
+        GoalConditionedEpsilonGreedyPolicyMixin.__init__(
             self,
             interface = interface,
             configuration = configuration,

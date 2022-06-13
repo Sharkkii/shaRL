@@ -1,6 +1,7 @@
 #### Policy (Mixin Class) ####
 
 import copy
+import numpy as np
 import torch
 from ..common import Component
 from ..network import PolicyNetwork
@@ -12,6 +13,7 @@ from .base import PolicyBase
 from .base import DiscretePolicyBase
 from .base import ContinuousPolicyBase
 from .base import GoalConditionedPolicyBase
+from .base import EpsilonGreedyPolicyBase
 
 
 class PolicyMixin(PolicyBase, Component):
@@ -329,7 +331,108 @@ class ContinuousPolicyMixin(PolicyMixin, ContinuousPolicyBase):
         return action
 
 
-class GoalConditionedPolicyMixin(PolicyMixin, GoalConditionedPolicyBase):
+class EpsilonGreedyPolicyMixin(DiscretePolicyMixin, EpsilonGreedyPolicyBase):
+
+    def declare(self):
+        self.eps = None
+
+    def __init__(
+        self,
+        interface = None,
+        configuration = None,
+        policy_network = None,
+        policy_optimizer = None,
+        allow_setup = True,
+        use_default = False,
+        default_policy_network = None,
+        default_policy_optimizer = None
+    ):
+        if (default_policy_network is None):
+            default_policy_network = ContinuousPolicyNetwork
+        if (default_policy_optimizer is None):
+            default_policy_optimizer = MeasureOptimizer
+
+        DiscretePolicyMixin.__init__(
+            self,
+            interface = interface,
+            configuration = configuration,
+            policy_network = policy_network,
+            policy_optimizer = policy_optimizer,
+            allow_setup = allow_setup,
+            use_default = use_default,
+            default_policy_network = default_policy_network,
+            default_policy_optimizer = default_policy_optimizer
+        )
+        self.declare()
+        if (allow_setup):
+            EpsilonGreedyPolicyMixin.setup(
+                self,
+                interface = interface,
+                configuration = configuration,
+                policy_network = policy_network,
+                policy_optimizer = policy_optimizer,
+                use_default = use_default,
+                default_policy_network = default_policy_network,
+                default_policy_optimizer = default_policy_optimizer
+            )
+
+    def setup(
+        self,
+        interface = None,
+        configuration = None,
+        policy_network = None,
+        policy_optimizer = None,
+        use_default = False,
+        default_policy_network = None,
+        default_policy_optimizer = None
+    ):
+        if (configuration is None):
+            configuration = {}
+        if (type(configuration) is not dict):
+            raise ValueError("`configuration` must be 'Dictionary'.")
+        if ("epsilon" not in configuration):
+            raise ValueError("`configuration` must have the key 'epsilon'.")
+        self.eps = configuration["epsilon"]
+
+    def choose_action_wrapper(
+        choose_action,
+    ):
+        def wrapper(
+            self,
+            state,
+            information = None
+        ):
+            # action_space
+            if ("action_space" not in information):
+                raise ValueError("`information` must have 'action_space' key.")
+            action_space = information["action_space"]
+
+            r = np.random.rand()
+            if (r <= self.eps):
+                action = action_space.sample()
+            else:
+                action = choose_action(
+                    self,
+                    state = state,
+                    information = information
+                )
+            return action
+        return wrapper
+
+    @choose_action_wrapper
+    def choose_action(
+        self,
+        state,
+        information = None
+    ):
+        return DiscretePolicyMixin.choose_action(
+            self,
+            state = state,
+            information = information
+        )
+
+
+class GoalConditionedPolicyMixin(DiscretePolicyMixin, GoalConditionedPolicyBase):
 
     def __call__(
         self,
@@ -378,3 +481,107 @@ class GoalConditionedPolicyMixin(PolicyMixin, GoalConditionedPolicyBase):
         # phase = PhaseType.NONE
     ):
         return action_space.sample()
+
+
+class GoalConditionedEpsilonGreedyPolicyMixin(GoalConditionedPolicyMixin, EpsilonGreedyPolicyBase):
+
+    def declare(self):
+        self.eps = None
+
+    def __init__(
+        self,
+        interface = None,
+        configuration = None,
+        policy_network = None,
+        policy_optimizer = None,
+        allow_setup = True,
+        use_default = False,
+        default_policy_network = None,
+        default_policy_optimizer = None
+    ):
+        if (default_policy_network is None):
+            default_policy_network = ContinuousPolicyNetwork
+        if (default_policy_optimizer is None):
+            default_policy_optimizer = MeasureOptimizer
+
+        GoalConditionedPolicyMixin.__init__(
+            self,
+            interface = interface,
+            configuration = configuration,
+            policy_network = policy_network,
+            policy_optimizer = policy_optimizer,
+            allow_setup = allow_setup,
+            use_default = use_default,
+            default_policy_network = default_policy_network,
+            default_policy_optimizer = default_policy_optimizer
+        )
+        self.declare()
+        if (allow_setup):
+            GoalConditionedEpsilonGreedyPolicyMixin.setup(
+                self,
+                interface = interface,
+                configuration = configuration,
+                policy_network = policy_network,
+                policy_optimizer = policy_optimizer,
+                use_default = use_default,
+                default_policy_network = default_policy_network,
+                default_policy_optimizer = default_policy_optimizer
+            )
+
+    def setup(
+        self,
+        interface = None,
+        configuration = None,
+        policy_network = None,
+        policy_optimizer = None,
+        use_default = False,
+        default_policy_network = None,
+        default_policy_optimizer = None
+    ):
+        if (configuration is None):
+            configuration = {}
+        if (type(configuration) is not dict):
+            raise ValueError("`configuration` must be 'Dictionary'.")
+        if ("epsilon" not in configuration):
+            raise ValueError("`configuration` must have the key 'epsilon'.")
+        self.eps = configuration["epsilon"]
+
+    def choose_action_wrapper(
+        choose_action,
+    ):
+        def wrapper(
+            self,
+            state,
+            goal,
+            information = None
+        ):
+            if ("action_space" not in information):
+                raise ValueError("`information` must have 'action_space' key.")
+            action_space = information["action_space"]
+
+            r = np.random.rand()
+            if (r <= self.eps):
+                action = action_space.sample()
+            else:
+                action = choose_action(
+                    self,
+                    state = state,
+                    goal = goal,
+                    information = information
+                )
+            return action
+        return wrapper
+
+    @choose_action_wrapper
+    def choose_action(
+        self,
+        state,
+        goal,
+        information = None
+    ):
+        return GoalConditionedPolicyMixin.choose_action(
+            self,
+            state = state,
+            goal = goal,
+            information = information
+        )
