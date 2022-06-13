@@ -9,12 +9,14 @@ class AgentBase(ABC):
     def __init__(self): raise NotImplementedError
     @abstractmethod
     def setup(self): raise NotImplementedError
-    # TODO) TO BE RENAMED: setup_on_every_epoch #
     @abstractmethod
-    def setup_on_every_epoch(self): raise NotImplementedError
-    # TODO) TO BE RENAMED: setup_on_every_step #
+    def epochwise_preprocess(self): raise NotImplementedError
     @abstractmethod
-    def setup_on_every_step(self): raise NotImplementedError
+    def epochwise_postprocess(self): raise NotImplementedError
+    @abstractmethod
+    def stepwise_preprocess(self): raise NotImplementedError
+    @abstractmethod
+    def stepwise_postprocess(self): raise NotImplementedError
     # @abstractmethod
     # def reset(self): raise NotImplementedError
     @abstractmethod

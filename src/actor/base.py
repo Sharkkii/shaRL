@@ -11,6 +11,14 @@ class ActorBase(ABC):
     def setup(self): raise NotImplementedError
     @abstractmethod
     def setup_with_critic(self): raise NotImplementedError
+    @abstractmethod
+    def epochwise_preprocess(self): raise NotImplementedError
+    @abstractmethod
+    def epochwise_postprocess(self): raise NotImplementedError
+    @abstractmethod
+    def stepwise_preprocess(self): raise NotImplementedError
+    @abstractmethod
+    def stepwise_postprocess(self): raise NotImplementedError
     # @abstractmethod
     # def reset(self): raise NotImplementedError
     @abstractmethod

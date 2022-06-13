@@ -64,16 +64,7 @@ class DQNAgent(DiscreteControlAgentMixin):
     ):
         self.actor.setup_with_critic(critic = self.critic)
         self.critic.setup_with_actor(actor = self.actor)
-    
-    def setup_on_every_epoch(
-        self,
-        epoch,
-        n_epoch
-    ):
-        self.actor.setup_on_every_epoch(
-            epoch = epoch,
-            n_epoch = n_epoch
-        )
+  
 
 class DQNActor(DiscreteControlActorMixin):
 
@@ -110,7 +101,7 @@ class DQNActor(DiscreteControlActorMixin):
             qvalue = critic.qvalue
         )
 
-    def setup_on_every_epoch(
+    def epochwise_preprocess(
         self,
         epoch,
         n_epoch

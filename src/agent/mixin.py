@@ -112,19 +112,61 @@ class AgentMixin(AgentBase, Component):
         self._critic = critic
         self._become_available()
 
-    def setup_on_every_epoch(
+    def epochwise_preprocess(
         self,
         epoch,
         n_epoch
     ):
-        pass
+        self.actor.epochwise_preprocess(
+            epoch = epoch,
+            n_epoch = n_epoch
+        )
+        self.critic.epochwise_preprocess(
+            epoch = epoch,
+            n_epoch = n_epoch
+        )
 
-    def setup_on_every_step(
+    def epochwise_postprocess(
+        self,
+        epoch,
+        n_epoch
+    ):
+        self.actor.epochwise_postprocess(
+            epoch = epoch,
+            n_epoch = n_epoch
+        )
+        self.critic.epochwise_postprocess(
+            epoch = epoch,
+            n_epoch = n_epoch
+        )
+
+    def stepwise_preprocess(
         self,
         step,
         n_step
     ):
-        pass
+        self.actor.stepwise_preprocess(
+            step = step,
+            n_step = n_step
+        )
+        self.critic.stepwise_preprocess(
+            step = step,
+            n_step = n_step
+        )
+
+    def stepwise_postprocess(
+        self,
+        step,
+        n_step
+    ):
+        self.actor.stepwise_postprocess(
+            step = step,
+            n_estep= n_step
+        )
+        self.critic.stepwise_postprocess(
+            step = step,
+            n_estep= n_step
+        )
 
     def choose_action(
         self,

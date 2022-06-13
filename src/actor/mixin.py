@@ -107,6 +107,34 @@ class ActorMixin(ActorBase, Component):
     ):
         pass
 
+    def epochwise_preprocess(
+        self,
+        epoch,
+        n_epoch
+    ):
+        pass
+
+    def epochwise_postprocess(
+        self,
+        epoch,
+        n_epoch
+    ):
+        pass
+
+    def stepwise_preprocess(
+        self,
+        step,
+        n_step
+    ):
+        pass
+
+    def stepwise_postprocess(
+        self,
+        step,
+        n_step
+    ):
+        pass
+
     @property
     def can_pointwise_estimate(
         self
