@@ -198,7 +198,7 @@ class RLController(BaseController):
 
         for epoch in range(n_epoch):
 
-            self.agent.setup_on_every_epoch(
+            self.agent.epochwise_preprocess(
                 epoch = epoch,
                 n_epoch = n_epoch
             )
@@ -211,7 +211,7 @@ class RLController(BaseController):
 
             for step in range(n_env_step):
 
-                self.agent.setup_on_every_step(
+                self.agent.stepwise_preprocess(
                     step = step,
                     n_step = n_env_step
                 )
@@ -434,7 +434,8 @@ class GoalConditionedRLController(BaseController):
         dataloader = DataLoader(
             dataset = dataset,
             batch_size = batch_size,
-            shuffle = shuffle
+            shuffle = shuffle,
+            num_workers = 0
         )
 
         metrics = self.env.score([]).keys()
@@ -445,7 +446,7 @@ class GoalConditionedRLController(BaseController):
 
         for epoch in range(n_epoch):
 
-            self.agent.setup_on_every_epoch(
+            self.agent.epochwise_preprocess(
                 epoch = epoch,
                 n_epoch = n_epoch
             )
@@ -455,7 +456,7 @@ class GoalConditionedRLController(BaseController):
 
             for step in range(n_env_step):
 
-                self.agent.setup_on_every_step(
+                self.agent.stepwise_preprocess(
                     step = step,
                     n_step = n_env_step
                 )
@@ -465,16 +466,7 @@ class GoalConditionedRLController(BaseController):
                         env = self.env,
                         n_episode = 1,
                         information = {
-                            "phase": PhaseType.TRAINING
-                        }
-                    )
-
-                if (model_type == EnvironmentModelType.MODEL_BASED):
-                    history_model = self.agent.interact_with_env(
-                        env = self.agent.model,
-                        n_episode = 1,
-                        information = {
-                            "phase": PhaseType.TRAINING
+                            "phase": PhaseType.TRAINING,
                         }
                     )
 
@@ -483,23 +475,9 @@ class GoalConditionedRLController(BaseController):
             if (not dataloader.is_available):
                 continue
 
-            # if (is_on_policy):
-            #     pass # convert trajs by Memory.zip
-
-            # if (is_off_policy):
-            #     self.agent.save_history(trajs)
-            #     # guard
-            #     if (self.agent.memory.count >= n_sample_start):
-            #         trajs = self.agent.replay_history(
-            #             n_sample = n_sample
-            #         )
-            #         # trajs = self.agent.load_history()
-            #     else:
-            #         continue
-
             for step in range(n_gradient_step):
 
-                # history: {(s,a,g)}
+                # history: {(s,a,g,s,a)}
                 for history in dataloader:
                     # guard
                     if (len(history[0]) < batch_size):
@@ -512,10 +490,6 @@ class GoalConditionedRLController(BaseController):
                         history = history,
                         n_step = 1
                     )
-
-                    # learn dynamics
-                    # if (model_type == EnvironmentModelType.MODEL_BASED):
-                    #     self.agent.update_model(history, n_times=1)
 
             # learn something if needed
             # self.agent.update_every_epoch(
@@ -561,10 +535,13 @@ class GoalConditionedRLController(BaseController):
                 self.env,
                 n_episode = 1,
                 information = {
-                    "phase": PhaseType.TRAINING
+                    "phase": PhaseType.TRAINING,
+                    "policy": "random",
+                    "action_space": self.env.action_space
                 },
                 use_info = True
             )
+            history, info_history = {}, {}
             score = self.env.score(
                 history,
                 info_history
@@ -578,7 +555,8 @@ class GoalConditionedRLController(BaseController):
                 self.env,
                 n_episode = 1,
                 information = {
-                    "phase": PhaseType.TEST
+                    "phase": PhaseType.TEST,
+                    "policy": "greedy"
                 },
                 use_info = True
             )

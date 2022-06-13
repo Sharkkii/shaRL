@@ -358,7 +358,8 @@ class GoalConditionedPolicyMixin(PolicyMixin, GoalConditionedPolicyBase):
         goal,
         action = None
     ):
-        x = torch.cat([state, goal], dim=1)
+        dim = state.ndim - 1
+        x = torch.cat([state, goal], dim=dim)
         return self.policy_network.P(x, action)
 
     def logP(
@@ -367,7 +368,8 @@ class GoalConditionedPolicyMixin(PolicyMixin, GoalConditionedPolicyBase):
         goal,
         action = None
     ):
-        x = torch.cat([state, goal], dim=1)
+        dim = state.ndim - 1
+        x = torch.cat([state, goal], dim=dim)
         return self.policy_network.logP(x, action)
     
     def sample(

@@ -115,6 +115,61 @@ class GoalConditionedDiscretePolicy(GoalConditionedPolicyMixin, DiscretePolicyMi
             policy_optimizer = policy_optimizer,
             use_default = use_default
         )
+    
+    def choose_action(
+        self,
+        state,
+        goal,
+        information = None
+    ):
+        if (information is None):
+            information = { "meta_policy": "greedy" }
+        if ("meta_policy" not in information):
+            raise ValueError("`information` must have the key 'meta_policy'.")
+        meta_policy = information["meta_policy"]
+
+        if (meta_policy == "greedy"):
+            action = GoalConditionedPolicyMixin.choose_action(
+                self,
+                state = state,
+                goal = goal,
+                information = information
+            )
+
+        elif (meta_policy == "mixed"):
+            r = np.random.rand()
+            eps = 0.20
+            if (r <= eps):
+                action_space = information["action_space"]
+                action = GoalConditionedPolicyMixin.sample(
+                    self,
+                    state = state,
+                    goal = goal,
+                    action_space = action_space
+                    # information = information
+                )
+            else:
+                action = GoalConditionedPolicyMixin.choose_action(
+                    self,
+                    state = state,
+                    goal = goal,
+                    information = information
+                )
+
+        elif (meta_policy == "random"):
+            action_space = information["action_space"]
+            action = GoalConditionedPolicyMixin.sample(
+                self,
+                state = state,
+                goal = goal,
+                action_space = action_space
+                # information = information
+            )
+        else:
+            raise ValueError()
+
+        action = np.int64(action)
+        return action
 
 
 class GoalConditionedContinuousPolicy(GoalConditionedPolicyMixin, ContinuousPolicyMixin, PolicyBase):
