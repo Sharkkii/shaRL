@@ -9,7 +9,7 @@ class BaseData:
         cls,
         n = 1
     ):
-        state_set = [ torch.randn(size = (1,)) for _ in range(n) ]
+        state_set = list(torch.randn(size = (n,)))
         return state_set
 
     @classmethod
@@ -17,7 +17,7 @@ class BaseData:
         cls,
         n = 1
     ):
-        action_set = [ torch.randint(low = 0, high = 2, size = (1,)) for _ in range(n) ]
+        action_set = list(torch.randint(low = 0, high = 2, size = (n,)))
         return action_set
 
     @classmethod
@@ -25,7 +25,7 @@ class BaseData:
         cls,
         n = 1
     ):
-        reward_set = [ torch.rand(size = (1,)) for _ in range(n) ]
+        reward_set = list(torch.rand(size = (n,)))
         return reward_set
 
     @classmethod
@@ -33,7 +33,7 @@ class BaseData:
         cls,
         n = 1
     ):
-        goal_set = [ torch.randn(size = (1,)) for _ in range(n) ]
+        goal_set = list(torch.randn(size = (n,)))
         return goal_set
 
 
