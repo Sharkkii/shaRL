@@ -348,11 +348,6 @@ class EpsilonGreedyPolicyMixin(DiscretePolicyMixin, EpsilonGreedyPolicyBase):
         default_policy_network = None,
         default_policy_optimizer = None
     ):
-        if (default_policy_network is None):
-            default_policy_network = ContinuousPolicyNetwork
-        if (default_policy_optimizer is None):
-            default_policy_optimizer = MeasureOptimizer
-
         DiscretePolicyMixin.__init__(
             self,
             interface = interface,
@@ -509,11 +504,6 @@ class GoalConditionedEpsilonGreedyPolicyMixin(GoalConditionedPolicyMixin, Epsilo
         default_policy_network = None,
         default_policy_optimizer = None
     ):
-        if (default_policy_network is None):
-            default_policy_network = ContinuousPolicyNetwork
-        if (default_policy_optimizer is None):
-            default_policy_optimizer = MeasureOptimizer
-
         GoalConditionedPolicyMixin.__init__(
             self,
             interface = interface,

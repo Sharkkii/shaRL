@@ -6,6 +6,7 @@ from .policy import PseudoPolicy
 from .policy import GoalConditionedPolicy
 from .policy import GoalConditionedDiscretePolicy
 from .policy import GoalConditionedContinuousPolicy
+from .policy import GoalConditionedEpsilonGreedyPolicy
 
 from .helper import get_default_policy
 from .helper import cast_to_policy

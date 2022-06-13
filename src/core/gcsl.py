@@ -1,13 +1,12 @@
 #### Goal-conditioned Supervised-learning (GCSL)
 
-from cv2 import log
 import torch
 import torch.nn.functional as F
 
 
 from ..const import PhaseType
 from ..common import SGASG
-from ..policy import GoalConditionedDiscretePolicy
+from ..policy import GoalConditionedEpsilonGreedyPolicy
 from ..actor import DiscreteControlActorMixin
 from ..actor import GoalConditionedActorMixin
 from ..critic import DiscreteControlCriticMixin
@@ -23,11 +22,12 @@ class GCSLAgent(GoalConditionedAgentMixin, DiscreteControlAgentMixin):
         configuration = None,
         actor = None,
         critic = None,
+        eps = 0.05,
         use_default = False
     ):
         actor = GCSLActor(
             interface = interface,
-            configuration = None,
+            configuration = { "epsilon": eps },
             use_default = use_default
         )
         critic = GCSLCritic(
@@ -155,7 +155,7 @@ class GCSLActor(GoalConditionedActorMixin, DiscreteControlActorMixin):
         policy = None,
         use_default = False
     ):
-        policy = GoalConditionedDiscretePolicy(
+        policy = GoalConditionedEpsilonGreedyPolicy(
             interface = interface,
             configuration = configuration,
             use_default = use_default
@@ -168,27 +168,13 @@ class GCSLActor(GoalConditionedActorMixin, DiscreteControlActorMixin):
             use_default = False
         )
 
-    def __call__(
-        self,
-        state,
-        goal,
-        information = None
-    ):
-        return GoalConditionedActorMixin.choose_action(
-            self,
-            state = state,
-            goal = goal,
-            information = information
-        )
-
     def choose_action(
         self,
         state,
         goal,
         information = None
     ):
-        action = GoalConditionedActorMixin.choose_action(
-            self,
+        action = self.policy.choose_action(
             state = state,
             goal = goal,
             information = information
@@ -219,9 +205,7 @@ class GCSLActor(GoalConditionedActorMixin, DiscreteControlActorMixin):
             total_log_likelihood = total_log_likelihood + log_likelihood
 
         T = len(state_history)
-        total_log_likelihood = total_log_likelihood / T
-
-        nloss = total_log_likelihood
+        nloss = total_log_likelihood / T
         loss = -1 * nloss
         # print("%3.3f | %d %d %d" % (loss.item(), sum([action == 0 for action in action_history]).item(), sum([action == 1 for action in action_history]).item(), sum([action == 2 for action in action_history]).item()))
 
