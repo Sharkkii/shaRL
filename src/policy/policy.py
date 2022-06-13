@@ -190,7 +190,7 @@ class GoalConditionedEpsilonGreedyPolicy(GoalConditionedEpsilonGreedyPolicyMixin
         )
 
 
-class QValueBasedPolicy(DiscretePolicyMixin, PolicyBase):
+class QValueBasedEpsilonGreedyPolicy(EpsilonGreedyPolicyMixin, PolicyBase):
 
     def declare(self):
         self._qvalue_reference = None
@@ -210,7 +210,7 @@ class QValueBasedPolicy(DiscretePolicyMixin, PolicyBase):
         default_policy_network = None,
         default_policy_optimizer = None
     ):
-        DiscretePolicyMixin.__init__(
+        EpsilonGreedyPolicyMixin.__init__(
             self,
             interface = interface,
             configuration = configuration,
@@ -224,7 +224,7 @@ class QValueBasedPolicy(DiscretePolicyMixin, PolicyBase):
         self.declare()
 
         if (allow_setup):
-            QValueBasedPolicy.setup(
+            QValueBasedEpsilonGreedyPolicy.setup(
                 self,
                 interface = interface,
                 configuration = configuration,
@@ -268,51 +268,15 @@ class QValueBasedPolicy(DiscretePolicyMixin, PolicyBase):
             state = state
         )
 
+    @EpsilonGreedyPolicy.choose_action_wrapper
     def choose_action(
         self,
         state,
-        information = None,
-        # random = False # will be in `information`
+        information = None
     ):
-        if (type(information) is not dict):
-            raise ValueError("`information` must be 'Dictionary'.")
-
-        # action_space
-        if ("action_space" not in information):
-            raise ValueError("`information` must have 'action_space' key.")
-        if (not isinstance(information["action_space"], gym.Space)):
-            raise ValueError("`action_space` must be 'gym.spaces'.")
-        action_space = information["action_space"]
-
-        # phase
-        if ("phase" not in information):
-            raise ValueError("`information` must have 'phase' key.")
-        if (type(information["phase"]) is not PhaseType):
-            raise ValueError("`phase` must be 'PhaseType'.")
-        phase = information["phase"]
-
-        # eps
-        if ("eps" not in information):
-            raise ValueError("`information` must have 'eps' key.")
-        if (type(information["eps"]) is not float):
-            raise ValueError("`eps` must be 'float'.")
-        eps = information["eps"]
-
-        # epsilon-greedy
         with torch.no_grad():
-
             q = self.qvalue_reference(state).numpy()
-
-            if (phase in [PhaseType.TEST]):
-                action = np.argmax(q)
-            
-            else:
-                r = np.random.rand()
-                if (r <= action_space.n * eps):
-                    action = action_space.sample()
-                else:
-                    action = np.argmax(q)
-
+            action = np.argmax(q)
         action = np.int64(action)
         return action
 

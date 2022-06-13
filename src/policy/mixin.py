@@ -3,6 +3,7 @@
 import copy
 import numpy as np
 import torch
+from ..const import PhaseType
 from ..common import Component
 from ..network import PolicyNetwork
 from ..network import DiscretePolicyNetwork
@@ -407,15 +408,22 @@ class EpsilonGreedyPolicyMixin(DiscretePolicyMixin, EpsilonGreedyPolicyBase):
                 raise ValueError("`information` must have 'action_space' key.")
             action_space = information["action_space"]
 
+            # phase
+            if ("phase" not in information):
+                raise ValueError("`information` must have 'phase' key.")
+            if (type(information["phase"]) is not PhaseType):
+                raise ValueError("`phase` must be 'PhaseType'.")
+            phase = information["phase"]
+
             r = np.random.rand()
-            if (r <= self.eps):
-                action = action_space.sample()
-            else:
+            if ((phase in [PhaseType.TEST]) or (r > self.eps)):
                 action = choose_action(
                     self,
                     state = state,
                     information = information
                 )
+            else:
+                action = action_space.sample()
             return action
         return wrapper
 
@@ -569,6 +577,7 @@ class GoalConditionedEpsilonGreedyPolicyMixin(GoalConditionedPolicyMixin, Epsilo
                     goal = goal,
                     information = information
                 )
+            action = np.int64(action)
             return action
         return wrapper
 
