@@ -9,9 +9,11 @@ from src.common import SARS
 from src.common import SARSA
 from src.common import SGASG
 from src.common import SGARSG
+from src.common import SARSEpisode
 from src.dataset import Dataset
 from src.dataset import SarsDataset
 from src.dataset import SgasgDataset
+from src.dataset import SARSEpisodeMemory
 from src.dataset import DataLoader
 
 
@@ -105,6 +107,21 @@ class TestSgarsgData():
         assert hasattr(data, "reward")
         assert hasattr(data, "next_state")
         assert hasattr(data, "next_goal")
+
+    
+class TestSARSEpisodeData():
+
+    @pytest.mark.unit
+    def test_random_method_should_return_sars_episode_objects(self):
+        N = 3
+        L = 4
+        dataset = SARSEpisode.random(n = N, l = L)
+        assert type(dataset) is list
+        assert len(dataset) == N
+        for n in range(N):
+            assert type(dataset[n]) is list
+            assert len(dataset[n]) == L
+            assert all([ (type(data is SARS) for data in dataset[n]) ])
 
 
 class TestDataset():
@@ -275,7 +292,7 @@ class TestDataset():
 class TestSarsDataset():
 
     @pytest.mark.unit
-    def test_should_be_unavailable_on_nonempty_initialization_with_nonempty_collection(self):
+    def test_should_be_available_on_nonempty_initialization_with_nonempty_collection(self):
         collection = SARS.random(n = 3)
         dataset = SarsDataset(
             collection = collection
@@ -314,7 +331,7 @@ class TestSarsDataset():
 class TestSgasgDataset():
 
     @pytest.mark.unit
-    def test_should_be_unavailable_on_nonempty_initialization_with_nonempty_collection(self):
+    def test_should_be_available_on_nonempty_initialization_with_nonempty_collection(self):
         collection = SGASG.random(n = 3)
         dataset = SgasgDataset(
             collection = collection
@@ -348,6 +365,35 @@ class TestSgasgDataset():
         assert len(dataset) == 3
         with pytest.raises(ValueError) as message:
             dataset.add(TDataset.random(n = 2)) # invalid
+
+
+class TestSARSEpisodeMemory():
+
+    @pytest.mark.unit
+    def test_should_be_available_on_nonempty_initialization_with_nonempty_collection(self):
+        collection = SARSEpisode.random(n = 3, l = 4)
+        dataset = SARSEpisodeMemory(
+            collection = collection
+        )
+        assert dataset.is_available == True
+
+    @pytest.mark.unit
+    @pytest.mark.parametrize(
+        "N1, L1, N2, L2, N12",
+        [
+            (3, 4, 2, 4, 5), # `n1 = n2`
+            (3, 4, 2, 2, 5), # `n1 != n2`
+            (3, 4, 2, 0, 5), # `l2 = 0`
+            (3, 4, 0, 2, 3), # `n2 = 0`
+        ] 
+      ) 
+    def test_valid_collection_can_be_added_to_dataset(self, N1, L1, N2, L2, N12):
+        dataset = SARSEpisodeMemory(
+            collection = SARSEpisode.random(n = N1, l = L1)
+        )
+        assert len(dataset) == N1
+        dataset.add(SARSEpisode.random(n = N2, l = L2))
+        assert len(dataset) == N12
 
 
 class TestDataLoader():
@@ -462,3 +508,37 @@ class TestDataLoader():
         batch = next(loader)
         assert batch[0] == "c"
         assert batch[1] == "d"
+
+    @pytest.mark.unit
+    def test_can_be_used_as_sars_memory_loader(self):
+        dataset = SarsDataset(
+            collection = SARS.random(n = 10)
+        )
+        dataloader = DataLoader(
+            dataset = dataset,
+            batch_size = 2,
+            shuffle = False
+        )
+        for batch in dataloader:
+            batch_s, batch_a, batch_r, batch_ns = batch
+            assert batch_s.shape == (2,)
+            assert batch_a.shape == (2,)
+            assert batch_r.shape == (2,)
+            assert batch_ns.shape == (2,)
+
+    @pytest.mark.unit
+    def test_can_be_used_as_sars_episode_memory(self):
+        dataset = SARSEpisodeMemory(
+            collection = SARSEpisode.random(n = 10, l = 3)
+        )
+        dataloader = DataLoader(
+            dataset = dataset,
+            batch_size = 2,
+            shuffle = False
+        )
+        for batch in dataloader:
+            batch_s, batch_a, batch_r, batch_ns = batch
+            assert batch_s.shape == (2, 3)
+            assert batch_a.shape == (2, 3)
+            assert batch_r.shape == (2, 3)
+            assert batch_ns.shape == (2, 3)
