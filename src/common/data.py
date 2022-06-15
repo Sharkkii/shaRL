@@ -190,3 +190,16 @@ class SGARSG(Data):
             SGARSG(state, goal, action, reward, next_state, next_goal) for state, goal, action, reward, next_state, next_goal in zip(state_set, goal_set, action_set, reward_set, next_state_set, next_goal_set)
         ]
         return dataset
+
+
+class SARSEpisode(Data):
+
+    @classmethod
+    def random(
+        cls,
+        n = 1,
+        l = 1
+    ):
+        dataset = SARS.random(n = n * l)
+        dataset = [ dataset[ idx*l : (idx+1)*l ] for idx in range(n) ]
+        return dataset
