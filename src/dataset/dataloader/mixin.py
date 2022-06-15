@@ -1,12 +1,11 @@
-#### DataLoader ####
+#### DataLoader (Mixin) ####
 
-from abc import ABCMeta, abstractmethod
-from tabnanny import check
 from torch.utils.data import DataLoader as TorchDataLoader
 from torch.utils.data._utils.collate import default_collate
+from ...common import Component
 
-from ..common import Component
-from .dataset import BaseDataset
+from ..dataset import DatasetBase
+from .base import DataLoaderBase
 
 
 def custom_collate_fn(batch):
@@ -15,9 +14,26 @@ def custom_collate_fn(batch):
     return default_collate(batch)
 
 
-class BaseDataLoader(Component, metaclass=ABCMeta):
+class DataLoaderMixin(DataLoaderBase, Component):
 
-    @abstractmethod
+    def declare(self):
+        self._dataset = None
+        self._dataloader = None
+        self._batch_size = None
+        self._shuffle = None
+        self._num_workers = None
+
+    @property
+    def dataset(self): return self._dataset
+    @property
+    def dataloader(self): return self._dataloader
+    @property
+    def batch_size(self): return self._batch_size
+    @property
+    def shuffle(self): return self._shuffle
+    @property
+    def num_workers(self): return self._num_workers
+
     def __init__(
         self,
         dataset = None,
@@ -25,23 +41,14 @@ class BaseDataLoader(Component, metaclass=ABCMeta):
         shuffle = True,
         num_workers = 0
     ):
+        DataLoaderMixin.declare(self)
         Component.__init__(self)
-        self.dataset = None
-        self.dataloader = None
-        self.batch_size = None
-        self.shuffle = None
-        self.num_workers = None
         self.setup(
             dataset = dataset,
             batch_size = batch_size,
             shuffle = shuffle,
             num_workers = num_workers
         )
-        
-    def reset(
-        self
-    ):
-        pass
 
     def setup(
         self,
@@ -51,17 +58,17 @@ class BaseDataLoader(Component, metaclass=ABCMeta):
         num_workers = 0
     ):
         if (self.check_whether_valid_size(batch_size)):
-            self.batch_size = batch_size
+            self._batch_size = batch_size
         if (self.check_whether_valid_flag(shuffle)):
-            self.shuffle = shuffle
+            self._shuffle = shuffle
 
         if (
             self.check_whether_valid_size(self.batch_size) and
             self.check_whether_valid_flag(self.shuffle) and
             self.check_whether_valid_dataset(dataset)
         ):
-            self.dataset = dataset
-            self.dataloader = TorchDataLoader(
+            self._dataset = dataset
+            self._dataloader = TorchDataLoader(
                 dataset = dataset,
                 batch_size = self.batch_size,
                 shuffle = self.shuffle,
@@ -70,7 +77,6 @@ class BaseDataLoader(Component, metaclass=ABCMeta):
             )
             self._become_available()
 
-    @Component.check_whether_available
     def __iter__(
         self
     ):
@@ -83,16 +89,6 @@ class BaseDataLoader(Component, metaclass=ABCMeta):
             return _iterator()
         return iter(self.dataloader)
 
-    def check_whether_valid_size(self, size):
-        return (type(size) is int) and (size > 0)
-
-    def check_whether_valid_flag(self, flag):
-        return (type(flag) is bool)
-
-    def check_whether_valid_dataset(self, dataset):
-        return isinstance(dataset, BaseDataset) and dataset.is_available
-
-    @Component.check_whether_available
     def add(
         self,
         collection
@@ -100,22 +96,20 @@ class BaseDataLoader(Component, metaclass=ABCMeta):
         self.dataset.add(collection = collection)
 
     @Component.check_whether_available
-    def save(self, collection):
-        self.add(collection = collection)
-
-
-class DataLoader(BaseDataLoader):
-
-    def __init__(
+    def save(
         self,
-        dataset = None,
-        batch_size = 1,
-        shuffle = True,
-        num_workers = 0
+        collection
     ):
-        super().__init__(
-            dataset = dataset,
-            batch_size = batch_size,
-            shuffle = shuffle,
-            num_workers = num_workers
+        self.add(collection = collection)
+    
+    def check_whether_valid_size(self, size):
+        return (type(size) is int) and (size > 0)
+
+    def check_whether_valid_flag(self, flag):
+        return (type(flag) is bool)
+
+    def check_whether_valid_dataset(self, dataset):
+        return (
+            isinstance(dataset, DatasetBase) and
+            dataset.is_available
         )

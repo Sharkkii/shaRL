@@ -110,17 +110,25 @@ class TestSgarsgData():
 class TestDataset():
 
     @pytest.mark.unit
-    def test_should_be_unavailable_on_empty_initialization(self):
-        dataset = Dataset()
-        assert dataset.is_available == False
-
-    @pytest.mark.unit
-    def test_should_be_available_on_nonempty_initialization_with_empty_collection(self):
-        dataset = Dataset(collection = [])
+    @pytest.mark.parametrize(
+        "TDataset",
+        [ Dataset, SarsDataset, SgasgDataset ]
+    )
+    def test_should_be_available_on_empty_initialization(self, TDataset):
+        dataset = TDataset()
         assert dataset.is_available == True
 
     @pytest.mark.unit
-    def test_should_be_unavailable_on_nonempty_initialization_with_nonempty_collection(self):
+    @pytest.mark.parametrize(
+        "TDataset",
+        [ Dataset, SarsDataset, SgasgDataset ]
+    )
+    def test_should_be_available_on_nonempty_initialization_with_empty_collection(self, TDataset):
+        dataset = TDataset(collection = [])
+        assert dataset.is_available == True
+
+    @pytest.mark.unit
+    def test_should_be_available_on_nonempty_initialization_with_nonempty_collection(self):
         collection = [ 1, 2, 3 ]
         dataset = Dataset(
             collection = collection
@@ -128,20 +136,10 @@ class TestDataset():
         assert dataset.is_available == True
 
     @pytest.mark.unit
-    def test_should_be_available_after_valid_setup(self):
-        collection = [ 1, 2, 3 ]
-        dataset = Dataset()
-        dataset.setup(
-            collection = collection
-        )
-        assert dataset.is_available == True
-
-    @pytest.mark.unit
-    def test_should_raise_value_error_on_invalid_setup(self):
+    def test_should_raise_value_error_on_invalid_initialization(self):
         collection = iter([ 1, 2, 3 ]) # invalid
-        dataset = Dataset()
         with pytest.raises(ValueError) as message:
-            dataset.setup(
+            dataset = Dataset(
                 collection = collection
             )
 
@@ -187,12 +185,6 @@ class TestDataset():
         assert len(dataset) == 5
         dataset.remove(n = 2)
         assert len(dataset) == 3
-
-    @pytest.mark.unit
-    def test_should_raise_value_error_if_collection_is_none(self):
-        dataset = Dataset(collection = None)
-        with pytest.raises(UninitializedComponentException) as message:
-            _ = dataset[0]
 
     @pytest.mark.unit
     def test_should_return_none_if_collection_is_empty(self):
@@ -283,28 +275,9 @@ class TestDataset():
 class TestSarsDataset():
 
     @pytest.mark.unit
-    def test_should_be_unavailable_on_empty_initialization(self):
-        dataset = SarsDataset()
-        assert dataset.is_available == False
-
-    @pytest.mark.unit
-    def test_should_be_available_on_nonempty_initialization_with_empty_collection(self):
-        dataset = SarsDataset(collection = [])
-        assert dataset.is_available == True
-
-    @pytest.mark.unit
     def test_should_be_unavailable_on_nonempty_initialization_with_nonempty_collection(self):
         collection = SARS.random(n = 3)
-        dataset = Dataset(
-            collection = collection
-        )
-        assert dataset.is_available == True
-
-    @pytest.mark.unit
-    def test_should_be_available_after_valid_setup(self):
-        collection = SARS.random(n = 3)
-        dataset = SarsDataset()
-        dataset.setup(
+        dataset = SarsDataset(
             collection = collection
         )
         assert dataset.is_available == True
@@ -313,11 +286,10 @@ class TestSarsDataset():
     @pytest.mark.parametrize(
         "TDataset", [ SA, SARSA, SGASG, SGARSG ]
     )
-    def test_should_raise_value_error_on_invalid_setup(self, TDataset):
+    def test_should_raise_value_error_on_invalid_initialization(self, TDataset):
         collection = TDataset.random(n = 3) # invalid
-        dataset = SarsDataset()
         with pytest.raises(ValueError) as message:
-            dataset.setup(
+            dataset = SarsDataset(
                 collection = collection
             )
 
@@ -342,16 +314,6 @@ class TestSarsDataset():
 class TestSgasgDataset():
 
     @pytest.mark.unit
-    def test_should_be_unavailable_on_empty_initialization(self):
-        dataset = SgasgDataset()
-        assert dataset.is_available == False
-
-    @pytest.mark.unit
-    def test_should_be_available_on_nonempty_initialization_with_empty_collection(self):
-        dataset = SgasgDataset(collection = [])
-        assert dataset.is_available == True
-
-    @pytest.mark.unit
     def test_should_be_unavailable_on_nonempty_initialization_with_nonempty_collection(self):
         collection = SGASG.random(n = 3)
         dataset = SgasgDataset(
@@ -360,23 +322,13 @@ class TestSgasgDataset():
         assert dataset.is_available == True
 
     @pytest.mark.unit
-    def test_should_be_available_after_valid_setup(self):
-        collection = SGASG.random(n = 3)
-        dataset = SgasgDataset()
-        dataset.setup(
-            collection = collection
-        )
-        assert dataset.is_available == True
-
-    @pytest.mark.unit
     @pytest.mark.parametrize(
         "TDataset", [ SA, SARS, SARSA, SGARSG ]
     )
-    def test_should_raise_value_error_on_invalid_setup(self, TDataset):
+    def test_should_raise_value_error_on_invalid_initialization(self, TDataset):
         collection = TDataset.random(n = 3) # invalid
-        dataset = SgasgDataset()
         with pytest.raises(ValueError) as message:
-            dataset.setup(
+            dataset = SgasgDataset(
                 collection = collection
             )
 
@@ -449,16 +401,6 @@ class TestDataLoader():
             shuffle = False
         )
         assert dataloader.is_available == True
-
-    @pytest.mark.unit
-    def test_should_raise_value_error_if_collection_is_none(self):
-        dataset = Dataset(collection = None)
-        dataloader = DataLoader(
-            dataset = dataset
-        )
-        with pytest.raises(UninitializedComponentException) as message:
-            loader = iter(dataloader)
-            _ = next(loader)
 
     @pytest.mark.unit
     def test_should_return_none_if_collection_is_empty(self):
