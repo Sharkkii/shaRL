@@ -52,5 +52,5 @@ class StepwiseMemoryBase(MemoryBase):
     pass
 
 
-class EpisodewiseMemoryBase(MemoryBase):
+class EpisodeMemoryBase(MemoryBase):
     pass

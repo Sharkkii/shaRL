@@ -5,7 +5,7 @@ from ...common import Component
 
 from .base import MemoryBase
 from .base import StepwiseMemoryBase
-from .base import EpisodewiseMemoryBase
+from .base import EpisodeMemoryBase
 
 
 MAX_SIZE = 10000
@@ -156,7 +156,7 @@ class StepwiseMemoryMixin(MemoryMixin, StepwiseMemoryBase):
             return False
 
 
-class EpisodewiseMemoryMixin(MemoryMixin, EpisodewiseMemoryBase):
+class EpisodeMemoryMixin(MemoryMixin, EpisodeMemoryBase):
 
     def check_whether_valid_collection(self, collection):
         if (collection is None): return False
