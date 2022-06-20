@@ -7,6 +7,7 @@ from src.const import SpaceType
 from src.environment import CartPoleEnvironment
 from src.environment import DiscreteMountainCarEnvironment
 from src.core import DQNAgent
+from src.core import DoubleDQNAgent
 from src.core import GCSLAgent
 from src.controller import RLController
 from src.controller import GoalConditionedRLController
@@ -154,6 +155,136 @@ class TestDQN():
             "batch_size": 100,
         }
         self.rl_with_dqn_agent_on_cartpole_env(
+            configuration_env = configuration_env,
+            configuration_agent = configuration_agent,
+            configuration_ctrl = configuration_ctrl
+        )
+
+
+@pytest.mark.L2
+class TestDoubleDQN():
+
+    def rl_with_double_dqn_agent_on_cartpole_env(
+        self,
+        configuration_env,
+        configuration_agent,
+        configuration_ctrl
+    ):
+        # environment
+        version = configuration_env["version"]
+        
+        env = CartPoleEnvironment(
+            version = version
+        )
+
+        # agent
+        eps = configuration_agent["eps"]
+        tau = configuration_agent["tau"]
+        gamma = configuration_agent["gamma"]
+
+        agent = DoubleDQNAgent(
+            eps = eps,
+            tau = tau,
+            gamma = gamma,
+            interface = cartpole_agent_interface,
+            use_default = True,
+        ) 
+
+        # controller
+        n_epoch = configuration_ctrl["n_epoch"]
+        n_env_step = configuration_ctrl["n_env_step"]
+        n_gradient_step = configuration_ctrl["n_gradient_step"]
+        max_dataset_size = configuration_ctrl["max_dataset_size"]
+        batch_size = configuration_ctrl["batch_size"]
+
+        controller = RLController(
+            environment = env,
+            agent = agent,
+            config_e = None,
+            config_a = None
+        )
+        controller.train(
+            n_epoch = n_epoch,
+            n_env_step = n_env_step,
+            n_gradient_step = n_gradient_step,
+            max_dataset_size = max_dataset_size,
+            batch_size = batch_size,
+            n_train_eval = 5,
+            n_test_eval = 5,
+            shuffle = True
+        )
+
+    @pytest.mark.integration
+    @pytest.mark.parametrize(
+        "version",
+        [ "v0", "v1" ]
+    )
+    def test_double_dqn_agent_should_work_on_cartpole_env(self, version):
+        
+        configuration_env = {
+            "version": version
+        }
+        configuration_agent = {
+            "eps": 0.20,
+            "tau": 0.01,
+            "gamma": 0.90
+        }
+        configuration_ctrl = {
+            "n_epoch": 10,
+            "n_env_step": 1,
+            "n_gradient_step": 1,
+            "max_dataset_size": 1000,
+            "batch_size": 10,
+        }
+        self.rl_with_double_dqn_agent_on_cartpole_env(
+            configuration_env = configuration_env,
+            configuration_agent = configuration_agent,
+            configuration_ctrl = configuration_ctrl
+        )
+        
+    @pytest.mark.evaluation
+    def test_double_dqn_agent_should_perform_well_on_cartpole_v0_env(self):
+
+        configuration_env = {
+            "version": "v0"
+        }
+        configuration_agent = {
+            "eps": 0.50,
+            "tau": 0.01,
+            "gamma": 0.90
+        }
+        configuration_ctrl = {
+            "n_epoch": 200,
+            "n_env_step": 5,
+            "n_gradient_step": 5,
+            "max_dataset_size": 20000,
+            "batch_size": 100,
+        }
+        self.rl_with_double_dqn_agent_on_cartpole_env(
+            configuration_env = configuration_env,
+            configuration_agent = configuration_agent,
+            configuration_ctrl = configuration_ctrl
+        )
+    
+    @pytest.mark.evaluation
+    def test_double_dqn_agent_should_perform_well_on_cartpole_v1_env(self):
+
+        configuration_env = {
+            "version": "v1"
+        }
+        configuration_agent = {
+            "eps": 0.50,
+            "tau": 0.01,
+            "gamma": 0.90
+        }
+        configuration_ctrl = {
+            "n_epoch": 500,
+            "n_env_step": 10,
+            "n_gradient_step": 10,
+            "max_dataset_size": 50000,
+            "batch_size": 100,
+        }
+        self.rl_with_double_dqn_agent_on_cartpole_env(
             configuration_env = configuration_env,
             configuration_agent = configuration_agent,
             configuration_ctrl = configuration_ctrl
