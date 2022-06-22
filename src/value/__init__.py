@@ -3,6 +3,9 @@ from .value import PseudoValue
 from .value import QValue
 from .value import DiscreteQValue
 from .value import ContinuousQValue
+from .value import DuelingNetworkQValue
+from .value import DiscreteDuelingNetworkQValue
+from .value import ContinuousDuelingNetworkQValue
 from .value import PseudoQValue
 from .value import Advantage
 from .value import DiscreteAdvantage

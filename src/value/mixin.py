@@ -3,6 +3,9 @@
 import copy
 import torch
 from ..common import Component
+from ..common import ValueReference
+from ..common import AdvantageReference
+from ..common import dereference
 from ..network import ValueNetwork
 from ..network import QValueNetwork
 from ..network import DiscreteQValueNetwork
@@ -374,6 +377,161 @@ class ContinuousQValueMixin(QValueMixin, ContinuousQValueBase):
         default_qvalue_optimizer = None
     ):
         pass
+
+
+class DuelingNetworkQValueMixin(QValueMixin, QValueBase):
+
+    def declare(self):
+        self._value_reference = None
+        self._advantage_reference = None
+
+    @property
+    def value_reference(self): return self._value_reference
+    @property
+    def advantage_reference(self): return self._advantage_reference
+
+    def __init__(
+        self,
+        interface = None,
+        configuration = None,
+        qvalue_network = None,
+        qvalue_optimizer = None,
+        value_reference = None,
+        advantage_reference = None,
+        allow_setup = True,
+        use_default = False,
+        default_qvalue_network = None,
+        default_qvalue_optimizer = None
+    ):
+        QValueMixin.__init__(
+            self,
+            interface = interface,
+            configuration = configuration,
+            qvalue_network = qvalue_network,
+            qvalue_optimizer = qvalue_optimizer,
+            allow_setup = allow_setup,
+            use_default = use_default,
+            default_qvalue_network = default_qvalue_network,
+            default_qvalue_optimizer = default_qvalue_optimizer
+        )
+        DuelingNetworkQValueMixin.declare(self)
+        
+        if (allow_setup):
+            DuelingNetworkQValueMixin.setup(
+                self,
+                interface = interface,
+                configuration = configuration,
+                qvalue_network = qvalue_network,
+                qvalue_optimizer = qvalue_optimizer,
+                value_reference = value_reference,
+                advantage_reference = advantage_reference,
+                use_default = use_default,
+                default_qvalue_network = default_qvalue_network,
+                default_qvalue_optimizer = default_qvalue_optimizer,
+            )
+
+    def setup(
+        self,
+        interface = None,
+        configuration = None,
+        qvalue_network = None,
+        qvalue_optimizer = None,
+        value_reference = None,
+        advantage_reference = None,
+        use_default = False,
+        default_qvalue_network = None,
+        default_qvalue_optimizer = None
+    ):
+        self.setup_with_value(
+            value = value_reference,
+            qvalue = None,
+            advantage = advantage_reference
+        )
+    
+    def setup_with_value(
+        self,
+        value = None,
+        qvalue = None,
+        advantage = None
+    ):
+        self._value_reference = ValueReference(
+            target = value
+        )
+        self._advantage_reference = AdvantageReference(
+            target = advantage
+        )
+
+    def __call__(
+        self,
+        state,
+        # action = None
+    ):
+        value = dereference(self.value_reference)
+        advantage = dereference(self.advantage_reference)
+        v = value(state = state)
+        adv = advantage(state = state)
+        q = v + (adv - torch.mean(adv, dim=-1, keepdim=True))
+        return q
+
+
+class DiscreteDuelingNetworkQValueMixin(DuelingNetworkQValueMixin, DiscreteQValueBase):
+
+    def __init__(
+        self,
+        interface = None,
+        configuration = None,
+        qvalue_network = None,
+        qvalue_optimizer = None,
+        value_reference = None,
+        advantage_reference = None,
+        allow_setup = True,
+        use_default = False,
+        default_qvalue_network = None,
+        default_qvalue_optimizer = None
+    ):
+        DuelingNetworkQValueMixin.__init__(
+            self,
+            interface = interface,
+            configuration = configuration,
+            qvalue_network = qvalue_network,
+            qvalue_optimizer = qvalue_optimizer,
+            value_reference = value_reference,
+            advantage_reference = advantage_reference,
+            allow_setup = allow_setup,
+            use_default = use_default,
+            default_qvalue_network = default_qvalue_network,
+            default_qvalue_optimizer = default_qvalue_optimizer
+        )
+
+
+class ContinuousDuelingNetworkQValueMixin(DuelingNetworkQValueMixin, QValueBase):
+
+    def __init__(
+        self,
+        interface = None,
+        configuration = None,
+        qvalue_network = None,
+        qvalue_optimizer = None,
+        value_reference = None,
+        advantage_reference = None,
+        allow_setup = True,
+        use_default = False,
+        default_qvalue_network = None,
+        default_qvalue_optimizer = None
+    ):
+        DuelingNetworkQValueMixin.__init__(
+            self,
+            interface = interface,
+            configuration = configuration,
+            qvalue_network = qvalue_network,
+            qvalue_optimizer = qvalue_optimizer,
+            value_reference = value_reference,
+            advantage_reference = advantage_reference,
+            allow_setup = allow_setup,
+            use_default = use_default,
+            default_qvalue_network = default_qvalue_network,
+            default_qvalue_optimizer = default_qvalue_optimizer
+        )
 
 
 class AdvantageMixin(AdvantageBase, Component):

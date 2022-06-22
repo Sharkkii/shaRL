@@ -7,6 +7,9 @@ from .mixin import ValueMixin
 from .mixin import QValueMixin
 from .mixin import DiscreteQValueMixin
 from .mixin import ContinuousQValueMixin
+from .mixin import DuelingNetworkQValueMixin
+from .mixin import DiscreteDuelingNetworkQValueMixin
+from .mixin import ContinuousDuelingNetworkQValueMixin
 from .mixin import AdvantageMixin
 from .mixin import DiscreteAdvantageMixin
 from .mixin import ContinuousAdvantageMixin
@@ -91,6 +94,77 @@ class ContinuousQValue(ContinuousQValueMixin, QValueBase):
             use_default = use_default
         )
 
+
+class DuelingNetworkQValue(DuelingNetworkQValueMixin, QValueBase):
+
+    def __init__(
+        self,
+        interface = None,
+        configuration = None,
+        qvalue_network = None,
+        qvalue_optimizer = None,
+        value_reference = None,
+        advantage_reference = None,
+        use_default = False
+    ):
+        DuelingNetworkQValueMixin.__init__(
+            self,
+            interface = interface,
+            configuration = configuration,
+            qvalue_network = qvalue_network,
+            qvalue_optimizer = qvalue_optimizer,
+            value_reference = value_reference,
+            advantage_reference = advantage_reference,
+            use_default = use_default
+        )
+
+
+class DiscreteDuelingNetworkQValue(DiscreteDuelingNetworkQValueMixin, QValueBase):
+
+    def __init__(
+        self,
+        interface = None,
+        configuration = None,
+        qvalue_network = None,
+        qvalue_optimizer = None,
+        value_reference = None,
+        advantage_reference = None,
+        use_default = False
+    ):
+        DiscreteDuelingNetworkQValueMixin.__init__(
+            self,
+            interface = interface,
+            configuration = configuration,
+            qvalue_network = qvalue_network,
+            qvalue_optimizer = qvalue_optimizer,
+            value_reference = value_reference,
+            advantage_reference = advantage_reference,
+            use_default = use_default
+        )
+
+
+class ContinuousDuelingNetworkQValue(ContinuousDuelingNetworkQValueMixin, QValueBase):
+
+    def __init__(
+        self,
+        interface = None,
+        configuration = None,
+        qvalue_network = None,
+        qvalue_optimizer = None,
+        value_reference = None,
+        advantage_reference = None,
+        use_default = False
+    ):
+        ContinuousDuelingNetworkQValueMixin.__init__(
+            self,
+            interface = interface,
+            configuration = configuration,
+            qvalue_network = qvalue_network,
+            qvalue_optimizer = qvalue_optimizer,
+            value_reference = value_reference,
+            advantage_reference = advantage_reference,
+            use_default = use_default
+        )
 
 class Advantage(AdvantageMixin, AdvantageBase):
 
