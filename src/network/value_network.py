@@ -1,5 +1,7 @@
 #### Value Network ####
 
+import warnings
+import copy
 import numpy as np
 import torch
 import torch.nn as nn
@@ -22,6 +24,11 @@ class ValueNetwork(BaseMeasureNetwork):
                 raise ValueError("`value_network` must be None if `use_default = True`")
             if (type(interface) is not AgentInterface):
                 raise ValueError("`interface` must be 'AgentInterface' object if `use_default = True`")
+            if (interface.sout != (1,)):
+                warnings.warn("`interface.sout` must be 1.")
+                i = copy.copy(interface)
+                i.sout = (1,)
+                interface = i
             value_network = DefaultNetwork(
                 interface = interface
             )

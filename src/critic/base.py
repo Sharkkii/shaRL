@@ -30,6 +30,8 @@ class CriticBase(ABC):
     @abstractmethod
     def update_qvalue(self): raise NotImplementedError
     @abstractmethod
+    def update_advantage(self): raise NotImplementedError
+    @abstractmethod
     def train(self): raise NotImplementedError
     @abstractmethod
     def eval(self): raise NotImplementedError
@@ -46,6 +48,9 @@ class CriticBase(ABC):
     @property
     @abstractmethod
     def qvalue(self): raise NotImplementedError
+    @property
+    @abstractmethod
+    def advantage(self): raise NotImplementedError
 
 
 class DiscreteControlCriticBase(CriticBase):
