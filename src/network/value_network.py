@@ -133,3 +133,89 @@ class ContinuousQValueNetwork(BaseMeasureNetwork):
         return self.network(state, action)
 
 QValueNetwork = DiscreteQValueNetwork
+
+
+class DiscreteAdvantageNetwork(BaseMeasureNetwork):
+
+    def __init__(
+        self,
+        advantage_network = None,
+        interface = None,
+        use_default = False
+    ):
+        if (use_default):
+            if (advantage_network is not None):
+                raise ValueError("`advantage_network` must be None if `use_default = True`")
+            if (type(interface) is not AgentInterface):
+                raise ValueError("`interface` must be 'AgentInterface' object if `use_default = True`")
+            advantage_network = DefaultNetwork(
+                interface = interface
+            )
+
+        super().__init__(
+            network = advantage_network
+        )
+
+    def reset(
+        self
+    ):
+        pass
+
+    def setup(
+        self,
+        advantage_network = None
+    ):
+        super().setup(
+            network = advantage_network
+        )
+
+    def __call__(
+        self,
+        state,
+        action = None
+    ):
+        assert(action is None)
+        return self.network(state)
+
+class ContinuousAdvantageNetwork(BaseMeasureNetwork):
+
+    def __init__(
+        self,
+        advantage_network = None,
+        interface = None,
+        use_default = False
+    ):
+        if (use_default):
+            if (advantage_network is not None):
+                raise ValueError("`advantage_network` must be None if `use_default = True`")
+            if (type(interface) is not AgentInterface):
+                raise ValueError("`interface` must be 'AgentInterface' object if `use_default = True`")
+            advantage_network = DefaultNetwork(
+                interface = interface
+            )
+
+        super().__init__(
+            network = advantage_network
+        )
+
+    def reset(
+        self
+    ):
+        pass
+
+    def setup(
+        self,
+        advantage_network = None
+    ):
+        super().setup(
+            network = advantage_network
+        )
+
+    def __call__(
+        self,
+        state,
+        action = None
+    ):
+        return self.network(state, action)
+
+AdvantageNetwork = DiscreteAdvantageNetwork

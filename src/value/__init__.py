@@ -4,6 +4,9 @@ from .value import QValue
 from .value import DiscreteQValue
 from .value import ContinuousQValue
 from .value import PseudoQValue
+from .value import Advantage
+from .value import DiscreteAdvantage
+from .value import ContinuousAdvantage
 
 from .helper import get_default_value
 from .helper import get_default_qvalue

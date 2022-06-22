@@ -2,10 +2,14 @@
 
 from .base import ValueBase
 from .base import QValueBase
+from .base import AdvantageBase
 from .mixin import ValueMixin
 from .mixin import QValueMixin
 from .mixin import DiscreteQValueMixin
 from .mixin import ContinuousQValueMixin
+from .mixin import AdvantageMixin
+from .mixin import DiscreteAdvantageMixin
+from .mixin import ContinuousAdvantageMixin
 
 
 class Value(ValueMixin, ValueBase):
@@ -84,6 +88,66 @@ class ContinuousQValue(ContinuousQValueMixin, QValueBase):
             configuration = configuration,
             qvalue_network = qvalue_network,
             qvalue_optimizer = qvalue_optimizer,
+            use_default = use_default
+        )
+
+
+class Advantage(AdvantageMixin, AdvantageBase):
+
+    def __init__(
+        self,
+        interface = None,
+        configuration = None,
+        advantage_network = None,
+        advantage_optimizer = None,
+        use_default = False
+    ):
+        AdvantageMixin.__init__(
+            self,
+            interface = interface,
+            configuration = configuration,
+            advantage_network = advantage_network,
+            advantage_optimizer = advantage_optimizer,
+            use_default = use_default
+        )
+
+
+class DiscreteAdvantage(DiscreteAdvantageMixin, AdvantageBase):
+
+    def __init__(
+        self,
+        interface = None,
+        configuration = None,
+        advantage_network = None,
+        advantage_optimizer = None,
+        use_default = False
+    ):
+        DiscreteAdvantageMixin.__init__(
+            self,
+            interface = interface,
+            configuration = configuration,
+            advantage_network = advantage_network,
+            advantage_optimizer = advantage_optimizer,
+            use_default = use_default
+        )
+
+
+class ContinuousAdvantage(ContinuousAdvantageMixin, AdvantageBase):
+
+    def __init__(
+        self,
+        interface = None,
+        configuration = None,
+        advantage_network = None,
+        advantage_optimizer = None,
+        use_default = False
+    ):
+        ContinuousAdvantageMixin.__init__(
+            self,
+            interface = interface,
+            configuration = configuration,
+            advantage_network = advantage_network,
+            advantage_optimizer = advantage_optimizer,
             use_default = use_default
         )
 

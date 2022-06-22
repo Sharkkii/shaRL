@@ -13,6 +13,9 @@ from .value_network import ValueNetwork
 from .value_network import QValueNetwork
 from .value_network import DiscreteQValueNetwork
 from .value_network import ContinuousQValueNetwork
+from .value_network import AdvantageNetwork
+from .value_network import DiscreteAdvantageNetwork
+from .value_network import ContinuousAdvantageNetwork
 
 from .default_value_network import DefaultValueNetwork
 from .default_value_network import DefaultQValueNetwork
