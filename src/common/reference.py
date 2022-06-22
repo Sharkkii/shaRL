@@ -20,5 +20,20 @@ class ReferenceBase:
         return self._target.__call__(*args, **kwargs)
 
 
+class ValueReference(ReferenceBase):
+    pass
+
+
 class QValueReference(ReferenceBase):
     pass
+
+
+class AdvantageReference(ReferenceBase):
+    pass
+
+
+def dereference(reference):
+    if (isinstance(reference, ReferenceBase)):
+        return reference._target
+    else:
+        raise TypeError("`reference` must be `ReferenceBase.")

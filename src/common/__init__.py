@@ -14,4 +14,7 @@ from .error import UninitializedComponentException
 
 from .component import Component
 
+from .reference import ValueReference
 from .reference import QValueReference
+from .reference import AdvantageReference
+from .reference import dereference
