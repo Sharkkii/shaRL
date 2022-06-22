@@ -9,6 +9,7 @@ import gym
 from ..const import SpaceType
 from ..const import PhaseType
 from ..common import QValueReference
+from ..common import dereference
 
 from .base import PolicyBase
 from .mixin import PolicyMixin
@@ -276,7 +277,7 @@ class QValueBasedEpsilonGreedyPolicy(EpsilonGreedyPolicyMixin, PolicyBase):
             default_policy_network = default_policy_network,
             default_policy_optimizer = default_policy_optimizer
         )
-        self.declare()
+        QValueBasedEpsilonGreedyPolicy.declare(self)
 
         if (allow_setup):
             QValueBasedEpsilonGreedyPolicy.setup(
@@ -372,6 +373,56 @@ class QValueBasedEpsilonGreedyPolicy(EpsilonGreedyPolicyMixin, PolicyBase):
             return log_p
         else:
             return log_p[action]
+
+
+class DuelingNetworkQValueBasedEpsilonGreedyPolicy(QValueBasedEpsilonGreedyPolicy, PolicyBase):
+
+    def __init__(
+        self,
+        interface = None,
+        configuration = None,
+        policy_network = None,
+        policy_optimizer = None,
+        qvalue_reference = None,
+        allow_setup = True,
+        use_default = False,
+        default_policy_network = None,
+        default_policy_optimizer = None
+    ):
+        QValueBasedEpsilonGreedyPolicy.__init__(
+            self,
+            interface = interface,
+            configuration = configuration,
+            policy_network = policy_network,
+            policy_optimizer = policy_optimizer,
+            qvalue_reference = qvalue_reference,
+            allow_setup = allow_setup,
+            use_default = use_default,
+            default_policy_network = default_policy_network,
+            default_policy_optimizer = default_policy_optimizer
+        )
+
+    def __call__(
+        self,
+        state
+    ):
+        return self.choose_action(
+            state = state
+        )
+
+    @EpsilonGreedyPolicy.choose_action_wrapper
+    def choose_action(
+        self,
+        state,
+        information = None
+    ):
+        with torch.no_grad():
+            qvalue = dereference(self.qvalue_reference)
+            advantage = dereference(qvalue.advantage_reference)
+            adv = advantage(state).numpy()
+            action = np.argmax(adv)
+        action = np.int64(action)
+        return action
 
 
 class BasePolicy(): pass
