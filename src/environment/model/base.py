@@ -37,6 +37,9 @@ class ModelBase(ABC):
     def configuration(self): raise NotImplementedError
     @property
     @abstractmethod
+    def state(self): raise NotImplementedError
+    @property
+    @abstractmethod
     def state_space(self): raise NotImplementedError
     @property
     @abstractmethod
@@ -44,3 +47,7 @@ class ModelBase(ABC):
     @property
     @abstractmethod
     def observation_space(self): raise NotImplementedError
+
+
+class ApproximateModelBase(ModelBase):
+    pass

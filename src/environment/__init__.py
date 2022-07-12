@@ -10,5 +10,9 @@ from .environment import CartPoleEnvironment
 from .environment import DiscreteMountainCarEnvironment
 from .environment import ContinuousMountainCarEnvironment
 from .environment import PendulumEnvironment
+
 from .model import Model
+from .model import ApproximateForwardDynamicsModel
+from .model import ApproximateInverseDynamicsModel
+
 from .helper import get_compatible_interface
