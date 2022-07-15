@@ -51,6 +51,10 @@ class ActorBase(ABC):
     def can_density_estimate(self): raise NotImplementedError
 
 
+class EmptyActorBase(ActorBase):
+    pass
+
+
 class DiscreteControlActorBase(ActorBase):
     pass
 

@@ -1,14 +1,41 @@
 #### Critic (Mixin Class) ####
 
 from ..common import Component
+from ..value import EmptyValueBase
+from ..value import EmptyQValueBase
 from ..value import Value
-from ..value import QValue
 from ..value import DiscreteQValue
 from ..value import ContinuousQValue
 
+from .base import EmptyCriticBase
 from .base import CriticBase
 from .base import DiscreteControlCriticBase
 from .base import ContinuousControlCriticBase
+
+
+class EmptyCriticMixin(EmptyCriticBase):
+
+    def __init__(self): return
+    def setup(self): raise NotImplementedError
+    def setup_with_actor(self): raise NotImplementedError
+    def epochwise_preprocess(self): raise NotImplementedError
+    def epochwise_postprocess(self): raise NotImplementedError
+    def stepwise_preprocess(self): raise NotImplementedError
+    def stepwise_postprocess(self): raise NotImplementedError
+    def update(self): raise NotImplementedError
+    def update_value(self): raise NotImplementedError
+    def update_qvalue(self): raise NotImplementedError
+    def train(self): raise NotImplementedError
+    def eval(self): raise NotImplementedError
+
+    @property
+    def interface(self): raise NotImplementedError
+    @property
+    def configuration(self): raise NotImplementedError
+    @property
+    def value(self): raise NotImplementedError
+    @property
+    def qvalue(self): raise NotImplementedError
 
 
 class CriticMixin(CriticBase, Component):
@@ -186,14 +213,18 @@ class CriticMixin(CriticBase, Component):
     def train(
         self
     ):
-        self.value.train()
-        self.qvalue.train()
+        if (not isinstance(self.value, EmptyValueBase)):
+            self.value.train()
+        if (not isinstance(self.qvalue, EmptyQValueBase)):
+            self.qvalue.train()
 
     def eval(
         self
     ):
-        self.value.eval()
-        self.qvalue.eval()
+        if (not isinstance(self.value, EmptyValueBase)):
+            self.value.eval()
+        if (not isinstance(self.qvalue, EmptyQValueBase)):
+            self.qvalue.eval()
 
 
 class DiscreteControlCriticMixin(CriticMixin, DiscreteControlCriticBase):
@@ -332,8 +363,10 @@ class SoftUpdateCriticMixin(CriticBase):
         self,
         tau = 0.01
     ):
-        self._target_value = self.value.copy()
-        self._target_qvalue = self.qvalue.copy()
+        if (not isinstance(self.value, EmptyValueBase)):
+            self._target_value = self.value.copy()
+        if (not isinstance(self.qvalue, EmptyQValueBase)):
+            self._target_qvalue = self.qvalue.copy()
         self._tau = tau
 
     def update(
@@ -365,6 +398,8 @@ class SoftUpdateCriticMixin(CriticBase):
         actor,
         history = None
     ):
+        if (self.target_value is None):
+            return
         for theta, target_theta in zip(self.value.value_network.parameters(), self.target_value.value_network.parameters()):
             target_theta.data = (1 - self.tau) * target_theta.data + self.tau * theta.data
 
@@ -373,5 +408,7 @@ class SoftUpdateCriticMixin(CriticBase):
         actor,
         history = None
     ):
+        if (self.target_qvalue is None):
+            return
         for theta, target_theta in zip(self.qvalue.qvalue_network.parameters(), self.target_qvalue.qvalue_network.parameters()):
             target_theta.data = (1 - self.tau) * target_theta.data + self.tau * theta.data

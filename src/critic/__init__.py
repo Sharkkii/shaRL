@@ -3,6 +3,7 @@ from .mixin import DiscreteControlCriticMixin
 from .mixin import ContinuousControlCriticMixin
 from .mixin import SoftUpdateCriticMixin
 
+from .critic import EmptyCritic
 from .critic import Critic
 from .critic import DiscreteControlCritic
 from .critic import ContinuousControlCritic

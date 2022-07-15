@@ -1,10 +1,21 @@
 #### Actor ####
 
 from .base import ActorBase
+from .mixin import EmptyActorMixin
 from .mixin import ActorMixin
 from .mixin import DiscreteControlActorMixin
 from .mixin import ContinuousControlActorMixin
 from .mixin import GoalConditionedActorMixin
+
+
+class EmptyActor(EmptyActorMixin):
+
+    def __init__(
+        self,
+        *args,
+        **kwargs
+    ):
+        return
 
 
 class Actor(ActorMixin, ActorBase):

@@ -48,6 +48,10 @@ class CriticBase(ABC):
     def qvalue(self): raise NotImplementedError
 
 
+class EmptyCriticBase(CriticBase):
+    pass
+
+
 class DiscreteControlCriticBase(CriticBase):
     pass
 

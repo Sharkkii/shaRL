@@ -1,9 +1,20 @@
 #### Critic ####
 
 from .base import CriticBase
+from .mixin import EmptyCriticMixin
 from .mixin import CriticMixin
 from .mixin import DiscreteControlCriticMixin
 from .mixin import ContinuousControlCriticMixin
+
+
+class EmptyCritic(EmptyCriticMixin):
+
+    def __init__(
+        self,
+        *args,
+        **kwargs
+    ):
+        return
 
 
 class Critic(CriticMixin, CriticBase):

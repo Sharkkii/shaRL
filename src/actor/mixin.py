@@ -1,14 +1,44 @@
 #### Actor (Mixin Class) ####
 
 from ..common import Component
+from ..policy import EmptyPolicyBase
 from ..policy import DiscretePolicy
 from ..policy import ContinuousPolicy
 from ..policy import GoalConditionedPolicy
 
+from .base import EmptyActorBase
 from .base import ActorBase
 from .base import DiscreteControlActorBase
 from .base import ContinuousControlActorBase
 from .base import GoalConditionedActorBase
+
+
+class EmptyActorMixin(EmptyActorBase):
+
+    def __init__(self): return
+    def setup(self): raise NotImplementedError
+    def setup_with_critic(self): raise NotImplementedError
+    def epochwise_preprocess(self): raise NotImplementedError
+    def epochwise_postprocess(self): raise NotImplementedError
+    def stepwise_preprocess(self): raise NotImplementedError
+    def stepwise_postprocess(self): raise NotImplementedError
+    def __call__(self): raise NotImplementedError
+    def choose_action(self): raise NotImplementedError
+    def update(self): raise NotImplementedError
+    def update_policy(self): raise NotImplementedError
+    def train(self): raise NotImplementedError
+    def eval(self): raise NotImplementedError
+
+    @property
+    def interface(self): raise NotImplementedError
+    @property
+    def configuration(self): raise NotImplementedError
+    @property
+    def policy(self): raise NotImplementedError
+    @property
+    def can_pointwise_estimate(self): raise NotImplementedError
+    @property
+    def can_density_estimate(self): raise NotImplementedError
 
 
 class ActorMixin(ActorBase, Component):
@@ -189,12 +219,14 @@ class ActorMixin(ActorBase, Component):
     def train(
         self
     ):
-        self.policy.train()
+        if (not isinstance(self.policy, EmptyPolicyBase)):
+            self.policy.train()
 
     def eval(
         self
     ):
-        self.policy.eval()
+        if (not isinstance(self.policy, EmptyPolicyBase)):
+            self.policy.eval()
 
 
 class DiscreteControlActorMixin(ActorMixin, DiscreteControlActorBase):
