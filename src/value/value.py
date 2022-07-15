@@ -2,10 +2,22 @@
 
 from .base import ValueBase
 from .base import QValueBase
+from .mixin import EmptyValueMixin
+from .mixin import EmptyQValueMixin
 from .mixin import ValueMixin
 from .mixin import QValueMixin
 from .mixin import DiscreteQValueMixin
 from .mixin import ContinuousQValueMixin
+
+
+class EmptyValue(EmptyValueMixin):
+
+    def __init__(
+        self,
+        *args,
+        **kwargs
+    ):
+        return
 
 
 class Value(ValueMixin, ValueBase):
@@ -26,6 +38,16 @@ class Value(ValueMixin, ValueBase):
             value_optimizer = value_optimizer,
             use_default = use_default
         )
+
+
+class EmptyQValue(EmptyQValueMixin):
+
+    def __init__(
+        self,
+        *args,
+        **kwargs
+    ):
+        return
 
 
 class QValue(QValueMixin, QValueBase):

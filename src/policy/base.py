@@ -50,6 +50,10 @@ class PolicyBase(ABC):
     def can_density_estimate(self): raise NotImplementedError
 
 
+class EmptyPolicyBase(PolicyBase):
+    pass
+
+
 class DiscretePolicyBase(PolicyBase):
     pass
 

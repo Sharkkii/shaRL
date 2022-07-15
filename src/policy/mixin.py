@@ -10,11 +10,38 @@ from ..network import DiscretePolicyNetwork
 from ..network import ContinuousPolicyNetwork
 from ..optimizer import MeasureOptimizer
 
+from .base import EmptyPolicyBase
 from .base import PolicyBase
 from .base import DiscretePolicyBase
 from .base import ContinuousPolicyBase
 from .base import GoalConditionedPolicyBase
 from .base import EpsilonGreedyPolicyBase
+
+
+class EmptyPolicyMixin(EmptyPolicyBase):
+
+    def __init__(self): return
+    def setup(self): raise NotImplementedError
+    def __call__(self): raise NotImplementedError
+    def choose_action(self): raise NotImplementedError
+    def sample(self): raise NotImplementedError
+    def P(self): raise NotImplementedError
+    def logP(self): raise NotImplementedError
+    def train(self): raise NotImplementedError
+    def eval(self): raise NotImplementedError
+
+    @property
+    def interface(self): raise NotImplementedError
+    @property
+    def configuration(self): raise NotImplementedError
+    @property
+    def policy_network(self): raise NotImplementedError
+    @property
+    def policy_optimizer(self): raise NotImplementedError
+    @property
+    def can_pointwise_estimate(self): raise NotImplementedError
+    @property
+    def can_density_estimate(self): raise NotImplementedError
 
 
 class PolicyMixin(PolicyBase, Component):

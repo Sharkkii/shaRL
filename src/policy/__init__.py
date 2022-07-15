@@ -1,3 +1,6 @@
+from .base import EmptyPolicyBase
+
+from .policy import EmptyPolicy
 from .policy import Policy
 from .policy import DiscretePolicy
 from .policy import ContinuousPolicy

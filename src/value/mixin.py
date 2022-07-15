@@ -9,10 +9,48 @@ from ..network import DiscreteQValueNetwork
 from ..network import ContinuousQValueNetwork
 from ..optimizer import MeasureOptimizer
 
+from .base import EmptyValueBase
+from .base import EmptyQValueBase
 from .base import ValueBase
 from .base import QValueBase
 from .base import DiscreteQValueBase
 from .base import ContinuousQValueBase
+
+
+class EmptyValueMixin(EmptyValueBase):
+
+    def __init__(self): return
+    def setup(self): raise NotImplementedError
+    def __call__(self): raise NotImplementedError
+    def train(self): raise NotImplementedError
+    def eval(self): raise NotImplementedError
+
+    @property
+    def interface(self): raise NotImplementedError
+    @property
+    def configuration(self): raise NotImplementedError
+    @property
+    def value_network(self): raise NotImplementedError
+    @property
+    def value_optimizer(self): raise NotImplementedError
+
+
+class EmptyQValueMixin(EmptyQValueBase):
+
+    def __init__(self): return
+    def setup(self): raise NotImplementedError
+    def __call__(self): raise NotImplementedError
+    def train(self): raise NotImplementedError
+    def eval(self): raise NotImplementedError
+
+    @property
+    def interface(self): raise NotImplementedError
+    @property
+    def configuration(self): raise NotImplementedError
+    @property
+    def qvalue_network(self): raise NotImplementedError
+    @property
+    def qvalue_optimizer(self): raise NotImplementedError
 
 
 class ValueMixin(ValueBase, Component):

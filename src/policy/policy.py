@@ -1,16 +1,13 @@
 #### Policy ####
 
-import warnings
 import numpy as np
 import torch
 import torch.nn.functional as F
-import gym
 
-from ..const import SpaceType
-from ..const import PhaseType
 from ..common import QValueReference
 
 from .base import PolicyBase
+from .mixin import EmptyPolicyMixin
 from .mixin import PolicyMixin
 from .mixin import DiscretePolicyMixin
 from .mixin import ContinuousPolicyMixin
@@ -18,6 +15,15 @@ from .mixin import EpsilonGreedyPolicyMixin
 from .mixin import GoalConditionedPolicyMixin
 from .mixin import GoalConditionedEpsilonGreedyPolicyMixin
 
+
+class EmptyPolicy(EmptyPolicyMixin):
+
+    def __init__(
+        self,
+        *args,
+        **kwargs
+    ):
+        return
 
 class Policy(PolicyMixin, PolicyBase):
 

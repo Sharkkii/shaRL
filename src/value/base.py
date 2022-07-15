@@ -36,6 +36,10 @@ class ValueBase(ABC):
     def value_optimizer(self): raise NotImplementedError
 
 
+class EmptyValueBase(ValueBase):
+    pass
+
+
 class QValueBase(ABC):
 
     @abstractmethod
@@ -67,6 +71,10 @@ class QValueBase(ABC):
     @property
     @abstractmethod
     def qvalue_optimizer(self): raise NotImplementedError
+
+
+class EmptyQValueBase(ValueBase):
+    pass
 
 
 class DiscreteQValueBase(QValueBase):
