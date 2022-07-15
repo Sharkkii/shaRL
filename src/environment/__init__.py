@@ -11,6 +11,7 @@ from .environment import DiscreteMountainCarEnvironment
 from .environment import ContinuousMountainCarEnvironment
 from .environment import PendulumEnvironment
 
+from .model import EmptyModel
 from .model import Model
 from .model import ApproximateForwardDynamicsModel
 from .model import ApproximateInverseDynamicsModel

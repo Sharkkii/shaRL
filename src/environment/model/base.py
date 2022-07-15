@@ -49,5 +49,9 @@ class ModelBase(ABC):
     def observation_space(self): raise NotImplementedError
 
 
+class EmptyModelBase(ModelBase):
+    pass
+
+
 class ApproximateModelBase(ModelBase):
     pass

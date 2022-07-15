@@ -6,9 +6,35 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from .base import EmptyModelBase
 from .base import ModelBase
 from .base import ApproximateModelBase
 from ..environment import EnvironmentBase
+
+
+class EmptyModelMixin(EmptyModelBase):
+
+    def __init__(self): raise NotImplementedError
+    def setup(self): raise NotImplementedError
+    def reset(self): raise NotImplementedError
+    def step(self): raise NotImplementedError
+    def sample(self): raise NotImplementedError
+    def update(self): raise NotImplementedError
+
+    @property
+    def env(self): raise NotImplementedError
+    @property
+    def interface(self): raise NotImplementedError
+    @property
+    def configuration(self): raise NotImplementedError
+    @property
+    def state(self): raise NotImplementedError
+    @property
+    def state_space(self): raise NotImplementedError
+    @property
+    def action_space(self): raise NotImplementedError
+    @property
+    def observation_space(self): raise NotImplementedError
 
 
 class ModelMixin(ModelBase):

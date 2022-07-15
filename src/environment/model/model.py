@@ -1,8 +1,19 @@
 #### Model ####
 
+from .mixin import EmptyModelMixin
 from .mixin import ModelMixin
 from .mixin import ApproximateForwardDynamicsModelMixin
 from .mixin import ApproximateInverseDynamicsModelMixin
+
+
+class EmptyModel(EmptyModelMixin):
+
+    def __init__(
+        self,
+        *args,
+        **kwargs
+    ):
+        return
 
 
 class Model(ModelMixin):
