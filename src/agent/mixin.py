@@ -11,6 +11,7 @@ from ..critic import Critic
 from ..critic import DiscreteControlCritic
 from ..critic import ContinuousControlCritic
 from ..environment import GoalReachingTaskEnvironmentBase
+from ..environment import EmptyModel
 
 from .base import AgentBase
 from .base import DiscreteControlAgentBase
@@ -25,6 +26,7 @@ class AgentMixin(AgentBase, Component):
         self._configuration = None
         self._actor = None
         self._critic = None
+        self._model = None
 
     @property
     def interface(self): return self._interface
@@ -34,6 +36,8 @@ class AgentMixin(AgentBase, Component):
     def actor(self): return self._actor
     @property
     def critic(self): return self._critic
+    @property
+    def model(self): return self._model
 
     def __init__(
         self,
@@ -41,6 +45,7 @@ class AgentMixin(AgentBase, Component):
         configuration = None,
         actor = None,
         critic = None,
+        model = None,
         allow_setup = True,
         use_default = False,
         default_actor = None,
@@ -60,6 +65,7 @@ class AgentMixin(AgentBase, Component):
                 configuration = configuration,
                 actor = actor,
                 critic = critic,
+                model = model,
                 use_default = use_default,
                 default_actor = default_actor,
                 default_critic = default_critic
@@ -71,6 +77,7 @@ class AgentMixin(AgentBase, Component):
         configuration = None,
         actor = None,
         critic = None,
+        model = None,
         use_default = False,
         default_actor = None,
         default_critic = None
@@ -105,11 +112,15 @@ class AgentMixin(AgentBase, Component):
             if ((actor is None) or (critic is None)):
                 return
         #         raise ValueError("`actor` & `critic` must not be None if `use_default = False`.")
+
+        if (model is None):
+            model = EmptyModel()
         
         self._interface = interface
         self._configuration = configuration
         self._actor = actor
         self._critic = critic
+        self._model = model
         self._become_available()
 
     def epochwise_preprocess(
@@ -242,17 +253,31 @@ class AgentMixin(AgentBase, Component):
             n_step = n_step
         )
 
+    def update_model(
+        self,
+        history,
+        n_step = 1
+    ):
+        return self.model.update(
+            history = history,
+            n_step = n_step
+        )
+
     def train(
         self
     ):
         self.actor.train()
         self.critic.train()
+        if (not isinstance(self.model, EmptyModel)):
+            self.model.train()
 
     def eval(
         self
     ):
         self.actor.eval()
         self.critic.eval()
+        if (not isinstance(self.model, EmptyModel)):
+            self.model.eval()
 
 
 class DiscreteControlAgentMixin(AgentMixin, DiscreteControlAgentBase):

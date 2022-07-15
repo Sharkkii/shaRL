@@ -28,6 +28,8 @@ class AgentBase(ABC):
     @abstractmethod
     def update_critic(self): raise NotImplementedError
     @abstractmethod
+    def update_model(self): raise NotImplementedError
+    @abstractmethod
     def train(self): raise NotImplementedError
     @abstractmethod
     def eval(self): raise NotImplementedError
@@ -44,6 +46,9 @@ class AgentBase(ABC):
     @property
     @abstractmethod
     def critic(self): raise NotImplementedError
+    @property
+    @abstractmethod
+    def model(self): raise NotImplementedError
     # @property
     # @abstractmethod
     # def env(self): raise NotImplementedError
