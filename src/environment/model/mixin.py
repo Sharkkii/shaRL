@@ -9,7 +9,7 @@ import torch.nn.functional as F
 from .base import EmptyModelBase
 from .base import ModelBase
 from .base import ApproximateModelBase
-from ..environment import EnvironmentBase
+from ..env import EnvironmentBase
 
 
 class EmptyModelMixin(EmptyModelBase):

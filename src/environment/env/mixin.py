@@ -4,13 +4,14 @@ import random
 import numpy as np
 import torch
 import gym
-from ..const import SpaceType
-from ..common import Component
+
+from ...const import SpaceType
+from ...common import Component
+from ..helper import get_environment_interface
 
 from .base import EnvironmentBase
 from .base import GymEnvironmentBase
 from .base import GoalReachingTaskEnvironmentBase
-from .helper import get_environment_interface
 
 
 class EnvironmentMixin(EnvironmentBase, Component):
