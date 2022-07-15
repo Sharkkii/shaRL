@@ -4,7 +4,7 @@ import torch
 import torch.nn.functional as F
 
 from ..policy import QValueBasedEpsilonGreedyPolicy
-from ..value import Value
+from ..value import EmptyValue
 from ..value import DiscreteQValue
 from ..actor import DiscreteControlActorMixin
 from ..critic import DiscreteControlCriticMixin
@@ -126,10 +126,10 @@ class DQNCritic(DiscreteControlCriticMixin, SoftUpdateCriticMixin):
         tau = 0.5,
         use_default = False
     ):
-        value = Value(
-            interface = interface,
-            configuration = configuration,
-            use_default = use_default
+        value = EmptyValue(
+            # interface = interface,
+            # configuration = configuration,
+            # use_default = use_default
         )
         qvalue = DiscreteQValue(
             interface = interface,
