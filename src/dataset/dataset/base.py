@@ -2,8 +2,11 @@
 
 from abc import ABC, abstractmethod
 
+from ...common.data import SARS
+from ...common.data import SGASG
 
-class DatasetBase(ABC):
+
+class MemoryBase(ABC):
 
     @abstractmethod
     def __init__(self): raise NotImplementedError
@@ -23,7 +26,21 @@ class DatasetBase(ABC):
     def collection(self): raise NotImplementedError
     @property
     @abstractmethod
+    def transform(self): raise NotImplementedError
+    @property
+    @abstractmethod
     def max_size(self): raise NotImplementedError
     @property
     @abstractmethod
     def size(self): raise NotImplementedError
+
+
+DatasetBase = MemoryBase
+
+
+class StepwiseMemoryBase(MemoryBase):
+    pass
+
+
+class EpisodeMemoryBase(MemoryBase):
+    pass

@@ -179,6 +179,7 @@ class SgasgDataset(Dataset):
     def check_whether_valid_sag_collection(self, collection):
         return all([ (type(item) is SGASG) for item in collection ])
 
+
 class AugmentedDataset(Dataset):
 
     def __init__(

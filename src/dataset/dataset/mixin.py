@@ -1,15 +1,18 @@
 #### Dataset (Mixin) ####
 
-from .base import DatasetBase
 from torch.utils.data import Dataset as TorchDataset
-
 from ...common import Component
+
+from .base import DatasetBase
+from .base import MemoryBase
+from .base import StepwiseMemoryBase
+from .base import EpisodeMemoryBase
 
 
 MAX_SIZE = 10000
 
 
-class DatasetMixin(DatasetBase, Component, TorchDataset):
+class MemoryMixin(MemoryBase, TorchDataset, Component):
 
     def declare(self):
         self._collection = None
@@ -31,9 +34,9 @@ class DatasetMixin(DatasetBase, Component, TorchDataset):
         transform = None,
         max_size = MAX_SIZE,
     ):
+        MemoryMixin.declare(self)
         Component.__init__(self)
-        DatasetMixin.declare(self)
-        DatasetMixin.setup(
+        MemoryMixin.setup(
             self,
             collection = collection,
             transform = transform,
@@ -47,18 +50,42 @@ class DatasetMixin(DatasetBase, Component, TorchDataset):
         max_size = MAX_SIZE
     ):
         if (collection is None):
-            return
-
+            collection = []
         if (not self.check_whether_valid_collection(collection)):
             raise ValueError("`collection` must be 'List' object.")
-        
-        self._collection = collection
-        self._max_size = max_size
+        flag = False
         if (self.check_whether_valid_transform(transform)):
-            self._transform = transform
+            flag = True
+        if (not self.check_whether_valid_size(max_size)):
+            raise ValueError("`max_size` must be 'Int'.")
+
+        self._collection = collection
+        if (flag): self._transform = transform
+        self._max_size = max_size
         self.trancate()
 
         self._become_available()
+
+    def __len__(
+        self
+    ):
+        if (len(self.collection) == 0):
+            return 1
+        else:
+            return len(self.collection)
+
+    def __getitem__(
+        self,
+        index
+    ):
+        if (len(self.collection) == 0):
+            return None
+
+        index = index % len(self)
+        item = self.collection[index]
+        if (self.check_whether_valid_transform(self.transform)):
+            item = self.transform(item)
+        return item
 
     def add(
         self,
@@ -105,7 +132,41 @@ class DatasetMixin(DatasetBase, Component, TorchDataset):
         del self.collection[:-self.max_size]
 
     def check_whether_valid_collection(self, collection):
-        return (collection is not None) and (hasattr(collection, "__iter__")) and (hasattr(collection, "__getitem__"))
+        return (
+            (collection is not None) and
+            (hasattr(collection, "__iter__")) and
+            (hasattr(collection, "__getitem__"))
+        )
 
     def check_whether_valid_transform(self, transform):
         return callable(transform)
+
+    def check_whether_valid_size(self, size):
+        return (type(size) is int) and (size > 0)
+
+
+class StepwiseMemoryMixin(MemoryMixin, StepwiseMemoryBase):
+
+    def check_whether_valid_collection(self, collection):
+        if (collection is None): return False
+        if (type(collection) is list):
+            if (len(collection) == 0): return True
+            return (type(collection[0]) is not list)
+        else:
+            return False
+
+
+class EpisodeMemoryMixin(MemoryMixin, EpisodeMemoryBase):
+
+    def check_whether_valid_collection(self, collection):
+        if (collection is None): return False
+        if (type(collection is list)):
+            if (len(collection) == 0): return True
+            if (type(collection[0]) is list):
+                if (len(collection[0]) == 0): return True
+                return (type(collection[0][0]) is not list)
+        else:
+            return False
+
+
+DatasetMixin = MemoryMixin
