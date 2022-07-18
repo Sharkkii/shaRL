@@ -1,12 +1,10 @@
 #### Dataset ####
 
-from abc import ABCMeta, abstractmethod
-from torch.utils.data import Dataset as TorchDataset
-
 from ..common import Component
 from ..common.data import SARS
 from ..common.data import SGASG
 
+from .mixin import DatasetMixin
 
 # T_STATE = torch.tensor
 # T_ACTION = int
@@ -15,121 +13,8 @@ from ..common.data import SGASG
 
 MAX_SIZE = 10000
 
-class BaseDataset(Component, TorchDataset, metaclass=ABCMeta):
 
-    @abstractmethod
-    def __init__(
-        self,
-        collection = None,
-        transform = None,
-        max_size = MAX_SIZE,
-    ):
-        Component.__init__(self)
-        self.collection = None      
-        self.transform = None
-        self.max_size = None
-        self.setup(
-            collection = collection,
-            transform = transform,
-            max_size = max_size
-        )
-    
-    @abstractmethod
-    def reset(
-        self
-    ):
-        pass
-
-    @abstractmethod
-    def setup(
-        self,
-        collection = None,
-        transform = None,
-        max_size = MAX_SIZE
-    ):
-        if (collection is None):
-            return
-
-        if (not self.check_whether_valid_collection(collection)):
-            raise ValueError("`collection` must be 'List' object.")
-        
-        self.collection = collection
-        self.max_size = max_size
-        if (self.check_whether_valid_transform(transform)):
-            self.transform = transform
-        self.trancate()
-
-        self._become_available()
-
-    @abstractmethod
-    def __len__(
-        self
-    ):
-        raise NotImplementedError
-
-    @abstractmethod
-    def __getitem__(
-        self,
-        index
-    ):
-        raise NotImplementedError
-
-    @property
-    def size(self):
-        return len(self.collection)
-
-    def add_collection(
-        self,
-        collection
-    ):
-        if (not self.check_whether_valid_collection(collection)):
-            raise ValueError("`collection` must be 'List' object.")
-        self.collection.extend(collection)
-        self.trancate()
-
-    def add_item(
-        self,
-        item
-    ):
-        self.add_collection([ item ])
-
-    def add(
-        self,
-        collection
-    ):
-        self.add_collection(collection)
-
-    def remove_collection(
-        self,
-        n = 0
-    ):
-        if (n > 0):
-            del self.collection[:n]
-    
-    def remove_item(
-        self
-    ):
-        self.remove_collection(n = 1)
-
-    def remove(
-        self,
-        n = 0
-    ):
-        self.remove_collection(n = n)
-
-    def trancate(
-        self
-    ):
-        del self.collection[:-self.max_size]
-
-    def check_whether_valid_collection(self, collection):
-        return (collection is not None) and (hasattr(collection, "__iter__")) and (hasattr(collection, "__getitem__"))
-
-    def check_whether_valid_transform(self, transform):
-        return callable(transform)
-
-
-class Dataset(BaseDataset):
+class Dataset(DatasetMixin):
 
     def __init__(
         self,
@@ -142,11 +27,6 @@ class Dataset(BaseDataset):
             transform = transform,
             max_size = max_size
         )
-
-    def reset(
-        self
-    ):
-        super().reset()
 
     def setup(
         self,

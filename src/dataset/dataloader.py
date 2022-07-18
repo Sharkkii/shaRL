@@ -1,12 +1,11 @@
 #### DataLoader ####
 
 from abc import ABCMeta, abstractmethod
-from tabnanny import check
 from torch.utils.data import DataLoader as TorchDataLoader
 from torch.utils.data._utils.collate import default_collate
 
 from ..common import Component
-from .dataset import BaseDataset
+from .base import DatasetBase
 
 
 def custom_collate_fn(batch):
@@ -90,7 +89,7 @@ class BaseDataLoader(Component, metaclass=ABCMeta):
         return (type(flag) is bool)
 
     def check_whether_valid_dataset(self, dataset):
-        return isinstance(dataset, BaseDataset) and dataset.is_available
+        return isinstance(dataset, DatasetBase) and dataset.is_available
 
     @Component.check_whether_available
     def add(
