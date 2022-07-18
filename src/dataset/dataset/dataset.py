@@ -1,8 +1,8 @@
 #### Dataset ####
 
-from ..common import Component
-from ..common.data import SARS
-from ..common.data import SGASG
+from ...common import Component
+from ...common.data import SARS
+from ...common.data import SGASG
 
 from .mixin import DatasetMixin
 

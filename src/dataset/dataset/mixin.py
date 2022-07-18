@@ -3,7 +3,7 @@
 from .base import DatasetBase
 from torch.utils.data import Dataset as TorchDataset
 
-from ..common import Component
+from ...common import Component
 
 
 MAX_SIZE = 10000

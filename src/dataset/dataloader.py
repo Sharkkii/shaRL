@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader as TorchDataLoader
 from torch.utils.data._utils.collate import default_collate
 
 from ..common import Component
-from .base import DatasetBase
+from .dataset import DatasetBase
 
 
 def custom_collate_fn(batch):
