@@ -178,3 +178,33 @@ class SgasgDataset(Dataset):
 
     def check_whether_valid_sag_collection(self, collection):
         return all([ (type(item) is SGASG) for item in collection ])
+
+class AugmentedDataset(Dataset):
+
+    def __init__(
+        self,
+        collection = None,
+        transform = None,
+        data_augmentator = None,
+        max_size = MAX_SIZE,
+    ):
+        Dataset.__init__(
+            self,
+            collection = collection,
+            transform = transform,
+            max_size = max_size
+        )
+        AugmentedDataset.setup(
+            self,
+            data_augmentator = data_augmentator
+        )
+
+    def setup(
+        self,
+        data_augmentator = None
+    ):
+        self.data_augmentator = data_augmentator
+
+    def add_collection(self, collection):
+        add_collection_fn = self.data_augmentator.add_decorator(Dataset.add_collection)
+        return add_collection_fn(self, collection = collection)

@@ -12,6 +12,8 @@ from src.common import SGARSG
 from src.dataset import Dataset
 from src.dataset import SarsDataset
 from src.dataset import SgasgDataset
+from src.dataset import AugmentedDataset
+from src.dataset import CustomDataAugmentator
 from src.dataset import DataLoader
 
 
@@ -396,6 +398,53 @@ class TestSgasgDataset():
         assert len(dataset) == 3
         with pytest.raises(ValueError) as message:
             dataset.add(TDataset.random(n = 2)) # invalid
+
+
+class TestDataAugmentator():
+
+    @pytest.mark.unit
+    def test_custom_data_augmentator_should_deal_with_single_augmentation(self):
+        C = 2
+        N = 10
+
+        augment_fn = (lambda x: [ C * _x for _x in x ])
+        augmentator = CustomDataAugmentator(augment_fn = augment_fn)
+        dataset = AugmentedDataset(
+            collection = [],
+            data_augmentator = augmentator
+        )
+
+        collection = list(range(N))
+        dataset.add(collection = collection)
+
+        collection = dataset.collection
+        assert dataset.size == 2 * N
+        for i in range(N):
+            assert i in collection
+            assert C * i in collection
+
+    @pytest.mark.unit
+    def test_custom_data_augmentator_should_deal_with_multiple_augmentation(self):
+        C1 = 2
+        C2 = 3
+        N = 10
+
+        augment_fn = (lambda x: [ C1 * _x for _x in x ] + [ C2  * _x for _x in x ])
+        augmentator = CustomDataAugmentator(augment_fn = augment_fn)
+        dataset = AugmentedDataset(
+            collection = [],
+            data_augmentator = augmentator
+        )
+
+        collection = list(range(N))
+        dataset.add(collection = collection)
+
+        collection = dataset.collection
+        assert dataset.size == 3 * N
+        for i in range(N):
+            assert i in collection
+            assert C1 * i in collection
+            assert C2 * i in collection
 
 
 class TestDataLoader():
