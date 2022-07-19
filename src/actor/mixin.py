@@ -62,10 +62,17 @@ class ActorMixin(ActorBase, Component):
         policy = None,
         allow_setup = True,
         use_default = False,
-        default_policy = None
     ):
-        if (default_policy is None):
-            default_policy = DiscretePolicy
+        flag = False
+        if (policy is None):
+            policy = DiscretePolicy(
+                interface = interface,
+                configuration = configuration,
+                use_default = use_default
+            )
+            flag = True
+        if (flag):
+            use_default = False
 
         ActorMixin.declare(self)
         Component.__init__(self)
@@ -76,7 +83,6 @@ class ActorMixin(ActorBase, Component):
                 configuration = configuration,
                 policy = policy,
                 use_default = use_default,
-                default_policy = default_policy
             )
 
     def setup(
@@ -85,10 +91,7 @@ class ActorMixin(ActorBase, Component):
         configuration = None,
         policy = None,
         use_default = False,
-        default_policy = None
     ):
-        TPOLICY = default_policy
-
         if (use_default and (interface is None)):
             raise ValueError("`interface` must be 'AgentInterface' object if `use_default = True`.")
         if (configuration is None):
@@ -100,12 +103,10 @@ class ActorMixin(ActorBase, Component):
         if (use_default):
             if (policy is not None):
                 raise ValueError("`policy` must be None if `use_default = True`")
-            if (default_policy is None):
-                raise ValueError("`default_policy` must not be None if `use_default = True`")
 
-            policy = TPOLICY(
+            policy = DiscretePolicy(
                 interface = interface,
-                # configuration = configuration,
+                configuration = configuration,
                 use_default = True
             )
 
@@ -238,10 +239,17 @@ class DiscreteControlActorMixin(ActorMixin, DiscreteControlActorBase):
         policy = None,
         allow_setup = True,
         use_default = False,
-        default_policy = None
     ):
-        if (default_policy is None):
-            default_policy = DiscretePolicy
+        flag = False
+        if (policy is None):
+            policy = DiscretePolicy(
+                interface = interface,
+                configuration = configuration,
+                use_default = use_default
+            )
+            flag = True
+        if (flag):
+            use_default = False
         
         ActorMixin.__init__(
             self,
@@ -250,7 +258,6 @@ class DiscreteControlActorMixin(ActorMixin, DiscreteControlActorBase):
             policy = policy,
             allow_setup = allow_setup,
             use_default = use_default,
-            default_policy = default_policy
         )
         if (allow_setup):
             DiscreteControlActorMixin.setup(
@@ -259,7 +266,6 @@ class DiscreteControlActorMixin(ActorMixin, DiscreteControlActorBase):
                 configuration = configuration,
                 policy = policy,
                 use_default = use_default,
-                default_policy = default_policy
             )
 
     def setup(
@@ -268,7 +274,6 @@ class DiscreteControlActorMixin(ActorMixin, DiscreteControlActorBase):
         configuration = None,
         policy = None,
         use_default = False,
-        default_policy = None
     ):
         pass
 
@@ -282,10 +287,17 @@ class ContinuousControlActorMixin(ActorMixin, ContinuousControlActorBase):
         policy = None,
         allow_setup = True,
         use_default = False,
-        default_policy = None
     ):
-        if (default_policy is None):
-            default_policy = ContinuousPolicy
+        flag = False
+        if (policy is None):
+            policy = ContinuousPolicy(
+                interface = interface,
+                configuration = configuration,
+                use_default = use_default
+            )
+            flag = True
+        if (flag):
+            use_default = False
         
         ActorMixin.__init__(
             self,
@@ -294,7 +306,6 @@ class ContinuousControlActorMixin(ActorMixin, ContinuousControlActorBase):
             policy = policy,
             allow_setup = allow_setup,
             use_default = use_default,
-            default_policy = default_policy
         )
         if (allow_setup):
             ContinuousControlActorMixin.setup(
@@ -303,7 +314,6 @@ class ContinuousControlActorMixin(ActorMixin, ContinuousControlActorBase):
                 configuration = configuration,
                 policy = policy,
                 use_default = use_default,
-                default_policy = default_policy
             )
 
     def setup(
@@ -312,7 +322,6 @@ class ContinuousControlActorMixin(ActorMixin, ContinuousControlActorBase):
         configuration = None,
         policy = None,
         use_default = False,
-        default_policy = None
     ):
         pass
 
@@ -380,10 +389,17 @@ class GoalConditionedActorMixin(ActorMixin, GoalConditionedActorBase):
         policy = None,
         allow_setup = True,
         use_default = False,
-        default_policy = None
     ):
-        if (default_policy is None):
-            default_policy = GoalConditionedPolicy
+        flag = False
+        if (policy is None):
+            policy = GoalConditionedPolicy(
+                interface = interface,
+                configuration = configuration,
+                use_default = use_default
+            )
+            flag = True
+        if (flag):
+            use_default = False
         
         ActorMixin.__init__(
             self,
@@ -392,7 +408,6 @@ class GoalConditionedActorMixin(ActorMixin, GoalConditionedActorBase):
             policy = policy,
             allow_setup = allow_setup,
             use_default = use_default,
-            default_policy = default_policy
         )
         if (allow_setup):
             GoalConditionedActorMixin.setup(
@@ -401,7 +416,6 @@ class GoalConditionedActorMixin(ActorMixin, GoalConditionedActorBase):
                 configuration = configuration,
                 policy = policy,
                 use_default = use_default,
-                default_policy = default_policy
             )
 
     def setup(
@@ -410,7 +424,6 @@ class GoalConditionedActorMixin(ActorMixin, GoalConditionedActorBase):
         configuration = None,
         policy = None,
         use_default = False,
-        default_policy = None
     ):
         pass
 

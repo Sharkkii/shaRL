@@ -63,13 +63,24 @@ class CriticMixin(CriticBase, Component):
         qvalue = None,
         allow_setup = True,
         use_default = False,
-        default_value = None,
-        default_qvalue = None
     ):
-        if (default_value is None):
-            default_value = Value
-        if (default_qvalue is None):
-            default_qvalue = DiscreteQValue
+        flag = False
+        if (value is None):
+            value = Value(
+                interface = interface,
+                configuration = configuration,
+                use_default = use_default
+            )
+            flag = True
+        if (qvalue is None):
+            qvalue = DiscreteQValue(
+                interface = interface,
+                configuration = configuration,
+                use_default = use_default
+            )
+            flag = True
+        if (flag):
+            use_default = False
 
         CriticMixin.declare(self)
         Component.__init__(self)
@@ -81,8 +92,6 @@ class CriticMixin(CriticBase, Component):
                 value = value,
                 qvalue = qvalue,
                 use_default = use_default,
-                default_value = default_value,
-                default_qvalue = default_qvalue
             )
 
     def setup(
@@ -92,12 +101,7 @@ class CriticMixin(CriticBase, Component):
         value = None,
         qvalue = None,
         use_default = False,
-        default_value = None,
-        default_qvalue = None
     ):
-        TVALUE = default_value
-        TQVALUE = default_qvalue
-
         if (use_default and (interface is None)):
             raise ValueError("`interface` must be 'AgentInterface' object if `use_default = True`.")
         if (configuration is None):
@@ -109,17 +113,15 @@ class CriticMixin(CriticBase, Component):
         if (use_default):
             if ((value is not None) or (qvalue is not None)):
                 raise ValueError("`value` & `qvalue` must be None if `use_default = True`")
-            if ((default_value is None) or (default_qvalue is None)):
-                raise ValueError("`default_value` & `default_qvalue` must not be None if `use_default = True`")
             
-            value = TVALUE(
+            value = Value(
                 interface = interface,
-                # configuration = configuration,
+                configuration = configuration,
                 use_default = True
             )
-            qvalue = TQVALUE(
+            qvalue = DiscreteQValue(
                 interface = interface,
-                # configuration = configuration,
+                configuration = configuration,
                 use_default = True
             )
 
@@ -237,13 +239,24 @@ class DiscreteControlCriticMixin(CriticMixin, DiscreteControlCriticBase):
         qvalue = None,
         allow_setup = True,
         use_default = False,
-        default_value = None,
-        default_qvalue = None
     ):
-        if (default_value is None):
-            default_value = Value
-        if (default_qvalue is None):
-            default_qvalue = DiscreteQValue
+        flag = False
+        if (value is None):
+            value = Value(
+                interface = interface,
+                configuration = configuration,
+                use_default = use_default
+            )
+            flag = True
+        if (qvalue is None):
+            qvalue = DiscreteQValue(
+                interface = interface,
+                configuration = configuration,
+                use_default = use_default
+            )
+            flag = True
+        if (flag):
+            use_default = False
 
         CriticMixin.__init__(
             self,
@@ -253,8 +266,6 @@ class DiscreteControlCriticMixin(CriticMixin, DiscreteControlCriticBase):
             qvalue = qvalue,
             allow_setup = allow_setup,
             use_default = use_default,
-            default_value = default_value,
-            default_qvalue = default_qvalue
         )
         if (allow_setup):
             DiscreteControlCriticMixin.setup(
@@ -264,8 +275,6 @@ class DiscreteControlCriticMixin(CriticMixin, DiscreteControlCriticBase):
                 value = value,
                 qvalue = qvalue,
                 use_default = use_default,
-                default_value = default_value,
-                default_qvalue = default_qvalue
             )
 
     def setup(
@@ -275,8 +284,6 @@ class DiscreteControlCriticMixin(CriticMixin, DiscreteControlCriticBase):
         value = None,
         qvalue = None,
         use_default = False,
-        default_value = None,
-        default_qvalue = None
     ):
         pass
 
@@ -291,13 +298,24 @@ class ContinuousControlCriticMixin(CriticMixin, ContinuousControlCriticBase):
         qvalue = None,
         allow_setup = True,
         use_default = False,
-        default_value = None,
-        default_qvalue = None
     ):
-        if (default_value is None):
-            default_value = Value
-        if (default_qvalue is None):
-            default_qvalue = ContinuousQValue
+        flag = False
+        if (value is None):
+            value = Value(
+                interface = interface,
+                configuration = configuration,
+                use_default = use_default
+            )
+            flag = True
+        if (qvalue is None):
+            qvalue = ContinuousQValue(
+                interface = interface,
+                configuration = configuration,
+                use_default = use_default
+            )
+            flag = True
+        if (flag):
+            use_default = False
 
         CriticMixin.__init__(
             self,
@@ -307,8 +325,6 @@ class ContinuousControlCriticMixin(CriticMixin, ContinuousControlCriticBase):
             qvalue = qvalue,
             allow_setup = allow_setup,
             use_default = use_default,
-            default_value = default_value,
-            default_qvalue = default_qvalue
         )
         if (allow_setup):
             CriticMixin.setup(
@@ -318,8 +334,6 @@ class ContinuousControlCriticMixin(CriticMixin, ContinuousControlCriticBase):
                 value = value,
                 qvalue = qvalue,
                 use_default = use_default,
-                default_value = default_value,
-                default_qvalue = default_qvalue
             )
 
     def setup(
@@ -329,8 +343,6 @@ class ContinuousControlCriticMixin(CriticMixin, ContinuousControlCriticBase):
         value = None,
         qvalue = None,
         use_default = False,
-        default_value = None,
-        default_qvalue = None
     ):
         pass
 

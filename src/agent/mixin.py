@@ -48,13 +48,24 @@ class AgentMixin(AgentBase, Component):
         model = None,
         allow_setup = True,
         use_default = False,
-        default_actor = None,
-        default_critic = None
     ):
-        if (default_actor is None):
-            default_actor = Actor
-        if (default_critic is None):
-            default_critic = Critic
+        flag = False
+        if (actor is None):
+            actor = Actor(
+                interface = interface,
+                configuration = configuration,
+                use_default = use_default
+            )
+            flag = True
+        if (critic is None):
+            critic = Critic(
+                interface = interface,
+                configuration = configuration,
+                use_default = use_default
+            )
+            flag = True
+        if (flag):
+            use_default = False
 
         AgentMixin.declare(self)
         Component.__init__(self)
@@ -67,8 +78,6 @@ class AgentMixin(AgentBase, Component):
                 critic = critic,
                 model = model,
                 use_default = use_default,
-                default_actor = default_actor,
-                default_critic = default_critic
             )
     
     def setup(
@@ -79,12 +88,7 @@ class AgentMixin(AgentBase, Component):
         critic = None,
         model = None,
         use_default = False,
-        default_actor = None,
-        default_critic = None
     ):
-        TACTOR = default_actor
-        TCRITIC = default_critic
-
         if (use_default and (interface is None)):
             raise ValueError("`interface` must be 'AgentInterface' object if `use_default = True`.")
         if (configuration is None):
@@ -96,15 +100,15 @@ class AgentMixin(AgentBase, Component):
         if (use_default):
             if ((actor is not None) or (critic is not None)):
                 raise ValueError("`actor` & `critic` must be None if `use_default = True`")
-            if ((default_actor is None) or (default_critic is None)):
-                raise ValueError("`default_actor` & `default_critic` must not be None if `use_default = True`")
-            actor = TACTOR(
+
+            actor = Actor(
                 interface = interface,
                 configuration = configuration,
                 use_default = True
             )
-            critic = TCRITIC(
+            critic = Critic(
                 interface = interface,
+                configuration = configuration,
                 use_default = True
             )
         
@@ -290,13 +294,24 @@ class DiscreteControlAgentMixin(AgentMixin, DiscreteControlAgentBase):
         critic = None,
         allow_setup = True,
         use_default = False,
-        default_actor = None,
-        default_critic = None
     ):
-        if (default_actor is None):
-            default_actor = DiscreteControlActor
-        if (default_critic is None):
-            default_critic = DiscreteControlCritic
+        flag = False
+        if (actor is None):
+            actor = DiscreteControlActor(
+                interface = interface,
+                configuration = configuration,
+                use_default = use_default
+            )
+            flag = True
+        if (critic is None):
+            critic = DiscreteControlCritic(
+                interface = interface,
+                configuration = configuration,
+                use_default = use_default
+            )
+            flag = True
+        if (flag):
+            use_default = False
 
         AgentMixin.__init__(
             self,
@@ -305,8 +320,6 @@ class DiscreteControlAgentMixin(AgentMixin, DiscreteControlAgentBase):
             actor = actor,
             critic = critic,
             use_default = use_default,
-            default_actor = default_actor,
-            default_critic = default_critic
         )
         if (allow_setup):
             DiscreteControlAgentMixin.setup(
@@ -316,8 +329,6 @@ class DiscreteControlAgentMixin(AgentMixin, DiscreteControlAgentBase):
                 actor = actor,
                 critic = critic,
                 use_default = use_default,
-                default_actor = default_actor,
-                default_critic = default_critic
             )
 
     def setup(
@@ -327,8 +338,6 @@ class DiscreteControlAgentMixin(AgentMixin, DiscreteControlAgentBase):
         actor = None,
         critic = None,
         use_default = False,
-        default_actor = None,
-        default_critic = None
     ):
         pass
 
@@ -343,13 +352,24 @@ class ContinuousControlAgentMixin(AgentMixin, ContinuousControlAgentBase):
         critic = None,
         allow_setup = True,
         use_default = False,
-        default_actor = None,
-        default_critic = None
     ):
-        if (default_actor is None):
-            default_actor = ContinuousControlActor
-        if (default_critic is None):
-            default_critic = ContinuousControlCritic
+        flag = False
+        if (actor is None):
+            actor = ContinuousControlActor(
+                interface = interface,
+                configuration = configuration,
+                use_default = use_default
+            )
+            flag = True
+        if (critic is None):
+            critic = ContinuousControlCritic(
+                interface = interface,
+                configuration = configuration,
+                use_default = use_default
+            )
+            flag = True
+        if (flag):
+            use_default = False
 
         AgentMixin.__init__(
             self,
@@ -358,8 +378,6 @@ class ContinuousControlAgentMixin(AgentMixin, ContinuousControlAgentBase):
             actor = actor,
             critic = critic,
             use_default = use_default,
-            default_actor = default_actor,
-            default_critic = default_critic
         )
         if (allow_setup):
             ContinuousControlAgentMixin.setup(
@@ -369,8 +387,6 @@ class ContinuousControlAgentMixin(AgentMixin, ContinuousControlAgentBase):
                 actor = actor,
                 critic = critic,
                 use_default = use_default,
-                default_actor = default_actor,
-                default_critic = default_critic
             )
 
     def setup(
@@ -396,13 +412,24 @@ class GoalConditionedAgentMixin(AgentMixin, GoalConditionedAgentBase):
         critic = None,
         allow_setup = True,
         use_default = False,
-        default_actor = None,
-        default_critic = None
     ):
-        if (default_actor is None):
-            default_actor = GoalConditionedActor
-        if (default_critic is None):
-            default_critic = Critic
+        flag = False
+        if (actor is None):
+            actor = GoalConditionedActor(
+                interface = interface,
+                configuration = configuration,
+                use_default = use_default
+            )
+            flag = True
+        if (critic is None):
+            critic = Critic(
+                interface = interface,
+                configuration = configuration,
+                use_default = use_default
+            )
+            flag = True
+        if (flag):
+            use_default = False
 
         AgentMixin.__init__(
             self,
@@ -412,8 +439,6 @@ class GoalConditionedAgentMixin(AgentMixin, GoalConditionedAgentBase):
             critic = critic,
             allow_setup = allow_setup,
             use_default = use_default,
-            default_actor = default_actor,
-            default_critic = default_critic
         )
         if (allow_setup):
             GoalConditionedAgentMixin.setup(
@@ -423,8 +448,6 @@ class GoalConditionedAgentMixin(AgentMixin, GoalConditionedAgentBase):
                 actor = actor,
                 critic = critic,
                 use_default = use_default,
-                default_actor = default_actor,
-                default_critic = default_critic
             )
     
     def setup(
@@ -434,8 +457,6 @@ class GoalConditionedAgentMixin(AgentMixin, GoalConditionedAgentBase):
         actor = None,
         critic = None,
         use_default = False,
-        default_actor = None,
-        default_critic = None
     ):
         pass
 
