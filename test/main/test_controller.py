@@ -36,31 +36,31 @@ default_goal_conditioned_agent_interface = AgentInterface(
 @pytest.mark.L1
 class TestController():
 
-    @pytest.mark.unit
-    def test_should_be_unavailable_on_empty_initialization(self):
-        controller = RLController()
-        assert controller.is_available == False
+    # @pytest.mark.unit
+    # def test_should_be_unavailable_on_empty_initialization(self):
+    #     controller = RLController()
+    #     assert controller.is_available == False
 
-    @pytest.mark.unit
-    def test_should_be_available_on_nonempty_initialization(self):
-        env = Environment()
-        agent = Agent()
-        controller = RLController(
-            environment = env,
-            agent = agent
-        )
-        assert controller.is_available == True
+    # @pytest.mark.unit
+    # def test_should_be_available_on_nonempty_initialization(self):
+    #     env = Environment()
+    #     agent = Agent()
+    #     controller = RLController(
+    #         environment = env,
+    #         agent = agent
+    #     )
+    #     assert controller.is_available == True
 
-    @pytest.mark.unit
-    def test_should_be_available_after_setup(self):
-        env = Environment()
-        agent = Agent()
-        controller = RLController()
-        controller.setup(
-            environment = env,
-            agent = agent
-        )
-        assert controller.is_available == True
+    # @pytest.mark.unit
+    # def test_should_be_available_after_setup(self):
+    #     env = Environment()
+    #     agent = Agent()
+    #     controller = RLController()
+    #     controller.setup(
+    #         environment = env,
+    #         agent = agent
+    #     )
+    #     assert controller.is_available == True
 
     @pytest.mark.unit
     @pytest.mark.integration
@@ -90,31 +90,31 @@ class TestController():
 @pytest.mark.L1
 class TestGoalConditionedRLController():
 
-    @pytest.mark.unit
-    def test_should_be_unavailable_on_empty_initialization(self):
-        controller = GoalConditionedRLController()
-        assert controller.is_available == False
+    # @pytest.mark.unit
+    # def test_should_be_unavailable_on_empty_initialization(self):
+    #     controller = GoalConditionedRLController()
+    #     assert controller.is_available == False
 
-    @pytest.mark.unit
-    def test_should_be_available_on_nonempty_initialization(self):
-        env = GoalReachingTaskEnvironment()
-        agent = GoalConditionedAgent()
-        controller = GoalConditionedRLController(
-            environment = env,
-            agent = agent
-        )
-        assert controller.is_available == True
+    # @pytest.mark.unit
+    # def test_should_be_available_on_nonempty_initialization(self):
+    #     env = GoalReachingTaskEnvironment()
+    #     agent = GoalConditionedAgent()
+    #     controller = GoalConditionedRLController(
+    #         environment = env,
+    #         agent = agent
+    #     )
+    #     assert controller.is_available == True
 
-    @pytest.mark.unit
-    def test_should_be_available_after_setup(self):
-        env = GoalReachingTaskEnvironment()
-        agent = GoalConditionedAgent()
-        controller = GoalConditionedRLController()
-        controller.setup(
-            environment = env,
-            agent = agent
-        )
-        assert controller.is_available == True
+    # @pytest.mark.unit
+    # def test_should_be_available_after_setup(self):
+    #     env = GoalReachingTaskEnvironment()
+    #     agent = GoalConditionedAgent()
+    #     controller = GoalConditionedRLController()
+    #     controller.setup(
+    #         environment = env,
+    #         agent = agent
+    #     )
+    #     assert controller.is_available == True
 
     @pytest.mark.unit
     @pytest.mark.integration

@@ -46,22 +46,22 @@ class TestAgent():
     #     agent = TAgent()
     #     assert agent.is_available == False
 
-    @pytest.mark.unit
-    @pytest.mark.parametrize(
-        "TAgent, TActor, TCritic",
-        [
-            (Agent, Actor, Critic),
-            (DiscreteControlAgent, DiscreteControlActor, DiscreteControlCritic),(ContinuousControlAgent, ContinuousControlActor, ContinuousControlCritic)
-        ]
-    )
-    def test_should_be_available_on_nonempty_initialization(self, TAgent, TActor, TCritic):
-        actor = TActor()
-        critic = TCritic()
-        agent = TAgent(
-            actor = actor,
-            critic = critic
-        )
-        assert agent.is_available == True
+    # @pytest.mark.unit
+    # @pytest.mark.parametrize(
+    #     "TAgent, TActor, TCritic",
+    #     [
+    #         (Agent, Actor, Critic),
+    #         (DiscreteControlAgent, DiscreteControlActor, DiscreteControlCritic),(ContinuousControlAgent, ContinuousControlActor, ContinuousControlCritic)
+    #     ]
+    # )
+    # def test_should_be_available_on_nonempty_initialization(self, TAgent, TActor, TCritic):
+    #     actor = TActor()
+    #     critic = TCritic()
+    #     agent = TAgent(
+    #         actor = actor,
+    #         critic = critic
+    #     )
+    #     assert agent.is_available == True
 
     # @pytest.mark.unit
     # @pytest.mark.parametrize(
@@ -81,50 +81,50 @@ class TestAgent():
     #     )
     #     assert agent.is_available == True
 
-    @pytest.mark.unit
-    @pytest.mark.parametrize(
-        "TAgent",
-        [ Agent, DiscreteControlAgent, ContinuousControlAgent ]
-    )
-    def test_should_be_available_on_empty_initialization_with_use_default_true(self, TAgent):
-        interface = default_agent_interface
-        agent = TAgent(
-            interface = interface,
-            use_default = True
-        )
-        assert agent.is_available == True
+    # @pytest.mark.unit
+    # @pytest.mark.parametrize(
+    #     "TAgent",
+    #     [ Agent, DiscreteControlAgent, ContinuousControlAgent ]
+    # )
+    # def test_should_be_available_on_empty_initialization_with_use_default_true(self, TAgent):
+    #     interface = default_agent_interface
+    #     agent = TAgent(
+    #         interface = interface,
+    #         use_default = True
+    #     )
+    #     assert agent.is_available == True
     
-    @pytest.mark.unit
-    @pytest.mark.parametrize(
-        "TAgent",
-        [ Agent, DiscreteControlAgent, ContinuousControlAgent ]
-    )
-    def test_should_raise_value_error_with_use_default_true_but_no_interface_specified(self, TAgent):
-        with pytest.raises(ValueError) as message:
-            agent = TAgent(
-                interface = None,
-                use_default = True
-            )
+    # @pytest.mark.unit
+    # @pytest.mark.parametrize(
+    #     "TAgent",
+    #     [ Agent, DiscreteControlAgent, ContinuousControlAgent ]
+    # )
+    # def test_should_raise_value_error_with_use_default_true_but_no_interface_specified(self, TAgent):
+    #     with pytest.raises(ValueError) as message:
+    #         agent = TAgent(
+    #             interface = None,
+    #             use_default = True
+    #         )
 
-    @pytest.mark.unit
-    @pytest.mark.parametrize(
-        "TAgent, TActor, TCritic",
-        [
-            (Agent, Actor, Critic),
-            (DiscreteControlAgent, DiscreteControlActor, DiscreteControlCritic),(ContinuousControlAgent, ContinuousControlActor, ContinuousControlCritic)
-        ]
-    )
-    def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self, TAgent, TActor, TCritic):
-        actor = TActor()
-        critic = TCritic()
-        interface = default_agent_interface
-        with pytest.raises(ValueError) as message:
-            agent = TAgent(
-                actor = actor,
-                critic = critic,
-                interface = interface,
-                use_default = True
-            )
+    # @pytest.mark.unit
+    # @pytest.mark.parametrize(
+    #     "TAgent, TActor, TCritic",
+    #     [
+    #         (Agent, Actor, Critic),
+    #         (DiscreteControlAgent, DiscreteControlActor, DiscreteControlCritic),(ContinuousControlAgent, ContinuousControlActor, ContinuousControlCritic)
+    #     ]
+    # )
+    # def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self, TAgent, TActor, TCritic):
+    #     actor = TActor()
+    #     critic = TCritic()
+    #     interface = default_agent_interface
+    #     with pytest.raises(ValueError) as message:
+    #         agent = TAgent(
+    #             actor = actor,
+    #             critic = critic,
+    #             interface = interface,
+    #             use_default = True
+    #         )
 
     @pytest.mark.unit
     @pytest.mark.parametrize(
@@ -135,10 +135,16 @@ class TestAgent():
         ]
     )
     def test_should_accept_dictionary_type_configuration(self, TAgent, TActor, TCritic):
-        actor = TActor()
-        critic = TCritic()
         interface = default_agent_interface
         configuration = { "key": "value" }
+        actor = TActor(
+            interface = interface,
+            configuration = configuration
+        )
+        critic = TCritic(
+            interface = interface,
+            configuration = configuration
+        )
         agent = TAgent(
             actor = actor,
             critic = critic,
@@ -156,11 +162,17 @@ class TestAgent():
         ]
     )
     def test_should_reject_non_dictionary_type_configuration(self, TAgent, TActor, TCritic):
-        actor = TActor()
-        critic = TCritic()
         interface = default_agent_interface
         configuration = ( "value1", "value2", "value3" )
         with pytest.raises(ValueError) as message:
+            actor = TActor(
+                interface = interface,
+                configuration = configuration
+            )
+            critic = TCritic(
+                interface = interface,
+                configuration = configuration
+            )
             agent = TAgent(
                 actor = actor,
                 critic = critic,

@@ -54,21 +54,21 @@ class TestActor():
     #     actor = TActor()
     #     assert actor.is_available == False
 
-    @pytest.mark.unit
-    @pytest.mark.parametrize(
-        "TActor, TPolicy",
-        [
-            (Actor, Policy),
-            (DiscreteControlActor, DiscretePolicy),
-            (ContinuousControlActor, ContinuousPolicy)
-        ]
-    )
-    def test_should_be_available_on_nonempty_initialization(self, TActor, TPolicy):
-        policy = TPolicy()
-        actor = TActor(
-            policy = policy
-        )
-        assert actor.is_available == True
+    # @pytest.mark.unit
+    # @pytest.mark.parametrize(
+    #     "TActor, TPolicy",
+    #     [
+    #         (Actor, Policy),
+    #         (DiscreteControlActor, DiscretePolicy),
+    #         (ContinuousControlActor, ContinuousPolicy)
+    #     ]
+    # )
+    # def test_should_be_available_on_nonempty_initialization(self, TActor, TPolicy):
+    #     policy = TPolicy()
+    #     actor = TActor(
+    #         policy = policy
+    #     )
+    #     assert actor.is_available == True
 
     # @pytest.mark.unit
     # @pytest.mark.parametrize(
@@ -87,49 +87,49 @@ class TestActor():
     #     )
     #     assert actor.is_available == True
 
-    @pytest.mark.unit
-    @pytest.mark.parametrize(
-        "TActor",
-        [ Actor, DiscreteControlActor, ContinuousControlActor ]
-    )
-    def test_should_be_available_on_empty_initialization_with_use_default_true(self, TActor):
-        interface = default_agent_interface
-        actor = TActor(
-            interface = interface,
-            use_default = True
-        )
-        assert actor.is_available == True
+    # @pytest.mark.unit
+    # @pytest.mark.parametrize(
+    #     "TActor",
+    #     [ Actor, DiscreteControlActor, ContinuousControlActor ]
+    # )
+    # def test_should_be_available_on_empty_initialization_with_use_default_true(self, TActor):
+    #     interface = default_agent_interface
+    #     actor = TActor(
+    #         interface = interface,
+    #         use_default = True
+    #     )
+    #     assert actor.is_available == True
 
-    @pytest.mark.unit
-    @pytest.mark.parametrize(
-        "TActor",
-        [ Actor, DiscreteControlActor, ContinuousControlActor ]
-    )
-    def test_should_raise_value_error_with_use_default_true_but_no_interface_specified(self, TActor):
-        with pytest.raises(ValueError) as message:
-            actor = TActor(
-                interface = None,
-                use_default = True
-            )
+    # @pytest.mark.unit
+    # @pytest.mark.parametrize(
+    #     "TActor",
+    #     [ Actor, DiscreteControlActor, ContinuousControlActor ]
+    # )
+    # def test_should_raise_value_error_with_use_default_true_but_no_interface_specified(self, TActor):
+    #     with pytest.raises(ValueError) as message:
+    #         actor = TActor(
+    #             interface = None,
+    #             use_default = True
+    #         )
 
-    @pytest.mark.unit
-    @pytest.mark.parametrize(
-        "TActor, TPolicy",
-        [
-            (Actor, Policy),
-            (DiscreteControlActor, DiscretePolicy),
-            (ContinuousControlActor, ContinuousPolicy)
-        ]
-    )
-    def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self, TActor, TPolicy):
-        policy = TPolicy()
-        interface = default_agent_interface
-        with pytest.raises(ValueError) as message:
-            actor = TActor(
-                policy = policy,
-                interface = interface,
-                use_default = True
-            )
+    # @pytest.mark.unit
+    # @pytest.mark.parametrize(
+    #     "TActor, TPolicy",
+    #     [
+    #         (Actor, Policy),
+    #         (DiscreteControlActor, DiscretePolicy),
+    #         (ContinuousControlActor, ContinuousPolicy)
+    #     ]
+    # )
+    # def test_should_raise_value_error_on_nonempty_initialization_with_use_default_true(self, TActor, TPolicy):
+    #     policy = TPolicy()
+    #     interface = default_agent_interface
+    #     with pytest.raises(ValueError) as message:
+    #         actor = TActor(
+    #             policy = policy,
+    #             interface = interface,
+    #             use_default = True
+    #         )
     
     @pytest.mark.unit
     @pytest.mark.parametrize(
