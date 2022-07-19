@@ -25,7 +25,7 @@ class Critic(CriticMixin, CriticBase):
         configuration = None,
         value = None,
         qvalue = None,
-        use_default = False
+        use_default = True
     ):
         CriticMixin.__init__(
             self,
@@ -45,7 +45,7 @@ class DiscreteControlCritic(DiscreteControlCriticMixin, CriticBase):
         configuration = None,
         value = None,
         qvalue = None,
-        use_default = False
+        use_default = True
     ):
         DiscreteControlCriticMixin.__init__(
             self,
@@ -65,7 +65,7 @@ class ContinuousControlCritic(ContinuousControlCriticMixin, CriticBase):
         configuration = None,
         value = None,
         qvalue = None,
-        use_default = False
+        use_default = True
     ):
         ContinuousControlCriticMixin.__init__(
             self,

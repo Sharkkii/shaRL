@@ -25,7 +25,7 @@ class Actor(ActorMixin, ActorBase):
         interface = None,
         configuration = None,
         policy = None,
-        use_default = False
+        use_default = True
     ):
         ActorMixin.__init__(
             self,
@@ -43,7 +43,7 @@ class DiscreteControlActor(DiscreteControlActorMixin, ActorBase):
         interface = None,
         configuration = None,
         policy = None,
-        use_default = False
+        use_default = True
     ):
         DiscreteControlActorMixin.__init__(
             self,
@@ -61,7 +61,7 @@ class ContinuousControlActor(ContinuousControlActorMixin, ActorBase):
         interface = None,
         configuration = None,
         policy = None,
-        use_default = False
+        use_default = True
     ):
         ContinuousControlActorMixin.__init__(
             self,
@@ -79,7 +79,7 @@ class GoalConditionedActor(GoalConditionedActorMixin, ActorBase):
         interface = None,
         configuration = None,
         policy = None,
-        use_default = False
+        use_default = True
     ):
         GoalConditionedActorMixin.__init__(
             self,

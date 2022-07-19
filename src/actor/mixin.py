@@ -61,18 +61,14 @@ class ActorMixin(ActorBase, Component):
         configuration = None,
         policy = None,
         allow_setup = True,
-        use_default = False,
+        use_default = True,
     ):
-        flag = False
         if (policy is None):
             policy = DiscretePolicy(
                 interface = interface,
                 configuration = configuration,
                 use_default = use_default
             )
-            flag = True
-        if (flag):
-            use_default = False
 
         ActorMixin.declare(self)
         Component.__init__(self)
@@ -90,9 +86,9 @@ class ActorMixin(ActorBase, Component):
         interface = None,
         configuration = None,
         policy = None,
-        use_default = False,
+        use_default = True,
     ):
-        if (use_default and (interface is None)):
+        if (interface is None):
             raise ValueError("`interface` must be 'AgentInterface' object if `use_default = True`.")
         if (configuration is None):
             # return
@@ -100,32 +96,7 @@ class ActorMixin(ActorBase, Component):
         if ((type(configuration) is not dict)):
             raise ValueError("`configuration` must be 'Dictionary' object or None.")
 
-        if (use_default):
-            if (policy is not None):
-                raise ValueError("`policy` must be None if `use_default = True`")
-
-            policy = DiscretePolicy(
-                interface = interface,
-                configuration = configuration,
-                use_default = True
-            )
-
-            # if (interface.tout is SpaceType.DISCRETE):
-#                 policy = DiscretePolicy(
-#                     interface = interface,
-#                     use_default = True
-#                 )
-#             elif (interface.tout is SpaceType.CONTINUOUS):
-#                 policy = ContinuousPolicy(
-#                     interface = interface,
-#                     use_default = True
-#                 )
-#             else:
-#                 raise ValueError("invalid interface")
-
-        else:
-            if (policy is None):
-                return
+        if (policy is None): return
 
         self._interface = interface
         self._configuration = configuration
@@ -238,18 +209,14 @@ class DiscreteControlActorMixin(ActorMixin, DiscreteControlActorBase):
         configuration = None,
         policy = None,
         allow_setup = True,
-        use_default = False,
+        use_default = True,
     ):
-        flag = False
         if (policy is None):
             policy = DiscretePolicy(
                 interface = interface,
                 configuration = configuration,
                 use_default = use_default
             )
-            flag = True
-        if (flag):
-            use_default = False
         
         ActorMixin.__init__(
             self,
@@ -273,7 +240,7 @@ class DiscreteControlActorMixin(ActorMixin, DiscreteControlActorBase):
         interface = None,
         configuration = None,
         policy = None,
-        use_default = False,
+        use_default = True,
     ):
         pass
 
@@ -286,18 +253,14 @@ class ContinuousControlActorMixin(ActorMixin, ContinuousControlActorBase):
         configuration = None,
         policy = None,
         allow_setup = True,
-        use_default = False,
+        use_default = True,
     ):
-        flag = False
         if (policy is None):
             policy = ContinuousPolicy(
                 interface = interface,
                 configuration = configuration,
                 use_default = use_default
             )
-            flag = True
-        if (flag):
-            use_default = False
         
         ActorMixin.__init__(
             self,
@@ -321,7 +284,7 @@ class ContinuousControlActorMixin(ActorMixin, ContinuousControlActorBase):
         interface = None,
         configuration = None,
         policy = None,
-        use_default = False,
+        use_default = True,
     ):
         pass
 
@@ -388,18 +351,14 @@ class GoalConditionedActorMixin(ActorMixin, GoalConditionedActorBase):
         configuration = None,
         policy = None,
         allow_setup = True,
-        use_default = False,
+        use_default = True,
     ):
-        flag = False
         if (policy is None):
             policy = GoalConditionedPolicy(
                 interface = interface,
                 configuration = configuration,
                 use_default = use_default
             )
-            flag = True
-        if (flag):
-            use_default = False
         
         ActorMixin.__init__(
             self,
@@ -423,7 +382,7 @@ class GoalConditionedActorMixin(ActorMixin, GoalConditionedActorBase):
         interface = None,
         configuration = None,
         policy = None,
-        use_default = False,
+        use_default = True,
     ):
         pass
 

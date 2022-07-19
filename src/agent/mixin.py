@@ -47,25 +47,23 @@ class AgentMixin(AgentBase, Component):
         critic = None,
         model = None,
         allow_setup = True,
-        use_default = False,
+        use_default = True,
     ):
-        flag = False
+        # if (not use_default):
+        #     raise ValueError("`use_default` should be `True` right now.")
+
         if (actor is None):
             actor = Actor(
                 interface = interface,
                 configuration = configuration,
                 use_default = use_default
             )
-            flag = True
         if (critic is None):
             critic = Critic(
                 interface = interface,
                 configuration = configuration,
                 use_default = use_default
             )
-            flag = True
-        if (flag):
-            use_default = False
 
         AgentMixin.declare(self)
         Component.__init__(self)
@@ -87,9 +85,9 @@ class AgentMixin(AgentBase, Component):
         actor = None,
         critic = None,
         model = None,
-        use_default = False,
+        use_default = True,
     ):
-        if (use_default and (interface is None)):
+        if (interface is None):
             raise ValueError("`interface` must be 'AgentInterface' object if `use_default = True`.")
         if (configuration is None):
             # return
@@ -97,28 +95,8 @@ class AgentMixin(AgentBase, Component):
         if ((type(configuration) is not dict)):
             raise ValueError("`configuration` must be 'Dictionary' object or None.")
 
-        if (use_default):
-            if ((actor is not None) or (critic is not None)):
-                raise ValueError("`actor` & `critic` must be None if `use_default = True`")
-
-            actor = Actor(
-                interface = interface,
-                configuration = configuration,
-                use_default = True
-            )
-            critic = Critic(
-                interface = interface,
-                configuration = configuration,
-                use_default = True
-            )
-        
-        else:
-            if ((actor is None) or (critic is None)):
-                return
-        #         raise ValueError("`actor` & `critic` must not be None if `use_default = False`.")
-
-        if (model is None):
-            model = EmptyModel()
+        if ((actor is None) or (critic is None)): return
+        if (model is None): model = EmptyModel()
         
         self._interface = interface
         self._configuration = configuration
@@ -293,25 +271,20 @@ class DiscreteControlAgentMixin(AgentMixin, DiscreteControlAgentBase):
         actor = None,
         critic = None,
         allow_setup = True,
-        use_default = False,
+        use_default = True,
     ):
-        flag = False
         if (actor is None):
             actor = DiscreteControlActor(
                 interface = interface,
                 configuration = configuration,
                 use_default = use_default
             )
-            flag = True
         if (critic is None):
             critic = DiscreteControlCritic(
                 interface = interface,
                 configuration = configuration,
                 use_default = use_default
             )
-            flag = True
-        if (flag):
-            use_default = False
 
         AgentMixin.__init__(
             self,
@@ -337,7 +310,7 @@ class DiscreteControlAgentMixin(AgentMixin, DiscreteControlAgentBase):
         configuration = None,
         actor = None,
         critic = None,
-        use_default = False,
+        use_default = True,
     ):
         pass
 
@@ -351,25 +324,20 @@ class ContinuousControlAgentMixin(AgentMixin, ContinuousControlAgentBase):
         actor = None,
         critic = None,
         allow_setup = True,
-        use_default = False,
+        use_default = True,
     ):
-        flag = False
         if (actor is None):
             actor = ContinuousControlActor(
                 interface = interface,
                 configuration = configuration,
                 use_default = use_default
             )
-            flag = True
         if (critic is None):
             critic = ContinuousControlCritic(
                 interface = interface,
                 configuration = configuration,
                 use_default = use_default
             )
-            flag = True
-        if (flag):
-            use_default = False
 
         AgentMixin.__init__(
             self,
@@ -395,7 +363,7 @@ class ContinuousControlAgentMixin(AgentMixin, ContinuousControlAgentBase):
         configuration = None,
         actor = None,
         critic = None,
-        use_default = False,
+        use_default = True,
         default_actor = None,
         default_critic = None
     ):
@@ -411,25 +379,20 @@ class GoalConditionedAgentMixin(AgentMixin, GoalConditionedAgentBase):
         actor = None,
         critic = None,
         allow_setup = True,
-        use_default = False,
+        use_default = True,
     ):
-        flag = False
         if (actor is None):
             actor = GoalConditionedActor(
                 interface = interface,
                 configuration = configuration,
                 use_default = use_default
             )
-            flag = True
         if (critic is None):
             critic = Critic(
                 interface = interface,
                 configuration = configuration,
                 use_default = use_default
             )
-            flag = True
-        if (flag):
-            use_default = False
 
         AgentMixin.__init__(
             self,
@@ -456,7 +419,7 @@ class GoalConditionedAgentMixin(AgentMixin, GoalConditionedAgentBase):
         configuration = None,
         actor = None,
         critic = None,
-        use_default = False,
+        use_default = True,
     ):
         pass
 

@@ -15,7 +15,7 @@ class Agent(AgentMixin, AgentBase):
         configuration = None,
         actor = None,
         critic = None,
-        use_default = False
+        use_default = True
     ):
         AgentMixin.__init__(
             self,
@@ -35,7 +35,7 @@ class DiscreteControlAgent(DiscreteControlAgentMixin, AgentBase):
         configuration = None,
         actor = None,
         critic = None,
-        use_default = False
+        use_default = True
     ):
         DiscreteControlAgentMixin.__init__(
             self,
@@ -55,7 +55,7 @@ class ContinuousControlAgent(ContinuousControlAgentMixin, AgentBase):
         configuration = None,
         actor = None,
         critic = None,
-        use_default = False
+        use_default = True
     ):
         ContinuousControlAgentMixin.__init__(
             self,
@@ -75,7 +75,7 @@ class GoalConditionedAgent(GoalConditionedAgentMixin, AgentBase):
         configuration = None,
         actor = None,
         critic = None,
-        use_default = False
+        use_default = True
     ):
         GoalConditionedAgentMixin.__init__(
             self,
