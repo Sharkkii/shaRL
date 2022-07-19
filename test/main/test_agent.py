@@ -37,14 +37,14 @@ default_goal_conditioned_agent_interface = AgentInterface(
 @pytest.mark.L2
 class TestAgent():
 
-    @pytest.mark.unit
-    @pytest.mark.parametrize(
-        "TAgent",
-        [ Agent, DiscreteControlAgent, ContinuousControlAgent ]
-    )
-    def test_should_be_unavailable_on_empty_initialization(self, TAgent):
-        agent = TAgent()
-        assert agent.is_available == False
+    # @pytest.mark.unit
+    # @pytest.mark.parametrize(
+    #     "TAgent",
+    #     [ Agent, DiscreteControlAgent, ContinuousControlAgent ]
+    # )
+    # def test_should_be_unavailable_on_empty_initialization(self, TAgent):
+    #     agent = TAgent()
+    #     assert agent.is_available == False
 
     @pytest.mark.unit
     @pytest.mark.parametrize(

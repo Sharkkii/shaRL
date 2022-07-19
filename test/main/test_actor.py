@@ -45,14 +45,14 @@ default_agent_interface = default_agent_interface_with_discrete_action
 @pytest.mark.L3
 class TestActor():
 
-    @pytest.mark.unit
-    @pytest.mark.parametrize(
-        "TActor",
-        [ Actor, DiscreteControlActor, ContinuousControlActor ]
-    )
-    def test_should_be_unavailable_on_empty_initialization(self, TActor):
-        actor = TActor()
-        assert actor.is_available == False
+    # @pytest.mark.unit
+    # @pytest.mark.parametrize(
+    #     "TActor",
+    #     [ Actor, DiscreteControlActor, ContinuousControlActor ]
+    # )
+    # def test_should_be_unavailable_on_empty_initialization(self, TActor):
+    #     actor = TActor()
+    #     assert actor.is_available == False
 
     @pytest.mark.unit
     @pytest.mark.parametrize(

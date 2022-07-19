@@ -22,14 +22,14 @@ default_agent_interface = AgentInterface(
 @pytest.mark.L3
 class TestCritic():
 
-    @pytest.mark.unit
-    @pytest.mark.parametrize(
-        "TCritic",
-        [ Critic, DiscreteControlCritic, ContinuousControlCritic ]
-    )
-    def test_should_be_unavailable_on_empty_initialization(self, TCritic):
-        critic = TCritic()
-        assert critic.is_available == False
+    # @pytest.mark.unit
+    # @pytest.mark.parametrize(
+    #     "TCritic",
+    #     [ Critic, DiscreteControlCritic, ContinuousControlCritic ]
+    # )
+    # def test_should_be_unavailable_on_empty_initialization(self, TCritic):
+    #     critic = TCritic()
+    #     assert critic.is_available == False
 
     @pytest.mark.unit
     @pytest.mark.parametrize(
